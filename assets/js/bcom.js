@@ -147,29 +147,133 @@ function applyDashboard(data) {
   setText('uptime-linux',  l.uptime  ?? '--');
 }
 
+/* ── Container renderer ──────────────────────────────────────────────────
+   containers: array from /api/containers/  [{id,name,image,status,state}]
+   nodeId:     DOM id of list container  (e.g. 'ctr-spark')
+   dotId:      DOM id of header status dot (e.g. 'dot-ctr-spark')
+   ─────────────────────────────────────────────────────────────────────── */
+function applyContainers(containers, nodeId, dotId) {
+  const el  = document.getElementById(nodeId);
+  const dot = document.getElementById(dotId);
+  if (!el) return;
+
+  if (!containers || containers.length === 0) {
+    el.innerHTML = '<div class="await-row">NO CONTAINERS FOUND</div>';
+    if (dot) dot.className = 'status-dot off';
+    return;
+  }
+
+  const anyRunning = containers.some(c => c.state === 'running');
+  if (dot) dot.className = 'status-dot' + (anyRunning ? '' : ' off');
+
+  el.innerHTML = containers.map(c => {
+    const running  = c.state === 'running';
+    const dotCls   = running ? '' : ' off';
+    const label    = running ? 'RUNNING' : 'EXITED';
+    const imgShort = c.image.replace(/:.+$/, '').split('/').pop();
+    const cname    = c.name.replace(/^\//, '');
+    return `<div class="ctr-row">
+      <div class="ctr-dot${dotCls}"></div>
+      <span class="ctr-name">${cname}</span>
+      <span class="ctr-image">${imgShort}</span>
+      <span class="ctr-uptime">${label}</span>
+      <button class="ctr-btn" onclick="ctrlContainer('${c.id}','restart')">RESTART</button>
+    </div>`;
+  }).join('');
+}
+
+/* ── Model renderer ──────────────────────────────────────────────────────
+   models: array from /api/models/ (.models property)
+   nodeId: DOM id of model list element (e.g. 'mdl-spark')
+   dotId:  DOM id of header status dot (e.g. 'dot-mdl-spark')
+   ─────────────────────────────────────────────────────────────────────── */
+function applyModels(models, nodeId, dotId) {
+  const el  = document.getElementById(nodeId);
+  const dot = document.getElementById(dotId);
+  if (!el) return;
+
+  if (!models || models.length === 0) {
+    el.innerHTML = '<div class="await-row">NO MODELS LOADED</div>';
+    if (dot) dot.className = 'status-dot off';
+    return;
+  }
+
+  if (dot) dot.className = 'status-dot';
+
+  el.innerHTML = models.map(m => {
+    const params = m.details?.parameter_size      ?? '--';
+    const quant  = m.details?.quantization_level  ?? '--';
+    const name   = m.name ?? m.model ?? '--';
+    return `<div class="mdl-row">
+      <div class="mdl-dot"></div>
+      <span class="mdl-name">${name}</span>
+      <span class="mdl-size">${params}</span>
+      <span class="mdl-backend">${quant}</span>
+      <button class="mdl-test" onclick="triggerAction('TEST ${name}')">TEST</button>
+    </div>`;
+  }).join('');
+}
+
+/* ── Container action ────────────────────────────────────────────────────
+   Sends start/stop/restart to /api/containers/{id}/{action}.
+   Re-polls immediately after to reflect new state.
+   ─────────────────────────────────────────────────────────────────────── */
+async function ctrlContainer(id, action) {
+  logLine(`CTR: ${action.toUpperCase()} ${id.slice(0, 12)} — sent`, 'info');
+  try {
+    const base = BCOM.apiBase || '';
+    const res  = await fetch(`${base}/api/containers/${id}/${action}`, {
+      method: 'POST', cache: 'no-store'
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    logLine(`CTR: ${action.toUpperCase()} ${id.slice(0, 12)} — OK`, 'info');
+    pollDashboard();                              // refresh state immediately
+  } catch (err) {
+    logLine(`CTR error: ${err.message}`, 'warn');
+  }
+}
+
 /* ── Polling engine ──────────────────────────────────────────────────────
-   Fetches /api/metrics from BCOM.apiBase on each tick.
-   - Silently skips if apiBase is not set (standby mode).
+   Fetches metrics, containers, and models in parallel each tick.
+   - Metrics failure is fatal (sets error state).
+   - Containers/models failures are soft (card stays as-is).
    - Logs connection/error transitions only once (no spam).
-   - Works across hot-reloads: startPolling() resets the timer.
    ─────────────────────────────────────────────────────────────────────── */
 async function pollDashboard() {
   try {
     const base = BCOM.apiBase || '';
-    const res  = await fetch(base + '/api/metrics', { cache: 'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const [metricsRes, containersRes, modelsRes] = await Promise.allSettled([
+      fetch(base + '/api/metrics',     { cache: 'no-store' }),
+      fetch(base + '/api/containers/', { cache: 'no-store' }),
+      fetch(base + '/api/models/',     { cache: 'no-store' }),
+    ]);
 
-    // Log connection event only on state change
-    if (!BCOM._connected) {
-      logLine('Data source connected. Live telemetry active.', 'info');
-      BCOM._connected = true;
-      BCOM._lastErr   = null;
+    // ── Metrics (required) ────────────────────────────────────────────
+    if (metricsRes.status === 'fulfilled' && metricsRes.value.ok) {
+      const data = await metricsRes.value.json();
+      if (!BCOM._connected) {
+        logLine('Data source connected. Live telemetry active.', 'info');
+        BCOM._connected = true;
+        BCOM._lastErr   = null;
+      }
+      applyDashboard(data);
+    } else {
+      throw new Error(metricsRes.reason?.message ?? `HTTP ${metricsRes.value?.status}`);
     }
-    applyDashboard(data);
+
+    // ── Containers (soft) ─────────────────────────────────────────────
+    if (containersRes.status === 'fulfilled' && containersRes.value.ok) {
+      const ctrs = await containersRes.value.json();
+      applyContainers(Array.isArray(ctrs) ? ctrs : ctrs.containers ?? [], 'ctr-spark', 'dot-ctr-spark');
+    }
+
+    // ── Models (soft) ─────────────────────────────────────────────────
+    if (modelsRes.status === 'fulfilled' && modelsRes.value.ok) {
+      const mdl = await modelsRes.value.json();
+      applyModels(mdl.models ?? (Array.isArray(mdl) ? mdl : []), 'mdl-spark', 'dot-mdl-spark');
+    }
 
   } catch (err) {
-    // Suppress duplicate error logs
     const msg = 'Poll error: ' + err.message;
     if (BCOM._lastErr !== msg) {
       logLine(msg, 'warn');
