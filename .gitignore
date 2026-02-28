@@ -1,0 +1,68 @@
+# ═══════════════════════════════════════
+# BCOM-C — .gitignore
+# ═══════════════════════════════════════
+
+# ── Environment & secrets ─────────────
+# Never commit real API base URLs, tokens, or credentials
+.env
+.env.*
+*.env
+config.local.*
+secrets.*
+credentials.*
+
+# ── BCOM-C local overrides ────────────
+# If you create a local config to set BCOM.apiBase, keep it here
+bcom.config.local.js
+bcom.config.local.json
+
+# ── OS artifacts ──────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ── Editor / IDE ──────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.orig
+
+# ── Node.js (if added later) ──────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.npm/
+
+# ── Python backend (if added later) ───
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# ── Logs ──────────────────────────────
+*.log
+logs/
+
+# ── Build / cache ─────────────────────
+.cache/
+.parcel-cache/
+.next/
+out/
+
+# ── Docker local overrides ────────────
+docker-compose.override.yml
