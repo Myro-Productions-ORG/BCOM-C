@@ -8,7 +8,7 @@
    Leave empty to run in standby mode (no polling).
    ──────────────────────────────────────────────────── */
 const BCOM = {
-  apiBase:      null,     // null = standby; '' = same-origin proxy; 'http://...' = explicit host
+  apiBase:      '',       // '' = same-origin proxy; 'http://...' = explicit host
   pollInterval: 5000,     // ms between data refreshes
   _timer:       null,
   _connected:   false,
@@ -154,8 +154,6 @@ function applyDashboard(data) {
    - Works across hot-reloads: startPolling() resets the timer.
    ─────────────────────────────────────────────────────────────────────── */
 async function pollDashboard() {
-  if (BCOM.apiBase === null) return;  // null = standby mode — skip
-
   try {
     const base = BCOM.apiBase || '';
     const res  = await fetch(base + '/api/metrics', { cache: 'no-store' });
