@@ -364,7 +364,7 @@
 <script src="assets/js/bcom.js"></script>
 <script>
   // ── Polling config ─────────────────────────────────────────────────────
-  // BCOM.apiBase = 'http://YOUR_SERVER:PORT';   // ← set on deployment
+  BCOM.apiBase      = '';   // '' = same-origin (Caddy proxies /api/* → Spark)
   BCOM.pollInterval = 5000;
   startPolling();
   applyDashboard({});
@@ -382,7 +382,7 @@
         out.style.color = 'var(--orange-dark)';
       }
     }
-    if (!BCOM.apiBase) logLine('No API configured — command logged locally only', 'warn');
+    if (BCOM.apiBase === null) logLine('No API configured — command logged locally only', 'warn');
   }
 
   // ── Training Advisor ───────────────────────────────────────────────────
@@ -390,7 +390,7 @@
     const out = document.getElementById('advisor-output');
     out.textContent = 'Analyzing eval results...';
     logLine('CMD: ANALYZE RESULTS — initiated by operator', 'info');
-    if (!BCOM.apiBase) {
+    if (BCOM.apiBase === null) {
       out.textContent = 'No API connection. Advisor requires live eval data.';
       out.style.color = '#555';
     }
@@ -429,7 +429,7 @@
     const label = _termNode === 'spark' ? 'spark-bob' : 'linux-dsktp';
     termLine(label + ' $ ' + cmd);
     e.target.value = '';
-    if (!BCOM.apiBase) {
+    if (BCOM.apiBase === null) {
       termLine('[bcom-c] no API connection — command not sent', 'dim');
     }
     // TODO: send cmd via BCOM.apiBase WebSocket

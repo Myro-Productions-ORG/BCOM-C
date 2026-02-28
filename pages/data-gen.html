@@ -211,6 +211,7 @@
 
 <script src="../assets/js/bcom.js"></script>
 <script>
+  BCOM.apiBase      = '';   // '' = same-origin (Caddy proxies /api/* → Spark)
   BCOM.pollInterval = 5000;
   startPolling();
 
@@ -234,7 +235,7 @@
     const out = document.getElementById('dg-output');
     out.textContent = `[${t}] ${id} queued — ${count} ${typeLabel} on ${job.node}`;
     out.style.color = 'var(--orange-dark)';
-    if (!BCOM.apiBase) { logLine('No API — simulating locally', 'warn'); simulateJob(job); }
+    if (BCOM.apiBase === null) { logLine('No API — simulating locally', 'warn'); simulateJob(job); }
     renderActiveJobs();
   }
 
@@ -290,7 +291,7 @@
   }
 
   function refreshJobs() { logLine('Jobs refreshed', 'info'); renderActiveJobs(); renderHistory(); }
-  function exportHistory() { logLine('CMD: EXPORT HISTORY', 'info'); if (!BCOM.apiBase) logLine('No API — export unavailable', 'warn'); }
+  function exportHistory() { logLine('CMD: EXPORT HISTORY', 'info'); if (BCOM.apiBase === null) logLine('No API — export unavailable', 'warn'); }
 
   // Terminal
   let _termNode = 'spark';
@@ -310,7 +311,7 @@
     if (e.key !== 'Enter') return;
     const cmd = e.target.value.trim(); if (!cmd) return;
     termLine((_termNode==='spark'?'spark-bob':'linux-dsktp')+' $ '+cmd); e.target.value = '';
-    if (!BCOM.apiBase) termLine('[bcom-c] no API — command not sent', 'dim');
+    if (BCOM.apiBase === null) termLine('[bcom-c] no API — command not sent', 'dim');
   });
   document.getElementById('term-minimize').addEventListener('click', () => {
     const dock = document.getElementById('terminal-dock');

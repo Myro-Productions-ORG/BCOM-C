@@ -1,0 +1,9 @@
+services:
+  bcom-c:
+    build: .
+    container_name: bcom-c
+    restart: unless-stopped
+    ports:
+      - "3500:80"
+    volumes:
+      - /Volumes/DevDrive/Projects/websites/BCOM-C:/usr/share/nginx/html:ro

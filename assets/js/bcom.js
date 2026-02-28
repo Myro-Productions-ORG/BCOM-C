@@ -8,7 +8,7 @@
    Leave empty to run in standby mode (no polling).
    ──────────────────────────────────────────────────── */
 const BCOM = {
-  apiBase:      '',       // e.g. 'http://192.168.1.50:8080' — set on deployment
+  apiBase:      null,     // null = standby; '' = same-origin proxy; 'http://...' = explicit host
   pollInterval: 5000,     // ms between data refreshes
   _timer:       null,
   _connected:   false,
@@ -154,10 +154,11 @@ function applyDashboard(data) {
    - Works across hot-reloads: startPolling() resets the timer.
    ─────────────────────────────────────────────────────────────────────── */
 async function pollDashboard() {
-  if (!BCOM.apiBase) return;  // No API configured — skip silently
+  if (BCOM.apiBase === null) return;  // null = standby mode — skip
 
   try {
-    const res  = await fetch(BCOM.apiBase + '/api/metrics', { cache: 'no-store' });
+    const base = BCOM.apiBase || '';
+    const res  = await fetch(base + '/api/metrics', { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 

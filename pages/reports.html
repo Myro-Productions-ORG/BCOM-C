@@ -162,6 +162,7 @@
 
 <script src="../assets/js/bcom.js"></script>
 <script>
+  BCOM.apiBase      = '';   // '' = same-origin (Caddy proxies /api/* → Spark)
   BCOM.pollInterval = 5000;
   startPolling();
 
@@ -245,7 +246,7 @@
 
   function exportAll(type) {
     logLine(`CMD: EXPORT ${type.toUpperCase()} — CSV`, 'info');
-    if (!BCOM.apiBase) logLine('No API — export unavailable', 'warn');
+    if (BCOM.apiBase === null) logLine('No API — export unavailable', 'warn');
   }
 
   renderSummary(); renderEvals(); renderTrains(); renderPipelines();
@@ -268,7 +269,7 @@
     if (e.key !== 'Enter') return;
     const cmd = e.target.value.trim(); if (!cmd) return;
     termLine((_termNode==='spark'?'spark-bob':'linux-dsktp')+' $ '+cmd); e.target.value = '';
-    if (!BCOM.apiBase) termLine('[bcom-c] no API — command not sent', 'dim');
+    if (BCOM.apiBase === null) termLine('[bcom-c] no API — command not sent', 'dim');
   });
   document.getElementById('term-minimize').addEventListener('click', () => {
     const dock = document.getElementById('terminal-dock');
