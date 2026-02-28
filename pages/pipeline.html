@@ -230,7 +230,7 @@
   </div>
 </div>
 
-<script src="../assets/js/bcom.js?v=4"></script>
+<script src="../assets/js/bcom.js?v=5"></script>
 <script>
   BCOM.apiBase      = '';   // '' = same-origin (Caddy proxies /api/* → Spark)
   BCOM.pollInterval = 5000;
@@ -239,6 +239,32 @@
   const STAGES = ['st-data','st-train','st-deploy','st-eval','st-check'];
   const ARROWS  = ['arr-0','arr-1','arr-2','arr-3'];
   let _runSeq = 1, _runs = [], _activeRun = null, _simIv = null;
+
+  // ── Poll active deploy for banner ──────────────────────────────────
+  async function pollActiveDeploy() {
+    try {
+      const res = await fetch('/api/deploy/active', { cache: 'no-store' });
+      if (!res.ok) return;
+      const d   = await res.json();
+      if (d && d.status === 'active' && !_activeRun) {
+        // Show as a deploy-stage active pipeline
+        const banner = document.getElementById('active-banner');
+        banner.style.display = 'flex';
+        setText('bp-id',      d.id ? d.id.slice(0, 8) : '--');
+        setText('bp-model',   d.model_name ?? '--');
+        setText('bp-backend', d.backend    ?? '--');
+        setText('bp-node',    'SPARK-BOB');
+        setText('bp-iter',    '—');
+        setText('bp-score',   '—');
+        // Highlight DEPLOY stage
+        setStage(2);
+        document.getElementById('bp-prog').style.width = '60%';
+      }
+    } catch { /* soft fail */ }
+  }
+
+  pollActiveDeploy();
+  setInterval(pollActiveDeploy, 10000);
 
   function setStage(idx) {
     STAGES.forEach((id, i) => {

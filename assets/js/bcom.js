@@ -145,6 +145,16 @@ function applyDashboard(data) {
     l.cpu_temp ?? 0, 70, 85, 100);
   setText('ram-linux-gb',  l.ram_gb  ?? '--');
   setText('uptime-linux',  l.uptime  ?? '--');
+
+  // LINUX panel online / offline indicator
+  const linuxOnline = !!(data.linux && l.cpu_pct !== undefined);
+  const dotLinux    = document.getElementById('dot-linux');
+  const statusLinux = document.getElementById('status-linux');
+  if (dotLinux)    dotLinux.className    = 'status-dot' + (linuxOnline ? '' : ' off');
+  if (statusLinux) statusLinux.textContent = linuxOnline ? 'ONLINE' : 'OFFLINE';
+
+  // Resources page — VRAM chip (populated by metrics, consumed by resources.html)
+  setText('ca-spark-vram', s.vram_gb ?? '--');
 }
 
 /* ── Container renderer ──────────────────────────────────────────────────
@@ -242,10 +252,11 @@ async function ctrlContainer(id, action) {
 async function pollDashboard() {
   try {
     const base = BCOM.apiBase || '';
-    const [metricsRes, containersRes, modelsRes] = await Promise.allSettled([
-      fetch(base + '/api/metrics',     { cache: 'no-store' }),
-      fetch(base + '/api/containers/', { cache: 'no-store' }),
-      fetch(base + '/api/models/',     { cache: 'no-store' }),
+    const [metricsRes, containersRes, modelsRes, deployRes] = await Promise.allSettled([
+      fetch(base + '/api/metrics',       { cache: 'no-store' }),
+      fetch(base + '/api/containers/',   { cache: 'no-store' }),
+      fetch(base + '/api/models/',       { cache: 'no-store' }),
+      fetch(base + '/api/deploy/active', { cache: 'no-store' }),
     ]);
 
     // ── Metrics (required) ────────────────────────────────────────────
@@ -271,6 +282,13 @@ async function pollDashboard() {
     if (modelsRes.status === 'fulfilled' && modelsRes.value.ok) {
       const mdl = await modelsRes.value.json();
       applyModels(mdl.models ?? (Array.isArray(mdl) ? mdl : []), 'mdl-spark', 'dot-mdl-spark');
+    }
+
+    // ── Active deploy (soft) — SPARK panel MODEL/BACKEND chips ────────
+    if (deployRes.status === 'fulfilled' && deployRes.value.ok) {
+      const dep = await deployRes.value.json();
+      setText('active-model-spark',   dep.model_name ?? '--');
+      setText('active-backend-spark', dep.backend     ?? '--');
     }
 
   } catch (err) {

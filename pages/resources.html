@@ -231,30 +231,39 @@
   </div>
 </div>
 
-<script src="../assets/js/bcom.js?v=4"></script>
+<script src="../assets/js/bcom.js?v=5"></script>
 <script>
   BCOM.apiBase      = '';   // '' = same-origin (Caddy proxies /api/* → Spark)
   BCOM.pollInterval = 5000;
   startPolling();
 
-  const DEMO_MODELS = [
-    { id:'mistral-7b-q4',   type:'LLM',    size:'4.1 GB',  backend:'Ollama', node:'spark', vram:'5 GB',   quant:'Q4_K_M', status:'loaded'  },
-    { id:'llama3-8b-inst',  type:'LLM',    size:'8.0 GB',  backend:'vLLM',   node:'spark', vram:'10 GB',  quant:'FP16',   status:'loaded'  },
-    { id:'qwen2.5-14b',     type:'LLM',    size:'9.2 GB',  backend:'Ollama', node:'spark', vram:'12 GB',  quant:'Q5_K_M', status:'cached'  },
-    { id:'gpt-oss-20b-ft1', type:'FT-LLM', size:'14.0 GB', backend:'vLLM',   node:'spark', vram:'18 GB',  quant:'FP16',   status:'avail'   },
-    { id:'mistral-7b-q8',   type:'LLM',    size:'7.7 GB',  backend:'Ollama', node:'linux', vram:'9 GB',   quant:'Q8_0',   status:'loaded'  },
-    { id:'phi-3-mini',      type:'SLM',    size:'2.2 GB',  backend:'Ollama', node:'linux', vram:'3 GB',   quant:'Q4_K_M', status:'cached'  },
-    { id:'nomic-embed-v1',  type:'EMBED',  size:'0.3 GB',  backend:'Ollama', node:'linux', vram:'0.5 GB', quant:'F32',    status:'loaded'  },
-  ];
+  // ── Live model list ────────────────────────────────────────────────
+  let _liveModels = [];
+
+  function _liveToRegistry(models) {
+    return models.map(m => ({
+      id:      m.name ?? m.model ?? '--',
+      type:    (m.details?.family ?? 'llm').toUpperCase(),
+      size:    m.size ? (m.size / 1e9).toFixed(1) + ' GB' : '--',
+      backend: 'Ollama',
+      node:    'spark',
+      vram:    '--',
+      quant:   m.details?.quantization_level ?? '--',
+      status:  'loaded',
+    }));
+  }
 
   function renderRegistry() {
     const fn = document.getElementById('reg-filter-node').value;
     const fs = document.getElementById('reg-filter-status').value;
-    let m = DEMO_MODELS;
+    let m = _liveModels.length ? _liveToRegistry(_liveModels) : [];
     if (fn !== 'all') m = m.filter(x => x.node === fn);
     if (fs !== 'all') m = m.filter(x => x.status === fs);
     const tb = document.getElementById('reg-body');
-    if (!m.length) { tb.innerHTML = '<tr><td colspan="9" class="empty">NO MODELS MATCH</td></tr>'; return; }
+    if (!m.length) {
+      tb.innerHTML = '<tr><td colspan="9" class="empty">NO MODELS LOADED</td></tr>';
+      return;
+    }
     tb.innerHTML = m.map(x => `<tr>
       <td style="color:var(--orange-dark);font-weight:600">${x.id}</td>
       <td>${x.type}</td><td>${x.size}</td><td>${x.backend}</td>
@@ -281,39 +290,75 @@
     const out = document.getElementById('pull-output');
     out.textContent = `[${t}] Pull queued: ${id}`;
     out.style.color = 'var(--orange-dark)';
-    if (BCOM.apiBase === null) logLine('No API — pull not sent', 'warn');
   }
 
   function setStorBar(id, labelId, used, total) {
-    const pct = Math.round(used/total*100);
-    const el = document.getElementById(id);
-    el.style.width = pct + '%';
-    el.className = 'stor-fill' + (pct>=90?' danger':pct>=75?' warn':'');
-    document.getElementById(labelId).textContent = `${used} GB / ${total} GB`;
+    if (!total) return;
+    const pct = Math.min(100, Math.round(used / total * 100));
+    const el  = document.getElementById(id);
+    if (el) {
+      el.style.width = pct + '%';
+      el.className   = 'stor-fill' + (pct >= 90 ? ' danger' : pct >= 75 ? ' warn' : '');
+    }
+    const lbl = document.getElementById(labelId);
+    if (lbl) lbl.textContent = `${used} GB / ${total} GB`;
+  }
+
+  // ── Resource page poll (system stats, storage, models) ─────────────
+  async function pollResourcePage() {
+    try {
+      const [statsRes, infoRes, storageRes, modelsRes] = await Promise.allSettled([
+        fetch('/api/system/stats',   { cache: 'no-store' }),
+        fetch('/api/system/info',    { cache: 'no-store' }),
+        fetch('/api/system/storage', { cache: 'no-store' }),
+        fetch('/api/models/',        { cache: 'no-store' }),
+      ]);
+
+      // System stats → compute chips (GPU name, CPU%, memory)
+      if (statsRes.status === 'fulfilled' && statsRes.value.ok) {
+        const s = await statsRes.value.json();
+        const g = s.gpu ?? {};
+        setText('ca-spark-gpu',   g.name ? `${g.name}` : '--');
+        setText('ca-spark-procs', s.cpu_percent !== undefined
+          ? `${s.cpu_percent.toFixed(1)}% CPU` : '--');
+      }
+
+      // System info → cpu_count
+      if (infoRes.status === 'fulfilled' && infoRes.value.ok) {
+        const info = await infoRes.value.json();
+        setText('ca-spark-cpu', info.cpu_count ? `${info.cpu_count} cores` : '--');
+      }
+
+      // Storage → bars
+      if (storageRes.status === 'fulfilled' && storageRes.value.ok) {
+        const stor = await storageRes.value.json();
+        const sp   = stor.spark ?? {};
+        if (sp.models)      setStorBar('sf-spark-models','stor-spark-models', sp.models.used_gb,      sp.models.total_gb);
+        if (sp.datasets)    setStorBar('sf-spark-data',  'stor-spark-data',   sp.datasets.used_gb,    sp.datasets.total_gb);
+        if (sp.checkpoints) setStorBar('sf-spark-ckpt',  'stor-spark-ckpt',   sp.checkpoints.used_gb, sp.checkpoints.total_gb);
+        if (sp.root)        setStorBar('sf-spark-root',  'stor-spark-root',   sp.root.used_gb,        sp.root.total_gb);
+      }
+
+      // Models → registry table
+      if (modelsRes.status === 'fulfilled' && modelsRes.value.ok) {
+        const mdl = await modelsRes.value.json();
+        _liveModels = mdl.models ?? (Array.isArray(mdl) ? mdl : []);
+        renderRegistry();
+      }
+
+    } catch (err) {
+      logLine('Resource poll error: ' + err.message, 'warn');
+    }
   }
 
   function refreshAll() {
     logLine('Resources refreshed', 'info');
-    renderRegistry();
-    setStorBar('sf-spark-models','stor-spark-models',36,80);
-    setStorBar('sf-spark-data',  'stor-spark-data',  22,60);
-    setStorBar('sf-spark-ckpt',  'stor-spark-ckpt',  18,60);
-    setStorBar('sf-spark-root',  'stor-spark-root',  48,120);
-    setStorBar('sf-linux-models','stor-linux-models',12,40);
-    setStorBar('sf-linux-data',  'stor-linux-data',  8,40);
-    setStorBar('sf-linux-ckpt',  'stor-linux-ckpt',  5,40);
-    setStorBar('sf-linux-root',  'stor-linux-root',  38,80);
-    document.getElementById('ca-spark-gpu').textContent   = '2× A100 80GB';
-    document.getElementById('ca-spark-vram').textContent  = '44.2 / 160 GB';
-    document.getElementById('ca-spark-cpu').textContent   = '64 cores';
-    document.getElementById('ca-spark-procs').textContent = '7 active';
-    document.getElementById('ca-linux-gpu').textContent   = '1× RTX 4090';
-    document.getElementById('ca-linux-ram').textContent   = '28.1 / 64 GB';
-    document.getElementById('ca-linux-cpu').textContent   = '24 cores';
-    document.getElementById('ca-linux-procs').textContent = '4 active';
+    pollResourcePage();
   }
 
-  refreshAll();
+  // Initial load + recurring poll
+  pollResourcePage();
+  setInterval(pollResourcePage, 10000); // storage is slow (du), 10s is fine
 
   // Terminal
   let _termNode = 'spark';

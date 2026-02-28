@@ -160,7 +160,7 @@
   </div>
 </div>
 
-<script src="../assets/js/bcom.js?v=4"></script>
+<script src="../assets/js/bcom.js?v=5"></script>
 <script>
   BCOM.apiBase      = '';   // '' = same-origin (Caddy proxies /api/* → Spark)
   BCOM.pollInterval = 5000;
@@ -234,15 +234,39 @@
     </tr>`).join('');
   }
 
-  function renderSummary() {
-    const scores = DEMO_EVALS.map(r => r.score);
-    document.getElementById('sum-evals').textContent     = DEMO_EVALS.length;
-    document.getElementById('sum-pipelines').textContent = DEMO_PIPELINES.length;
-    document.getElementById('sum-datajobs').textContent  = '9';
-    document.getElementById('sum-bestscore').textContent = Math.max(...scores) + '%';
-    document.getElementById('sum-avgscore').textContent  = Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) + '%';
-    document.getElementById('sum-ft').textContent        = DEMO_TRAINS.length;
+  // ── Live summary from API ────────────────────────────────────────────
+  async function pollReportsSummary() {
+    try {
+      const res = await fetch('/api/reports/summary', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const d = await res.json();
+      setText('sum-evals',     d.eval_runs     ?? '--');
+      setText('sum-pipelines', d.pipelines     ?? '--');
+      setText('sum-datajobs',  d.datagen_jobs  ?? '--');
+      setText('sum-ft',        d.finetune_jobs ?? '--');
+      // best/avg score only meaningful when there are eval records
+      if (!d.eval_runs) {
+        setText('sum-bestscore', '--');
+        setText('sum-avgscore',  '--');
+      }
+    } catch (err) {
+      logLine('Reports summary error: ' + err.message, 'warn');
+      // fall back to demo counts if API unavailable
+      renderSummaryDemo();
+    }
   }
+
+  function renderSummaryDemo() {
+    const scores = DEMO_EVALS.map(r => r.score);
+    setText('sum-evals',     DEMO_EVALS.length);
+    setText('sum-pipelines', DEMO_PIPELINES.length);
+    setText('sum-datajobs',  '9');
+    setText('sum-bestscore', Math.max(...scores) + '%');
+    setText('sum-avgscore',  Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) + '%');
+    setText('sum-ft',        DEMO_TRAINS.length);
+  }
+
+  function renderSummary() { pollReportsSummary(); }
 
   function exportAll(type) {
     logLine(`CMD: EXPORT ${type.toUpperCase()} — CSV`, 'info');

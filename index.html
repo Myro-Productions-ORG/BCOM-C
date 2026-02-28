@@ -74,6 +74,8 @@
             <div class="metric">VRAM<span id="vram-spark-gb">--</span></div>
             <div class="metric">GPU TEMP<span id="gpu-temp-spark">--</span></div>
             <div class="metric">UPTIME<span id="uptime-spark">--</span></div>
+            <div class="metric">MODEL<span id="active-model-spark">--</span></div>
+            <div class="metric">BACKEND<span id="active-backend-spark">--</span></div>
           </div>
         </div>
         <div class="temp-section">
@@ -361,7 +363,7 @@
 </div>
 
 <!-- SCRIPTS -->
-<script src="assets/js/bcom.js?v=4"></script>
+<script src="assets/js/bcom.js?v=5"></script>
 <script>
   // ── Polling config ─────────────────────────────────────────────────────
   BCOM.apiBase      = '';   // '' = same-origin (Caddy proxies /api/* → Spark)
