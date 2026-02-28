@@ -461,6 +461,15 @@
           <option value="file">FILE AGENT</option>
           <option value="eval">EVAL AGENT</option>
         </select>
+        <div class="orch-label">Orchestrator Model</div>
+        <select class="orch-select" id="task-model-select">
+          <option value="claude-haiku-4-5-20251001">CLAUDE HAIKU 4.5 — fast/cheap</option>
+          <option value="claude-sonnet-4-5-20250929">CLAUDE SONNET 4.5 — balanced</option>
+          <option value="claude-sonnet-4-6">CLAUDE SONNET 4.6 — latest</option>
+          <option value="claude-opus-4-5-20251101">CLAUDE OPUS 4.5 — powerful</option>
+          <option value="claude-opus-4-6">CLAUDE OPUS 4.6 — flagship</option>
+          <option value="local">LOCAL ONLY (llama3.3:70b)</option>
+        </select>
         <div class="orch-label">Priority</div>
         <select class="orch-select" id="task-priority-select">
           <option value="normal">NORMAL</option>
@@ -1006,12 +1015,14 @@ const API = '';   // same-origin via Caddy reverse proxy
 const _sseConns = {};
 
 async function deployTask() {
-  const name     = document.getElementById('task-name-input').value.trim() || 'Unnamed Task';
-  const type     = document.getElementById('task-type-select').value;
-  const agentRaw = document.getElementById('task-agent-select').value;
-  const priority = document.getElementById('task-priority-select').value;
+  const name      = document.getElementById('task-name-input').value.trim() || 'Unnamed Task';
+  const type      = document.getElementById('task-type-select').value;
+  const agentRaw  = document.getElementById('task-agent-select').value;
+  const priority  = document.getElementById('task-priority-select').value;
+  const modelRaw  = document.getElementById('task-model-select').value;
+  const orchModel = modelRaw === 'local' ? null : modelRaw;
 
-  orchLog(`DISPATCHING: "${name}" [${type.toUpperCase()}] …`, 'sys');
+  orchLog(`DISPATCHING: "${name}" [${type.toUpperCase()}] model=${orchModel || 'local'} …`, 'sys');
   document.getElementById('task-name-input').value = '';
 
   let runId;
@@ -1019,7 +1030,7 @@ async function deployTask() {
     const res = await fetch(`${API}/api/runs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task: name, config: { type, agent: agentRaw, priority }, queued: false }),
+      body: JSON.stringify({ task: name, config: { type, agent: agentRaw, priority, orchestrator_model: orchModel }, queued: false }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
