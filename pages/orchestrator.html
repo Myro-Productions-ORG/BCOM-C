@@ -85,6 +85,58 @@
 }
 .orch-textarea:focus { outline: none; border-color: var(--orange); }
 .orch-textarea::placeholder { color: #999; }
+/* ── QUEUE ITEMS ───────────────────────────────────────── */
+.oc-queue-empty {
+  font-size: 7px; color: #888; letter-spacing: 1px; text-align: center;
+  padding: 6px 0; text-transform: uppercase;
+}
+.oc-queue-item {
+  background: #3b3b3b; border: 1px solid #5a5a5a; border-radius: 1px;
+  padding: 5px 8px; display: flex; flex-direction: column; gap: 2px;
+}
+.oc-queue-item:hover { border-color: var(--orange-dark); }
+.oc-qi-top { display: flex; align-items: center; gap: 6px; }
+.oc-qi-pos {
+  background: var(--orange-deep); color: var(--orange); font-size: 8px;
+  font-weight: 700; width: 16px; height: 16px; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+  border: 1px solid var(--orange-dark);
+}
+.oc-qi-task {
+  font-size: 8px; color: #ddd; flex: 1;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.oc-qi-meta { display: flex; gap: 8px; }
+.oc-qi-meta span { font-size: 6px; color: #888; letter-spacing: 1px; text-transform: uppercase; }
+.oc-qi-mode {
+  font-size: 6px; letter-spacing: 1px; padding: 1px 5px;
+  border: 1px solid #5a5a5a; color: #7fb3cc; text-transform: uppercase;
+  flex-shrink: 0;
+}
+.oc-qi-mode.strands { color: #a78bfa; border-color: #7c3aed; }
+
+/* ── STEP LOG ──────────────────────────────────────────── */
+.oc-step-log {
+  display: flex; flex-direction: column; gap: 3px; font-family: 'Courier New', monospace;
+  max-height: 160px; overflow-y: auto;
+}
+.oc-step-log::-webkit-scrollbar { width: 2px; }
+.oc-step-log::-webkit-scrollbar-thumb { background: var(--orange-deep); }
+.oc-step-item {
+  font-size: 7px; letter-spacing: 0.3px; padding: 3px 6px;
+  border-left: 2px solid #4a4a4a; color: #bbb; line-height: 1.4;
+  word-break: break-all;
+}
+.oc-step-item.node_update  { border-color: var(--orange-dark); color: var(--orange); }
+.oc-step-item.text_chunk   { border-color: #5a8a5a; color: #aed4ae; }
+.oc-step-item.status       { border-color: #7fb3cc; color: #7fb3cc; }
+.oc-step-item.error        { border-color: #e74c3c; color: #e74c3c; }
+.oc-step-item.usage        { border-color: #555; color: #888; }
+.oc-step-empty {
+  font-size: 7px; color: #888; letter-spacing: 1px; text-align: center;
+  padding: 6px 0; text-transform: uppercase;
+}
+
 
 .orch-select {
   background: #3b3b3b; border: 1px solid var(--border-dim);
@@ -369,6 +421,14 @@
         <option value="critical">CRITICAL</option>
         <option value="low">LOW</option>
       </select>
+      <div class="orch-label" style="margin-top:4px;">Orchestrator Backend</div>
+      <select class="orch-select" id="orch-mode-select">
+        <option value="langgraph">LangGraph (Default)</option>
+        <option value="strands">Strands Agents SDK</option>
+      </select>
+      <div style="font-size:6px;color:#888;letter-spacing:1px;margin-bottom:4px;">
+        STRANDS: Claude sub-agents via Anthropic API
+      </div>
       <button class="orch-submit" onclick="deployTask()">&#9654; DISPATCH TASK</button>
     </div>
   </div>
@@ -436,6 +496,15 @@
       <div class="oc-hw-row"><span class="oc-hw-key">RAM</span><span class="oc-hw-val" id="orch-linux-ram">--</span></div>
       <div class="oc-hw-row"><span class="oc-hw-key">TEMP</span><span class="oc-hw-val" id="orch-linux-temp">--</span></div>
       <div class="oc-hw-row"><span class="oc-hw-key">UPTIME</span><span class="oc-hw-val" id="orch-linux-uptime">--</span></div>
+      <div class="oc-section-label" style="margin-top:8px;">PENDING QUEUE</div>
+      <div id="oc-queue-list">
+        <div class="oc-queue-empty">NO QUEUED RUNS</div>
+      </div>
+      <div class="oc-section-label" style="margin-top:8px;">STEP LOG</div>
+      <div style="font-size:6px;color:#888;letter-spacing:1px;margin-bottom:3px;" id="oc-step-run-label">SELECT A RUNNING TASK</div>
+      <div class="oc-step-log" id="oc-step-log">
+        <div class="oc-step-empty">NO ACTIVE RUN</div>
+      </div>
     </div>
   </div>
 
@@ -1009,7 +1078,7 @@ async function deployTask() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         task: fullTask,
-        config: { type, agent: agentRaw, priority, orchestrator_model: orchModel },
+        config: { type, agent: agentRaw, priority, orchestrator_model: orchModel, orchestrator_mode: (document.getElementById('orch-mode-select')||{value:'langgraph'}).value },
         queued: false,
       }),
     });
@@ -1042,6 +1111,7 @@ function _streamRun(runId, taskRef) {
   if (_sseConns[runId]) return;
   const es = new EventSource(`${API}/api/runs/${runId}/stream`);
   _sseConns[runId] = es;
+  watchRunSteps(runId);
 
   es.onmessage = (e) => {
     let ev; try { ev = JSON.parse(e.data); } catch { return; }
@@ -1097,7 +1167,7 @@ function renderTaskTable() {
     const bar = `<div style="width:100%;background:#3b3b3b;border-radius:1px;height:5px;overflow:hidden">
       <div style="width:${t.progress}%;background:${t.status==='error'?'#e74c3c':'var(--orange)'};height:5px;border-radius:1px;transition:width .4s"></div></div>`;
     const sid = t.id.length > 12 ? t.id.slice(0,8)+'…' : t.id;
-    return `<tr onclick="viewRun('${t.id}')" style="cursor:pointer">
+    return `<tr onclick="viewRun('${t.id}'); watchRunSteps('${t.id}');" style="cursor:pointer">
       <td class="task-id" title="${t.id}">${sid}</td>
       <td class="task-name">${t.name.slice(0,40)}${t.name.length>40?'…':''}</td>
       <td>${TYPE_LABELS[t.type]||t.type}</td>
@@ -1281,6 +1351,158 @@ pollOrchMetrics();
 setInterval(pollOrchMetrics, 10000);
 setInterval(refreshAnalytics, 15000);
 orchLog('BOB AI ready — select model, enter prompt, dispatch task', 'sys');
+
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  QUEUE POLLING  +  STEP LOG
+  // ═══════════════════════════════════════════════════════════════════
+
+  let _queuePollTimer   = null;
+  let _stepLogRunId     = null;
+  let _stepLogPollTimer = null;
+  let _stepLogSeenIds   = new Set();
+
+  // ── Queue polling ──────────────────────────────────────────────────
+  function startQueuePolling() {
+    if (_queuePollTimer) clearInterval(_queuePollTimer);
+    pollQueue();
+    _queuePollTimer = setInterval(pollQueue, 4000);
+  }
+
+  async function pollQueue() {
+    try {
+      const res = await fetch(`${API}/api/runs/queue`);
+      if (!res.ok) return;
+      const { queue: items } = await res.json();
+      _renderQueue(items);
+    } catch(_) {}
+  }
+
+  function _renderQueue(items) {
+    const el = document.getElementById('oc-queue-list');
+    if (!el) return;
+    if (!items || items.length === 0) {
+      el.innerHTML = '<div class="oc-queue-empty">NO QUEUED RUNS</div>';
+      return;
+    }
+    el.innerHTML = items.map(item => {
+      const task    = (item.task || '').substring(0, 55);
+      const waitS   = item.wait_s || 0;
+      const waitStr = waitS < 60 ? waitS + 's' : Math.floor(waitS / 60) + 'm ' + (waitS % 60) + 's';
+      const mode    = ((item.config || {}).orchestrator_mode) || 'langgraph';
+      const mc      = mode === 'strands' ? 'strands' : '';
+      return `<div class="oc-queue-item">
+        <div class="oc-qi-top">
+          <div class="oc-qi-pos">${item.queue_position}</div>
+          <div class="oc-qi-task" title="${item.task}">${task}</div>
+          <div class="oc-qi-mode ${mc}">${mode.toUpperCase()}</div>
+        </div>
+        <div class="oc-qi-meta">
+          <span>WAIT ${waitStr}</span>
+          <span>${(item.model || 'auto').toUpperCase()}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Step log ───────────────────────────────────────────────────────
+  function watchRunSteps(runId) {
+    if (_stepLogRunId === runId) return;
+    _stepLogRunId = runId;
+    _stepLogSeenIds.clear();
+
+    const label = document.getElementById('oc-step-run-label');
+    if (label) label.textContent = 'RUN ' + runId.substring(0, 8).toUpperCase() + '…';
+    const log = document.getElementById('oc-step-log');
+    if (log) log.innerHTML = '';
+
+    if (_stepLogPollTimer) clearInterval(_stepLogPollTimer);
+    _pollStepLog();
+    _stepLogPollTimer = setInterval(async () => {
+      await _pollStepLog();
+      try {
+        const res = await fetch(`${API}/api/runs/` + _stepLogRunId);
+        if (res.ok) {
+          const d = await res.json();
+          if (d.run && ['completed', 'failed', 'cancelled'].includes(d.run.status)) {
+            clearInterval(_stepLogPollTimer);
+            if (label) label.textContent = 'RUN ' + _stepLogRunId.substring(0, 8).toUpperCase() + ' — ' + d.run.status.toUpperCase();
+          }
+        }
+      } catch(_) {}
+    }, 2500);
+  }
+
+  async function _pollStepLog() {
+    if (!_stepLogRunId) return;
+    try {
+      const res = await fetch(`${API}/api/runs/` + _stepLogRunId);
+      if (!res.ok) return;
+      const { events } = await res.json();
+      if (!events) return;
+      const log = document.getElementById('oc-step-log');
+      if (!log) return;
+      // Remove placeholder if present
+      const placeholder = log.querySelector('.oc-step-empty');
+      if (placeholder) placeholder.remove();
+      let added = 0;
+      for (const ev of events) {
+        const key = String(ev.id || '') || (ev.event_type + ':' + ev.ts);
+        if (_stepLogSeenIds.has(key)) continue;
+        _stepLogSeenIds.add(key);
+        const el = _makeStepEl(ev);
+        if (el) { log.appendChild(el); added++; }
+      }
+      if (added > 0) log.scrollTop = log.scrollHeight;
+      if (log.children.length === 0) {
+        log.innerHTML = '<div class="oc-step-empty">WAITING FOR EVENTS…</div>';
+      }
+    } catch(_) {}
+  }
+
+  function _makeStepEl(ev) {
+    const type = ev.event_type || 'raw';
+    const data = ev.data || {};
+    let text = '';
+
+    switch (type) {
+      case 'status':
+        text = data.message || 'status';
+        break;
+      case 'node_update': {
+        const agent = (data.active_agent || data.node || '?').toUpperCase();
+        const msg   = data.message || '';
+        text = `[${agent}] ${msg}`;
+        if (data.snippet) text += ' — ' + String(data.snippet).substring(0, 80);
+        if (data.input_preview) text += ' ← ' + String(data.input_preview).substring(0, 60);
+        break;
+      }
+      case 'text_chunk':
+        if (!data.text || !data.text.trim()) return null;
+        text = `[${(data.agent || 'bot').toUpperCase()}] ${String(data.text).substring(0, 120)}`;
+        break;
+      case 'error':
+        text = '✗ ' + (data.message || 'error');
+        break;
+      case 'usage':
+        text = `TOKENS ↑${data.tokens_in || 0} ↓${data.tokens_out || 0}`;
+        break;
+      default:
+        return null;
+    }
+
+    const div = document.createElement('div');
+    div.className = `oc-step-item ${type}`;
+    div.textContent = text;
+    return div;
+  }
+
+  // ── Auto-watch when a run is dispatched ───────────────────────────
+  // Override _streamRun to also start step watching
+  const _origStreamRun = typeof _streamRun === 'function' ? _streamRun : null;
+
+  // Start queue polling on load
+  startQueuePolling();
 
 </script>
 </body>
