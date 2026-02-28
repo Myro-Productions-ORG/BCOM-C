@@ -29,8 +29,8 @@
 
 <!-- ACTION BAR -->
 <div class="actionbar">
-  <span style="font-size:9px;letter-spacing:2px;color:var(--orange);font-weight:700;">BCOM-C SETTINGS</span>
-  <span style="font-size:8px;letter-spacing:1px;color:var(--text-muted);margin-left:8px;">Configure dashboard, nodes, inference, and orchestration</span>
+  <span style="font-size:11px;letter-spacing:2px;color:var(--orange);font-weight:700;">BCOM-C SETTINGS</span>
+  <span style="font-size:10px;letter-spacing:1px;color:var(--text-muted);margin-left:8px;">Configure dashboard, nodes, inference, and orchestration</span>
 </div>
 
 <!-- SETTINGS LAYOUT -->
@@ -54,8 +54,8 @@
         <input type="color" id="accent-color" value="#DA7756"
                style="width:32px;height:24px;border:1.5px solid var(--orange-dark);background:transparent;cursor:pointer;padding:1px;"
                oninput="previewAccent(this.value)" />
-        <span style="font-size:9px;color:var(--text-muted);letter-spacing:1px;" id="accent-hex">#DA7756</span>
-        <button class="sett-btn" onclick="resetAccent()" style="padding:3px 10px;font-size:8px;">RESET</button>
+        <span style="font-size:11px;color:var(--text-muted);letter-spacing:1px;" id="accent-hex">#DA7756</span>
+        <button class="sett-btn" onclick="resetAccent()" style="padding:3px 10px;font-size:10px;">RESET</button>
       </div>
     </div>
 
@@ -104,7 +104,7 @@
       <label>Dashboard Poll Rate</label>
       <div style="display:flex;align-items:center;gap:6px;">
         <input class="sett-input narrow" id="poll-rate" type="number" min="2" max="60" value="5" />
-        <span style="font-size:9px;color:var(--text-muted);">SEC</span>
+        <span style="font-size:11px;color:var(--text-muted);">SEC</span>
       </div>
     </div>
 
@@ -112,7 +112,7 @@
       <label>Metrics Poll Rate</label>
       <div style="display:flex;align-items:center;gap:6px;">
         <input class="sett-input narrow" id="metrics-poll" type="number" min="5" max="60" value="10" />
-        <span style="font-size:9px;color:var(--text-muted);">SEC</span>
+        <span style="font-size:11px;color:var(--text-muted);">SEC</span>
       </div>
     </div>
 
@@ -120,7 +120,7 @@
       <label>Request Timeout</label>
       <div style="display:flex;align-items:center;gap:6px;">
         <input class="sett-input narrow" id="req-timeout" type="number" min="1" max="30" value="8" />
-        <span style="font-size:9px;color:var(--text-muted);">SEC</span>
+        <span style="font-size:11px;color:var(--text-muted);">SEC</span>
       </div>
     </div>
 
@@ -128,8 +128,8 @@
       <label>Connection Status</label>
       <div style="display:flex;align-items:center;gap:8px;">
         <div id="conn-dot" style="width:8px;height:8px;border-radius:50%;background:#555;"></div>
-        <span id="conn-label" style="font-size:9px;letter-spacing:1px;color:var(--text-muted);">UNKNOWN</span>
-        <button class="sett-btn" onclick="testConnection()" style="padding:3px 10px;font-size:8px;">TEST</button>
+        <span id="conn-label" style="font-size:11px;letter-spacing:1px;color:var(--text-muted);">UNKNOWN</span>
+        <button class="sett-btn" onclick="testConnection()" style="padding:3px 10px;font-size:10px;">TEST</button>
       </div>
     </div>
   </div>
@@ -140,7 +140,7 @@
 
     <div class="sett-row" style="background:rgba(218,119,86,0.04);">
       <label style="color:var(--orange);font-weight:700;">SPARK-BOB (DGX GB10)</label>
-      <span style="font-size:8px;color:var(--text-muted);">Primary inference node</span>
+      <span style="font-size:10px;color:var(--text-muted);">Primary inference node</span>
     </div>
 
     <div class="sett-row">
@@ -160,7 +160,7 @@
 
     <div class="sett-row" style="background:rgba(218,119,86,0.04);margin-top:4px;">
       <label style="color:var(--orange);font-weight:700;">LINUX-DSKTP</label>
-      <span style="font-size:8px;color:var(--text-muted);">UBNTxWINDesktop</span>
+      <span style="font-size:10px;color:var(--text-muted);">UBNTxWINDesktop</span>
     </div>
 
     <div class="sett-row">
@@ -180,7 +180,7 @@
 
     <div class="sett-row" style="background:rgba(218,119,86,0.04);margin-top:4px;">
       <label style="color:var(--orange);font-weight:700;">MAC MINI</label>
-      <span style="font-size:8px;color:var(--text-muted);">Caddy / hosting node</span>
+      <span style="font-size:10px;color:var(--text-muted);">Caddy / hosting node</span>
     </div>
 
     <div class="sett-row">
@@ -195,45 +195,45 @@
 
     <div class="sett-row" style="background:rgba(218,119,86,0.04);">
       <label style="color:var(--text-dim);">CPU Temperature</label>
-      <span style="font-size:8px;color:var(--text-muted);">warn / critical °C</span>
+      <span style="font-size:10px;color:var(--text-muted);">warn / critical °C</span>
     </div>
     <div class="sett-row">
       <label>CPU Warn Threshold</label>
       <div style="display:flex;align-items:center;gap:6px;">
         <input class="sett-input narrow" id="cpu-warn-temp" type="number" value="70" />
-        <span style="font-size:9px;color:var(--text-muted);">°C</span>
+        <span style="font-size:11px;color:var(--text-muted);">°C</span>
       </div>
     </div>
     <div class="sett-row">
       <label>CPU Critical Threshold</label>
       <div style="display:flex;align-items:center;gap:6px;">
         <input class="sett-input narrow" id="cpu-crit-temp" type="number" value="85" />
-        <span style="font-size:9px;color:var(--text-muted);">°C</span>
+        <span style="font-size:11px;color:var(--text-muted);">°C</span>
       </div>
     </div>
 
     <div class="sett-row" style="background:rgba(218,119,86,0.04);margin-top:4px;">
       <label style="color:var(--text-dim);">GPU Temperature</label>
-      <span style="font-size:8px;color:var(--text-muted);">warn / critical °C</span>
+      <span style="font-size:10px;color:var(--text-muted);">warn / critical °C</span>
     </div>
     <div class="sett-row">
       <label>GPU Warn Threshold</label>
       <div style="display:flex;align-items:center;gap:6px;">
         <input class="sett-input narrow" id="gpu-warn-temp" type="number" value="75" />
-        <span style="font-size:9px;color:var(--text-muted);">°C</span>
+        <span style="font-size:11px;color:var(--text-muted);">°C</span>
       </div>
     </div>
     <div class="sett-row">
       <label>GPU Critical Threshold</label>
       <div style="display:flex;align-items:center;gap:6px;">
         <input class="sett-input narrow" id="gpu-crit-temp" type="number" value="90" />
-        <span style="font-size:9px;color:var(--text-muted);">°C</span>
+        <span style="font-size:11px;color:var(--text-muted);">°C</span>
       </div>
     </div>
 
     <div class="sett-row" style="background:rgba(218,119,86,0.04);margin-top:4px;">
       <label style="color:var(--text-dim);">Memory</label>
-      <span style="font-size:8px;color:var(--text-muted);">% thresholds</span>
+      <span style="font-size:10px;color:var(--text-muted);">% thresholds</span>
     </div>
     <div class="sett-row">
       <label>RAM Warn %</label>
@@ -421,7 +421,7 @@
       <label>Agent Timeout</label>
       <div style="display:flex;align-items:center;gap:6px;">
         <input class="sett-input narrow" id="agent-timeout" type="number" value="120" />
-        <span style="font-size:9px;color:var(--text-muted);">SEC</span>
+        <span style="font-size:11px;color:var(--text-muted);">SEC</span>
       </div>
     </div>
 
@@ -589,52 +589,52 @@
     <div class="sett-about-grid">
       <div class="sett-row" style="border-right:1px solid var(--border-dim);">
         <label>Version</label>
-        <span style="font-size:10px;color:var(--orange);letter-spacing:1px;">BCOM-C v0.1</span>
+        <span style="font-size:12px;color:var(--orange);letter-spacing:1px;">BCOM-C v0.1</span>
       </div>
       <div class="sett-row">
         <label>Build Date</label>
-        <span style="font-size:10px;color:var(--text-dim);" id="about-build-date">2026-02-28</span>
+        <span style="font-size:12px;color:var(--text-dim);" id="about-build-date">2026-02-28</span>
       </div>
       <div class="sett-row" style="border-right:1px solid var(--border-dim);">
         <label>API Host</label>
-        <span style="font-size:10px;color:var(--text-dim);">spark:9010</span>
+        <span style="font-size:12px;color:var(--text-dim);">spark:9010</span>
       </div>
       <div class="sett-row">
         <label>Dashboard URL</label>
-        <span style="font-size:9px;color:var(--text-muted);">bcom.myroproductions.com</span>
+        <span style="font-size:11px;color:var(--text-muted);">bcom.myroproductions.com</span>
       </div>
       <div class="sett-row" style="border-right:1px solid var(--border-dim);">
         <label>Inference Node</label>
-        <span style="font-size:10px;color:var(--text-dim);">DGX Spark GB10</span>
+        <span style="font-size:12px;color:var(--text-dim);">DGX Spark GB10</span>
       </div>
       <div class="sett-row">
         <label>Hosting Node</label>
-        <span style="font-size:10px;color:var(--text-dim);">Mac Mini M4</span>
+        <span style="font-size:12px;color:var(--text-dim);">Mac Mini M4</span>
       </div>
       <div class="sett-row" style="border-right:1px solid var(--border-dim);">
         <label>Metrics Node</label>
-        <span style="font-size:10px;color:var(--text-dim);">UBNTxWINDesktop</span>
+        <span style="font-size:12px;color:var(--text-dim);">UBNTxWINDesktop</span>
       </div>
       <div class="sett-row">
         <label>Caddy + Cloudflare</label>
-        <span style="font-size:10px;color:#2ecc71;">ACTIVE</span>
+        <span style="font-size:12px;color:#2ecc71;">ACTIVE</span>
       </div>
     </div>
 
     <div class="sett-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <a href="https://github.com/Myro-Productions-ORG/BCOM-C" target="_blank"
-           style="font-size:8px;color:var(--orange);letter-spacing:1px;text-decoration:none;">
+           style="font-size:10px;color:var(--orange);letter-spacing:1px;text-decoration:none;">
           ↗ GITHUB REPO
         </a>
-        <span style="font-size:8px;color:var(--border-dim);">|</span>
+        <span style="font-size:10px;color:var(--border-dim);">|</span>
         <a href="https://bcom.myroproductions.com" target="_blank"
-           style="font-size:8px;color:var(--orange);letter-spacing:1px;text-decoration:none;">
+           style="font-size:10px;color:var(--orange);letter-spacing:1px;text-decoration:none;">
           ↗ LIVE DASHBOARD
         </a>
-        <span style="font-size:8px;color:var(--border-dim);">|</span>
+        <span style="font-size:10px;color:var(--border-dim);">|</span>
         <a href="../index.html"
-           style="font-size:8px;color:var(--orange);letter-spacing:1px;text-decoration:none;">
+           style="font-size:10px;color:var(--orange);letter-spacing:1px;text-decoration:none;">
           ← BACK TO DASHBOARD
         </a>
       </div>

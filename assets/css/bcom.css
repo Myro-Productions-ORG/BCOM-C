@@ -892,11 +892,11 @@ body { padding-bottom: 220px; }
    ════════════════════════════════════════════════════ */
 .sett-layout {
   flex: 1;
-  padding: 16px;
+  padding: 19px;
   overflow-y: auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 17px;
   align-content: start;
 }
 
@@ -912,42 +912,42 @@ body { padding-bottom: 220px; }
 }
 
 .sett-hdr {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 2px;
   color: var(--orange);
-  padding: 7px 12px;
+  padding: 9px 14px;
   border-bottom: 1px solid var(--orange-dark);
   text-transform: uppercase;
   background: rgba(218,119,86,0.06);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
-.sett-hdr-icon { font-size: 12px; }
+.sett-hdr-icon { font-size: 14px; }
 
 .sett-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border-dim);
-  gap: 12px;
-  min-height: 36px;
+  gap: 14px;
+  min-height: 43px;
 }
 .sett-row:last-child { border-bottom: none; }
 
 .sett-row label {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1px;
   color: var(--text-dim);
   text-transform: uppercase;
   flex-shrink: 0;
-  min-width: 140px;
+  min-width: 168px;
 }
 
 .sett-row-desc {
-  font-size: 8px;
+  font-size: 10px;
   color: var(--text-muted);
   letter-spacing: 0.5px;
 }
@@ -957,27 +957,27 @@ body { padding-bottom: 220px; }
   border: 1.5px solid var(--input-border);
   color: var(--text);
   font-family: 'Courier New', monospace;
-  font-size: 10px;
-  padding: 4px 8px;
-  width: 180px;
+  font-size: 12px;
+  padding: 5px 10px;
+  width: 216px;
   outline: none;
   transition: border-color 0.15s;
 }
 .sett-input:focus  { border-color: var(--orange); }
-.sett-input.narrow { width: 80px; }
-.sett-input.wide   { width: 240px; }
+.sett-input.narrow { width: 96px; }
+.sett-input.wide   { width: 288px; }
 
 .sett-select {
   background: var(--input-bg);
   border: 1.5px solid var(--input-border);
   color: var(--text);
   font-family: 'Courier New', monospace;
-  font-size: 10px;
-  padding: 4px 8px;
+  font-size: 12px;
+  padding: 5px 10px;
   outline: none;
   cursor: pointer;
   transition: border-color 0.15s;
-  width: 180px;
+  width: 216px;
 }
 .sett-select:focus { border-color: var(--orange); }
 
@@ -987,15 +987,15 @@ body { padding-bottom: 220px; }
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-  gap: 8px;
+  gap: 10px;
 }
 .sett-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
 .sett-toggle-track {
-  width: 40px;
-  height: 20px;
+  width: 48px;
+  height: 24px;
   background: var(--bg-deep);
   border: 1.5px solid var(--border-dim);
-  border-radius: 10px;
+  border-radius: 12px;
   position: relative;
   transition: background 0.2s, border-color 0.2s;
 }
@@ -1006,24 +1006,24 @@ body { padding-bottom: 220px; }
 .sett-toggle-track::after {
   content: '';
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 12px;
-  height: 12px;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
   background: #666;
   border-radius: 50%;
   transition: left 0.2s, background 0.2s;
 }
 .sett-toggle input:checked + .sett-toggle-track::after {
-  left: 22px;
+  left: 27px;
   background: #fff;
 }
 .sett-toggle-label {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1px;
   color: var(--text-dim);
   text-transform: uppercase;
-  min-width: 32px;
+  min-width: 36px;
 }
 
 /* ── Action buttons in settings ─────────────────── */
@@ -1032,9 +1032,9 @@ body { padding-bottom: 220px; }
   border: 1.5px solid var(--orange-dark);
   color: var(--orange);
   font-family: 'Courier New', monospace;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1.5px;
-  padding: 5px 14px;
+  padding: 6px 17px;
   cursor: pointer;
   text-transform: uppercase;
   transition: all 0.15s;
@@ -1046,15 +1046,15 @@ body { padding-bottom: 220px; }
 .sett-btn.success:hover{ background: #1a5a30; color: #fff; }
 
 /* ── Theme picker ─────────────────────────────── */
-.theme-btn-group { display: flex; gap: 6px; }
+.theme-btn-group { display: flex; gap: 7px; }
 .theme-btn {
   background: var(--bg-deep);
   border: 1.5px solid var(--border-dim);
   color: var(--text-dim);
   font-family: 'Courier New', monospace;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1.5px;
-  padding: 5px 16px;
+  padding: 6px 19px;
   cursor: pointer;
   text-transform: uppercase;
   transition: all 0.15s;
@@ -1073,15 +1073,15 @@ body { padding-bottom: 220px; }
 .sett-save-bar {
   background: var(--bg-bar);
   border-top: 2px solid var(--orange-dark);
-  padding: 8px 16px;
+  padding: 10px 19px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   justify-content: flex-end;
   flex-shrink: 0;
 }
 .sett-save-msg {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1px;
   color: #2ecc71;
   opacity: 0;
