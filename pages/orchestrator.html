@@ -484,11 +484,13 @@
         <div class="deploy-section-label">LangChain System</div>
         <div style="font-size:8px;color:#333;letter-spacing:1px;line-height:2;">
           <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">CHAIN MODE</span><span style="color:var(--orange);">MULTI-AGENT</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">ROUTER</span><span style="color:#7fb3cc;">LLM-BASED</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">MEMORY</span><span style="color:#2ecc71;">BUFFER + VECTOR</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">MAX PARALLEL</span><span style="color:#555;">— NO API —</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">ACTIVE CHAINS</span><span style="color:#555;">— NO API —</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">TOKEN BUDGET</span><span style="color:#555;">— NO API —</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">ROUTER</span><span style="color:#7fb3cc;">SUPERVISOR+LLM</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">MEMORY</span><span style="color:#2ecc71;">POSTGRES</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">RUNNING</span><span id="lc-running" style="color:#7fb3cc;">--</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">TOTAL RUNS</span><span id="lc-total" style="color:#7fb3cc;">--</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">TOKENS USED</span><span id="lc-tokens" style="color:#7fb3cc;">--</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">SUCCESS RATE</span><span id="lc-success" style="color:#2ecc71;">--</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">AVG DURATION</span><span id="lc-avgdur" style="color:#555;">--</span></div>
         </div>
       </div>
 
@@ -558,6 +560,7 @@
     <div class="terminal-tabs">
       <div class="terminal-tab active" data-term="orch" onclick="switchTerm('orch')">ORCHESTRATOR</div>
       <div class="terminal-tab" data-term="agent" onclick="switchTerm('agent')">AGENT LOG</div>
+      <div class="terminal-tab" data-term="history" onclick="switchTerm('history')">RUN HISTORY</div>
     </div>
     <div class="terminal-controls">
       <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
@@ -572,6 +575,11 @@
     <div class="terminal-output" id="term-out-agent" style="display:none">
       <div class="term-line sys">[agent-log] sub-agent monitor active</div>
       <div class="term-line dim">[agent-log] no agents currently running</div>
+    </div>
+    <div class="terminal-output" id="term-out-history" style="display:none">
+      <div id="run-history-body">
+        <div class="term-line dim">[run-history] loading...</div>
+      </div>
     </div>
     <div class="terminal-input-row">
       <span class="term-prompt" id="term-prompt">orch $</span>
@@ -991,34 +999,122 @@ const PRIORITY_COLORS = {
   low: '#444', normal: '#7fb3cc', high: '#f39c12', critical: '#e74c3c',
 };
 
-function deployTask() {
+/* ── API base (Caddy proxies /api/* → DGX:9010) ─────────── */
+const API = '';   // same-origin via Caddy reverse proxy
+
+/* ── Active SSE connections keyed by run_id ─────────────── */
+const _sseConns = {};
+
+async function deployTask() {
   const name     = document.getElementById('task-name-input').value.trim() || 'Unnamed Task';
   const type     = document.getElementById('task-type-select').value;
   const agentRaw = document.getElementById('task-agent-select').value;
   const priority = document.getElementById('task-priority-select').value;
 
-  const agentId = agentRaw === 'auto'
-    ? AGENT_DEFS[Math.floor(Math.random() * AGENT_DEFS.length)].id
-    : agentRaw;
+  orchLog(`DISPATCHING: "${name}" [${type.toUpperCase()}] …`, 'sys');
+  document.getElementById('task-name-input').value = '';
 
+  let runId;
+  try {
+    const res = await fetch(`${API}/api/runs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task: name, config: { type, agent: agentRaw, priority }, queued: false }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    runId = data.run_id;
+  } catch (err) {
+    orchLog(`ERROR dispatching task: ${err.message}`, 'err');
+    return;
+  }
+
+  // Add to local task table immediately
   const task = {
-    id:       'TSK-' + String(taskCounter++).padStart(4, '0'),
+    id: runId,
     name,
     type,
-    agentId,
+    agentId: agentRaw === 'auto' ? 'supervisor' : agentRaw,
     priority,
-    status:   'queued',
+    status: 'running',
     progress: 0,
-    elapsed:  0,
+    elapsed: 0,
     queuedAt: Date.now(),
   };
   tasks.push(task);
   renderTaskTable();
   updateTaskCount();
+  orchLog(`STARTED run ${runId.slice(0,8)}… — streaming live events`, 'sys');
 
-  orchLog(`QUEUED: ${task.id} → ${AGENT_DEFS.find(a => a.id === agentId)?.label} [${type.toUpperCase()}] priority:${priority.toUpperCase()} — awaiting API`, 'sys');
-  orchLog(`[no API] connect API to dispatch tasks to live agents`, 'dim');
-  document.getElementById('task-name-input').value = '';
+  // Open SSE stream for this run
+  _streamRun(runId, task);
+}
+
+function _streamRun(runId, taskRef) {
+  if (_sseConns[runId]) return;
+  const es = new EventSource(`${API}/api/runs/${runId}/stream`);
+  _sseConns[runId] = es;
+
+  es.onmessage = (e) => {
+    let ev;
+    try { ev = JSON.parse(e.data); } catch { return; }
+
+    const etype = ev.event_type || '';
+    const node  = ev.node || '';
+    const data  = ev.data || {};
+
+    if (etype === 'stream_end') {
+      es.close();
+      delete _sseConns[runId];
+      const finalStatus = data.status || 'completed';
+      if (taskRef) {
+        taskRef.status = finalStatus === 'completed' ? 'complete' : finalStatus === 'failed' ? 'error' : finalStatus;
+        taskRef.progress = finalStatus === 'completed' ? 100 : taskRef.progress;
+        renderTaskTable();
+      }
+      orchLog(`RUN ${runId.slice(0,8)} → ${finalStatus.toUpperCase()}`, finalStatus === 'completed' ? 'sys' : 'err');
+      refreshRunHistory();
+      refreshAnalytics();
+      return;
+    }
+
+    if (etype === 'node_update') {
+      const agent   = data.active_agent || node;
+      const snippet = data.snippet ? ` — ${data.snippet.slice(0,80)}` : '';
+      const tokStr  = data.tokens_out != null ? ` [tok:${data.tokens_in||0}/${data.tokens_out}]` : '';
+      orchLog(`[${agent.toUpperCase()}]${tokStr}${snippet}`, agent === 'supervisor' ? 'sys' : '');
+      // Update task progress heuristic
+      if (taskRef && data.iteration != null) {
+        taskRef.progress = Math.min(95, Math.round((data.iteration / (data.max_iter || 6)) * 100));
+        taskRef.status = 'running';
+        renderTaskTable();
+      }
+      // Highlight active node on canvas
+      _setActiveNode(agent);
+      agentLog(`[${node}] iter:${data.iteration||'?'} next:${data.next_node||'?'}${tokStr}`, '');
+    } else if (etype === 'error') {
+      orchLog(`ERROR in run ${runId.slice(0,8)}: ${data.message || '?'}`, 'err');
+    } else if (etype === 'status') {
+      orchLog(`STATUS: ${data.message || etype}`, 'dim');
+    }
+  };
+
+  es.onerror = () => {
+    es.close();
+    delete _sseConns[runId];
+  };
+}
+
+/* Map agent names to canvas node IDs for visual highlighting */
+const AGENT_NODE_MAP = {
+  supervisor: 'spark', code_agent: 'code', doc_agent: 'analysis',
+  analysis_agent: 'analysis', done: 'spark',
+};
+function _setActiveNode(agentName) {
+  const nodeId = AGENT_NODE_MAP[agentName];
+  if (!nodeId) return;
+  NODES.forEach(n => { n.status = n.id === nodeId ? 'active' : (n.id === 'spark' ? 'active' : 'idle'); });
+  drawCanvas();
 }
 
 function renderTaskTable() {
@@ -1032,17 +1128,100 @@ function renderTaskTable() {
     const sc = t.status === 'complete' ? 'complete' : t.status === 'error' ? 'error' : t.status === 'running' ? 'running' : 'queued';
     const pc_color = PRIORITY_COLORS[t.priority] || '#555';
     const elapsed = Math.floor((Date.now() - t.queuedAt) / 1000);
-    return `<tr>
-      <td class="task-id">${t.id}</td>
+    const progBar = `<div style="width:100%;background:#1a1a1a;border-radius:2px;height:6px;overflow:hidden">
+      <div style="width:${t.progress}%;background:${t.status==='error'?'#e74c3c':'var(--orange)'};height:6px;border-radius:2px;transition:width .4s"></div></div>`;
+    const shortId = t.id.length > 12 ? t.id.slice(0,8)+'…' : t.id;
+    return `<tr onclick="viewRun('${t.id}')" style="cursor:pointer">
+      <td class="task-id" title="${t.id}">${shortId}</td>
       <td class="task-name">${t.name}</td>
       <td>${TYPE_LABELS[t.type] || t.type}</td>
       <td class="task-agent">${agentLabel(t.agentId)}</td>
-      <td class="task-prog" style="color:#333">— AWAITING API —</td>
+      <td class="task-prog">${progBar}</td>
       <td style="color:${pc_color}">${t.priority.toUpperCase()}</td>
       <td class="task-time">${elapsed}s</td>
       <td><span class="task-status-chip ${sc}">${t.status.toUpperCase()}</span></td>
     </tr>`;
   }).join('');
+}
+
+/* ── View a single run detail in the terminal ─────────────── */
+async function viewRun(runId) {
+  switchTerm('orch');
+  orchLog(`Fetching run ${runId.slice(0,8)}…`, 'dim');
+  try {
+    const res = await fetch(`${API}/api/runs/${runId}`);
+    if (!res.ok) throw new Error('not found');
+    const { run, events } = await res.json();
+    orchLog(`── RUN ${runId.slice(0,8)} [${run.status.toUpperCase()}] task:"${run.task}" ──`, 'sys');
+    orchLog(`   model:${run.model||'?'} tokens:${run.tokens_in||0}in/${run.tokens_out||0}out dur:${run.duration_s||0}s`, 'dim');
+    events.forEach(ev => {
+      const d = ev.data || {};
+      if (ev.event_type === 'node_update') {
+        orchLog(`  [${ev.node||'?'}] ${d.snippet||''} tok:${d.tokens_out||0}`, '');
+      } else {
+        orchLog(`  [${ev.event_type}] ${d.message||JSON.stringify(d).slice(0,80)}`, 'dim');
+      }
+    });
+  } catch (err) {
+    orchLog(`ERROR fetching run: ${err.message}`, 'err');
+  }
+}
+
+/* ── Analytics refresh — updates LangChain System panel ───── */
+async function refreshAnalytics() {
+  try {
+    const res = await fetch(`${API}/api/runs/analytics`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const t = data.totals || {};
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set('lc-running',  t.running  ?? '--');
+    set('lc-total',    t.total_runs ?? '--');
+    set('lc-tokens',   t.total_tokens ? _fmtNum(t.total_tokens) : '--');
+    const successRate = t.total_runs > 0 ? Math.round((t.completed / t.total_runs) * 100) + '%' : '--';
+    set('lc-success',  successRate);
+    set('lc-avgdur',   t.avg_duration_s ? t.avg_duration_s + 's' : '--');
+    // Update footer
+    const fRunning = document.querySelector('.footer span:last-child');
+    if (fRunning) fRunning.textContent = `LANGGRAPH — ${t.running > 0 ? t.running + ' RUNNING' : 'IDLE'}`;
+  } catch (_) {}
+}
+
+function _fmtNum(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return String(n);
+}
+
+/* ── Run History tab ─────────────────────────────────────── */
+async function refreshRunHistory() {
+  const body = document.getElementById('run-history-body');
+  if (!body) return;
+  try {
+    const res = await fetch(`${API}/api/runs?limit=30`);
+    if (!res.ok) throw new Error('fetch failed');
+    const { runs } = await res.json();
+    if (!runs.length) {
+      body.innerHTML = '<div class="term-line dim">[run-history] no runs yet — dispatch a task to begin</div>';
+      return;
+    }
+    const statusColor = s => ({ completed:'#2ecc71', failed:'#e74c3c', running:'var(--orange)', queued:'#7fb3cc', cancelled:'#888' }[s] || '#555');
+    body.innerHTML = runs.map(r => {
+      const ts = r.created_at ? new Date(r.created_at).toLocaleTimeString() : '?';
+      const dur = r.duration_s != null ? `${r.duration_s}s` : '--';
+      const tok = (r.tokens_in + r.tokens_out) > 0 ? ` ${_fmtNum(r.tokens_in+r.tokens_out)}tok` : '';
+      const shortId = r.id.slice(0,8);
+      return `<div class="term-line" style="cursor:pointer;font-size:9px" onclick="viewRun('${r.id}')">
+        <span style="color:#555">[${ts}]</span>
+        <span style="color:${statusColor(r.status)};margin:0 4px">${r.status.toUpperCase()}</span>
+        <span style="color:#aaa">${shortId}</span>
+        <span style="color:#666;margin:0 4px">${dur}${tok}</span>
+        <span style="color:#888">${r.task.slice(0,60)}${r.task.length>60?'…':''}</span>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    body.innerHTML = `<div class="term-line err">[run-history] error: ${err.message}</div>`;
+  }
 }
 
 function updateTaskCount() {
@@ -1063,12 +1242,14 @@ function switchTerm(node) {
   _termNode = node;
   document.querySelectorAll('.terminal-tab').forEach(t =>
     t.classList.toggle('active', t.dataset.term === node));
-  ['orch', 'agent'].forEach(n => {
+  ['orch', 'agent', 'history'].forEach(n => {
     const el = document.getElementById('term-out-' + n);
     if (el) el.style.display = n === node ? 'block' : 'none';
   });
-  document.getElementById('term-prompt').textContent = node === 'orch' ? 'orch $' : 'agent $';
+  const prompts = { orch: 'orch $', agent: 'agent $', history: 'hist $' };
+  document.getElementById('term-prompt').textContent = prompts[node] || 'orch $';
   document.getElementById('terminal-input').focus();
+  if (node === 'history') refreshRunHistory();
 }
 
 function orchLog(msg, cls) {
@@ -1131,7 +1312,11 @@ function tickClock() {
 setInterval(tickClock, 1000);
 tickClock();
 
-orchLog('Orchestrator UI ready — connect API to enable live agent dispatching', 'sys');
+orchLog('Orchestrator UI ready — LangGraph backend connected', 'sys');
+orchLog('Dispatch a task to begin. Click a run row to inspect events.', 'dim');
+
+// Bootstrap analytics on load
+refreshAnalytics();
 
 /* ── Node Hardware polling ──────────────────────────────── */
 async function pollOrchMetrics() {
@@ -1158,6 +1343,7 @@ async function pollOrchMetrics() {
 }
 pollOrchMetrics();
 setInterval(pollOrchMetrics, 10000);
+setInterval(refreshAnalytics, 15000);
 </script>
 </body>
 </html>
