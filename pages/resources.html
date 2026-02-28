@@ -307,14 +307,15 @@
   // ── Resource page poll (system stats, storage, models) ─────────────
   async function pollResourcePage() {
     try {
-      const [statsRes, infoRes, storageRes, modelsRes] = await Promise.allSettled([
-        fetch('/api/system/stats',   { cache: 'no-store' }),
-        fetch('/api/system/info',    { cache: 'no-store' }),
-        fetch('/api/system/storage', { cache: 'no-store' }),
-        fetch('/api/models/',        { cache: 'no-store' }),
+      const [statsRes, infoRes, storageRes, modelsRes, linuxRes] = await Promise.allSettled([
+        fetch('/api/system/stats',        { cache: 'no-store' }),
+        fetch('/api/system/info',         { cache: 'no-store' }),
+        fetch('/api/system/storage',      { cache: 'no-store' }),
+        fetch('/api/models/',             { cache: 'no-store' }),
+        fetch('/api/system/linux/stats',  { cache: 'no-store' }),
       ]);
 
-      // System stats → compute chips (GPU name, CPU%, memory)
+      // Spark stats → compute chips
       if (statsRes.status === 'fulfilled' && statsRes.value.ok) {
         const s = await statsRes.value.json();
         const g = s.gpu ?? {};
@@ -323,13 +324,13 @@
           ? `${s.cpu_percent.toFixed(1)}% CPU` : '--');
       }
 
-      // System info → cpu_count
+      // Spark info → cpu_count
       if (infoRes.status === 'fulfilled' && infoRes.value.ok) {
         const info = await infoRes.value.json();
         setText('ca-spark-cpu', info.cpu_count ? `${info.cpu_count} cores` : '--');
       }
 
-      // Storage → bars
+      // Spark storage → bars
       if (storageRes.status === 'fulfilled' && storageRes.value.ok) {
         const stor = await storageRes.value.json();
         const sp   = stor.spark ?? {};
@@ -344,6 +345,24 @@
         const mdl = await modelsRes.value.json();
         _liveModels = mdl.models ?? (Array.isArray(mdl) ? mdl : []);
         renderRegistry();
+      }
+
+      // Linux desktop → compute chips + storage bars
+      if (linuxRes.status === 'fulfilled' && linuxRes.value.ok) {
+        const lx = await linuxRes.value.json();
+        if (!lx.error) {
+          setText('ca-linux-gpu',   'NONE');
+          setText('ca-linux-cpu',   lx.cpu_count ? `${lx.cpu_count} cores` : '--');
+          setText('ca-linux-ram',   lx.memory?.used_gb != null
+            ? `${lx.memory.used_gb} / ${lx.memory.total_gb} GB` : '--');
+          setText('ca-linux-procs', lx.procs_running != null
+            ? `${lx.procs_running} running` : '--');
+
+          const d = lx.disk ?? {};
+          if (d.root)    setStorBar('sf-linux-root',   'stor-linux-root',   d.root.used_gb,    d.root.total_gb);
+          if (d.ubdrive) setStorBar('sf-linux-models', 'stor-linux-models', d.ubdrive.used_gb, d.ubdrive.total_gb);
+          if (d.ubdrive) setStorBar('sf-linux-data',   'stor-linux-data',   d.ubdrive.used_gb, d.ubdrive.total_gb);
+        }
       }
 
     } catch (err) {
