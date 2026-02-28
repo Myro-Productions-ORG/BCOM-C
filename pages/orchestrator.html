@@ -6,372 +6,281 @@
 <title>BCOM-C — Orchestrator</title>
 <link rel="stylesheet" href="../assets/css/bcom.css?v=3" />
 <style>
-/* ── ORCHESTRATOR PAGE ───────────────────────────── */
+/* ── ORCHESTRATOR PAGE ─────────────────────────────────── */
 .orch-layout {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 260px 1fr 260px;
   grid-template-rows: 1fr 160px;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 10px 14px;
   min-height: 0;
 }
 
-/* ── CANVAS PANEL ────────────────────────────────── */
-.orch-canvas-wrap {
+/* ── SHARED PANEL BASE ─────────────────────────────────── */
+.orch-panel {
   background: var(--bg-panel);
   border: 2px solid var(--border-dim);
   border-radius: 2px;
-  grid-row: 1 / 2;
-  grid-column: 1 / 2;
-  position: relative;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
-
-.orch-canvas-hdr {
+.orch-panel-hdr {
   background: #1a0e06;
   border-bottom: 1px solid var(--border-dim);
-  padding: 5px 14px;
+  padding: 5px 12px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--orange-dark);
+  text-transform: uppercase;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-shrink: 0;
 }
-
-.orch-canvas-hdr-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.orch-canvas-title {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--orange-dark);
-  text-transform: uppercase;
-}
-
-.orch-canvas-badge {
-  font-size: 7px;
-  letter-spacing: 1.5px;
-  color: #2ecc71;
-  border: 1px solid #2ecc71;
-  padding: 1px 6px;
-}
-
-.orch-canvas-controls {
-  display: flex;
-  gap: 6px;
-}
-
-.orch-ctrl-btn {
-  background: #0d0d0d;
-  border: 1px solid var(--border-dim);
-  color: #555;
-  font-family: 'Courier New', monospace;
-  font-size: 8px;
-  letter-spacing: 1px;
-  padding: 2px 8px;
-  cursor: pointer;
-  text-transform: uppercase;
-}
-.orch-ctrl-btn:hover { color: var(--orange); border-color: var(--orange-dark); }
-.orch-ctrl-btn.active-ctrl { color: var(--orange); border-color: var(--orange); }
-
-#orch-canvas {
-  flex: 1;
-  width: 100%;
-  display: block;
-  cursor: grab;
-}
-#orch-canvas:active { cursor: grabbing; }
-
-/* ── TOOLTIP ─────────────────────────────────────── */
-#orch-tooltip {
-  position: absolute;
-  pointer-events: none;
-  background: #0a0a0a;
-  border: 1px solid var(--orange-dark);
-  padding: 6px 10px;
-  font-size: 8px;
-  letter-spacing: 1px;
-  color: var(--orange);
-  display: none;
-  z-index: 50;
-  min-width: 140px;
-}
-#orch-tooltip .tt-name { font-weight: 700; margin-bottom: 3px; letter-spacing: 2px; }
-#orch-tooltip .tt-row  { color: #666; display: flex; justify-content: space-between; gap: 16px; }
-#orch-tooltip .tt-val  { color: #999; }
-
-/* ── LEGEND ──────────────────────────────────────── */
-.orch-legend {
-  position: absolute;
-  bottom: 10px;
-  left: 14px;
-  display: flex;
-  gap: 16px;
-}
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 7px;
-  color: #444;
-  letter-spacing: 1px;
-}
-.legend-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-}
-
-/* ── RIGHT CONTROL PANEL ─────────────────────────── */
-.orch-ctrl-panel {
-  grid-row: 1 / 2;
-  grid-column: 2 / 3;
-  background: var(--bg-panel);
-  border: 2px solid var(--border-dim);
-  border-radius: 2px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.orch-ctrl-panel-hdr {
-  background: #1a0e06;
-  border-bottom: 1px solid var(--border-dim);
-  padding: 5px 14px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--orange-dark);
-  text-transform: uppercase;
-  flex-shrink: 0;
-}
-
-.orch-ctrl-body {
+.orch-panel-body {
   flex: 1;
   overflow-y: auto;
-  padding: 10px 12px;
+  padding: 10px 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
-.orch-ctrl-body::-webkit-scrollbar       { width: 3px; }
-.orch-ctrl-body::-webkit-scrollbar-track { background: var(--bg-deep); }
-.orch-ctrl-body::-webkit-scrollbar-thumb { background: var(--orange-deep); }
+.orch-panel-body::-webkit-scrollbar { width: 3px; }
+.orch-panel-body::-webkit-scrollbar-track { background: var(--bg-deep); }
+.orch-panel-body::-webkit-scrollbar-thumb { background: var(--orange-deep); }
 
-/* ── DEPLOY TASK FORM ────────────────────────────── */
-.deploy-section { display: flex; flex-direction: column; gap: 6px; }
-.deploy-section-label {
-  font-size: 7px;
-  color: #444;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  border-bottom: 1px solid #1a1a1a;
-  padding-bottom: 4px;
-  margin-bottom: 2px;
+/* ── LEFT: DEPLOY PANEL ────────────────────────────────── */
+.orch-deploy-panel { grid-row: 1/2; grid-column: 1/2; }
+
+.deploy-sep {
+  font-size: 7px; color: #333; letter-spacing: 2px; text-transform: uppercase;
+  border-bottom: 1px solid #151515; padding-bottom: 3px; margin-bottom: 2px;
 }
+.orch-label { font-size: 7px; color: #3a3a3a; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1px; }
 
 .orch-input {
-  background: #0d0d0d;
-  border: 1px solid var(--border-dim);
-  color: var(--orange);
-  font-family: 'Courier New', monospace;
-  font-size: 9px;
-  padding: 4px 8px;
-  width: 100%;
+  background: #0d0d0d; border: 1px solid var(--border-dim);
+  color: var(--orange); font-family: 'Courier New', monospace;
+  font-size: 9px; padding: 4px 8px; width: 100%; box-sizing: border-box;
 }
 .orch-input:focus { outline: none; border-color: var(--orange); }
-.orch-input::placeholder { color: #2a2a2a; }
+.orch-input::placeholder { color: #222; }
+
+.orch-textarea {
+  background: #0d0d0d; border: 1px solid var(--border-dim);
+  color: var(--orange); font-family: 'Courier New', monospace;
+  font-size: 9px; padding: 5px 8px; width: 100%; box-sizing: border-box;
+  resize: vertical; min-height: 60px; max-height: 110px; line-height: 1.5;
+}
+.orch-textarea:focus { outline: none; border-color: var(--orange); }
+.orch-textarea::placeholder { color: #222; }
 
 .orch-select {
-  background: #0d0d0d;
-  border: 1px solid var(--border-dim);
-  color: var(--orange);
-  font-family: 'Courier New', monospace;
-  font-size: 9px;
-  padding: 4px 8px;
-  width: 100%;
+  background: #0d0d0d; border: 1px solid var(--border-dim);
+  color: var(--orange); font-family: 'Courier New', monospace;
+  font-size: 9px; padding: 4px 8px; width: 100%; box-sizing: border-box;
 }
 .orch-select:focus { outline: none; border-color: var(--orange); }
 .orch-select option { background: #0d0d0d; }
 
+.orch-file-zone {
+  border: 1px dashed #252525; padding: 7px 8px; cursor: pointer;
+  text-align: center; font-size: 7px; letter-spacing: 1.5px; color: #2e2e2e;
+  transition: all 0.2s; position: relative; border-radius: 1px;
+}
+.orch-file-zone:hover, .orch-file-zone.drag-over {
+  border-color: var(--orange-dark); color: var(--orange-dark);
+}
+.orch-file-zone input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  width: 100%; height: 100%;
+}
+.orch-attach-list { display: flex; flex-direction: column; gap: 2px; }
+.orch-attach-item {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 7px; letter-spacing: 0.5px; color: #7fb3cc;
+  padding: 1px 2px;
+}
+.orch-attach-rm { color: #e74c3c; cursor: pointer; font-size: 9px; line-height: 1; }
+.orch-attach-rm:hover { color: #ff6b6b; }
+
 .orch-submit {
-  background: var(--orange-deep);
-  border: 1.5px solid var(--orange);
-  color: var(--orange);
-  font-family: 'Courier New', monospace;
-  font-size: 9px;
-  letter-spacing: 2px;
-  padding: 6px 12px;
-  cursor: pointer;
-  width: 100%;
-  text-transform: uppercase;
+  background: var(--orange-deep); border: 1.5px solid var(--orange);
+  color: var(--orange); font-family: 'Courier New', monospace;
+  font-size: 9px; letter-spacing: 2px; padding: 7px 12px;
+  cursor: pointer; width: 100%; text-transform: uppercase;
 }
 .orch-submit:hover { background: var(--orange-dark); color: #fff; }
 
-.orch-label { font-size: 7px; color: #444; letter-spacing: 1px; text-transform: uppercase; }
-
-/* ── AGENT STATUS LIST ───────────────────────────── */
-.agent-status-list { display: flex; flex-direction: column; gap: 3px; }
-
-.agent-status-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 6px;
-  background: #0a0a0a;
-  border: 1px solid #161616;
-  font-size: 8px;
+/* ── CENTER: CANVAS ────────────────────────────────────── */
+.orch-canvas-wrap {
+  grid-row: 1/2; grid-column: 2/3;
+  background: var(--bg-panel); border: 2px solid var(--border-dim);
+  border-radius: 2px; position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
 }
-.agent-status-row:hover { border-color: var(--border-dim); }
-
-.agent-st-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.orch-canvas-hdr {
+  background: #1a0e06; border-bottom: 1px solid var(--border-dim);
+  padding: 5px 12px; display: flex; align-items: center;
+  justify-content: space-between; flex-shrink: 0;
 }
-.agent-st-dot.idle    { background: #333; }
-.agent-st-dot.active  { background: #2ecc71; box-shadow: 0 0 5px #2ecc71; animation: pulse 1.5s infinite; }
-.agent-st-dot.busy    { background: #f39c12; box-shadow: 0 0 5px #f39c12; animation: pulse 1s infinite; }
-.agent-st-dot.error   { background: #e74c3c; box-shadow: 0 0 5px #e74c3c; }
-
-.agent-st-name { color: var(--orange); flex: 1; letter-spacing: 1px; font-weight: 700; }
-.agent-st-tag  { color: #333; font-size: 7px; letter-spacing: 1px; }
-.agent-st-chip {
-  font-size: 6px;
-  letter-spacing: 1px;
-  padding: 1px 5px;
-  color: #555;
-  border: 1px solid #222;
+.orch-canvas-title {
+  font-size: 9px; font-weight: 700; letter-spacing: 2px;
+  color: var(--orange-dark); text-transform: uppercase;
 }
-.agent-st-chip.chip-idle   { color: #444; border-color: #222; }
-.agent-st-chip.chip-active { color: #2ecc71; border-color: #2ecc71; }
-.agent-st-chip.chip-busy   { color: #f39c12; border-color: #f39c12; }
-.agent-st-chip.chip-error  { color: #e74c3c; border-color: #e74c3c; }
+.orch-canvas-badge {
+  font-size: 7px; letter-spacing: 1.5px;
+  border: 1px solid; padding: 1px 6px;
+}
+.orch-canvas-controls { display: flex; gap: 6px; }
+.orch-ctrl-btn {
+  background: #0d0d0d; border: 1px solid var(--border-dim); color: #555;
+  font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 1px;
+  padding: 2px 8px; cursor: pointer; text-transform: uppercase;
+}
+.orch-ctrl-btn:hover { color: var(--orange); border-color: var(--orange-dark); }
+.orch-ctrl-btn.active-ctrl { color: var(--orange); border-color: var(--orange); }
 
-/* ── BOTTOM TASK LOG PANEL ───────────────────────── */
+#orch-canvas { flex: 1; width: 100%; display: block; cursor: default; }
+
+#orch-tooltip {
+  position: absolute; pointer-events: none;
+  background: #080808; border: 1px solid var(--orange-dark);
+  padding: 6px 10px; font-size: 8px; letter-spacing: 1px;
+  color: var(--orange); display: none; z-index: 50; min-width: 140px;
+}
+#orch-tooltip .tt-name  { font-weight: 700; margin-bottom: 3px; letter-spacing: 2px; }
+#orch-tooltip .tt-row   { color: #555; display: flex; justify-content: space-between; gap: 16px; }
+#orch-tooltip .tt-val   { color: #888; }
+
+.orch-legend {
+  position: absolute; bottom: 10px; left: 12px; display: flex; gap: 14px;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 7px; color: #333; letter-spacing: 1px; }
+.legend-dot  { width: 7px; height: 7px; border-radius: 50%; }
+
+/* ── RIGHT: STATUS CARDS PANEL ─────────────────────────── */
+.orch-cards-panel { grid-row: 1/2; grid-column: 3/4; }
+
+.oc-section-label {
+  font-size: 7px; color: #333; letter-spacing: 2px; text-transform: uppercase;
+  border-bottom: 1px solid #151515; padding-bottom: 3px; margin-bottom: 4px;
+}
+
+/* Orchestrator card */
+.oc-orch-card {
+  background: #0e0a07; border: 1px solid var(--orange-dark); border-radius: 1px;
+  padding: 8px 10px; display: flex; flex-direction: column; gap: 5px;
+}
+.oc-orch-hdr { display: flex; align-items: center; gap: 6px; }
+.oc-orch-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  background: #333; transition: background 0.4s, box-shadow 0.4s;
+}
+.oc-orch-dot.idle    { background: #333; }
+.oc-orch-dot.active  { background: #2ecc71; box-shadow: 0 0 6px #2ecc71; animation: pulse 1.5s infinite; }
+.oc-orch-dot.running { background: #f39c12; box-shadow: 0 0 6px #f39c12; animation: pulse 1s infinite; }
+.oc-orch-name { font-size: 11px; font-weight: 700; letter-spacing: 2.5px; color: var(--orange); flex: 1; }
+.oc-orch-chip {
+  font-size: 6px; letter-spacing: 1.5px; padding: 1px 6px;
+  border: 1px solid #2a2a2a; color: #444; text-transform: uppercase;
+  transition: color 0.3s, border-color 0.3s;
+}
+.oc-orch-chip.running { color: #f39c12; border-color: #f39c12; }
+.oc-orch-chip.active  { color: #2ecc71; border-color: #2ecc71; }
+.oc-model-label {
+  font-size: 8px; color: #7fb3cc; letter-spacing: 1.5px;
+  padding-left: 14px; font-weight: 700;
+}
+.oc-orch-stats { display: flex; gap: 12px; padding-left: 14px; }
+.oc-stat { display: flex; flex-direction: column; gap: 1px; }
+.oc-stat-label { font-size: 6px; color: #2e2e2e; letter-spacing: 1px; }
+.oc-stat-val   { font-size: 9px; color: #555; }
+
+/* Agent card */
+.oc-agent-card {
+  background: #060d12; border: 1px solid #0e2030; border-radius: 1px;
+  padding: 6px 10px; display: flex; flex-direction: column; gap: 3px;
+  transition: opacity 0.5s, transform 0.3s;
+  animation: cardIn 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.oc-agent-card.despawning { opacity: 0; transform: translateY(-4px); }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.oc-agent-hdr  { display: flex; align-items: center; gap: 6px; }
+.oc-agent-dot  {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.oc-agent-dot.idle  { background: #1e2e3a; }
+.oc-agent-dot.busy  { background: #f39c12; box-shadow: 0 0 5px #f39c12; animation: pulse 1s infinite; }
+.oc-agent-dot.active{ background: #2ecc71; box-shadow: 0 0 5px #2ecc71; animation: pulse 1.5s infinite; }
+.oc-agent-name { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #7fb3cc; flex: 1; }
+.oc-agent-chip {
+  font-size: 6px; letter-spacing: 1px; padding: 1px 5px;
+  border: 1px solid #0e2030; color: #1e3a50;
+}
+.oc-agent-chip.busy  { color: #f39c12; border-color: #f39c12; }
+.oc-agent-chip.active{ color: #2ecc71; border-color: #2ecc71; }
+.oc-agent-sub { font-size: 7px; color: #1e3a50; letter-spacing: 1px; padding-left: 12px; }
+
+/* Node hardware mini */
+.oc-hw-row {
+  display: flex; justify-content: space-between;
+  font-size: 8px; letter-spacing: 0.5px; line-height: 1.8;
+}
+.oc-hw-key { color: #2a2a2a; }
+.oc-hw-val { color: #555; }
+
+/* ── BOTTOM TASK PANEL ─────────────────────────────────── */
 .orch-task-panel {
-  grid-row: 2 / 3;
-  grid-column: 1 / 3;
-  background: var(--bg-panel);
-  border: 2px solid var(--border-dim);
-  border-radius: 2px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  grid-row: 2/3; grid-column: 1/4;
+  background: var(--bg-panel); border: 2px solid var(--border-dim);
+  border-radius: 2px; display: flex; flex-direction: column; overflow: hidden;
 }
-
 .orch-task-hdr {
-  background: #1a0e06;
-  border-bottom: 1px solid var(--border-dim);
-  padding: 5px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--orange-dark);
-  flex-shrink: 0;
+  background: #1a0e06; border-bottom: 1px solid var(--border-dim);
+  padding: 5px 12px; display: flex; align-items: center;
+  justify-content: space-between; font-size: 9px; font-weight: 700;
+  letter-spacing: 2px; color: var(--orange-dark); flex-shrink: 0;
 }
-
-.orch-task-hdr-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
+.orch-task-hdr-right { display: flex; align-items: center; gap: 8px; }
 #orch-task-count {
-  font-size: 7px;
-  color: var(--orange);
-  background: var(--orange-deep);
-  border: 1px solid var(--orange-dark);
-  padding: 1px 6px;
-  letter-spacing: 1px;
+  font-size: 7px; color: var(--orange); background: var(--orange-deep);
+  border: 1px solid var(--orange-dark); padding: 1px 6px; letter-spacing: 1px;
 }
-
-.orch-task-table-wrap {
-  flex: 1;
-  overflow-y: auto;
-}
+.orch-task-table-wrap { flex: 1; overflow-y: auto; }
 .orch-task-table-wrap::-webkit-scrollbar       { width: 4px; }
 .orch-task-table-wrap::-webkit-scrollbar-track { background: var(--bg-deep); }
 .orch-task-table-wrap::-webkit-scrollbar-thumb { background: var(--orange-deep); }
-
-.orch-task-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 8px;
-}
+.orch-task-table { width: 100%; border-collapse: collapse; font-size: 8px; }
 .orch-task-table th {
-  color: #444;
-  border-bottom: 1px solid #1a1a1a;
-  padding: 4px 10px;
-  text-align: left;
-  letter-spacing: 1px;
-  font-weight: 700;
-  background: #0a0a0a;
-  white-space: nowrap;
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  color: #333; border-bottom: 1px solid #151515; padding: 4px 10px;
+  text-align: left; letter-spacing: 1px; font-weight: 700; background: #090909;
+  white-space: nowrap; position: sticky; top: 0; z-index: 1;
 }
 .orch-task-table td {
-  padding: 4px 10px;
-  color: #555;
-  border-bottom: 1px solid #111;
-  white-space: nowrap;
-  letter-spacing: 0.5px;
+  padding: 4px 10px; color: #555; border-bottom: 1px solid #0f0f0f;
+  white-space: nowrap; letter-spacing: 0.5px;
 }
 .orch-task-table tbody tr:hover td { background: #0f0f0f; }
-
-.task-id   { color: #3a3a3a; font-family: 'Courier New', monospace; }
-.task-name { color: var(--orange) !important; font-weight: 700; }
-.task-agent{ color: #7fb3cc !important; }
-.task-prog { color: var(--orange-dark) !important; }
-.task-time { color: #333; }
-
+.task-id    { color: #2a2a2a; font-family: 'Courier New', monospace; }
+.task-name  { color: var(--orange) !important; font-weight: 700; }
+.task-agent { color: #7fb3cc !important; }
+.task-empty { padding: 20px; text-align: center; color: #1e1e1e; font-size: 8px; letter-spacing: 2px; }
 .task-status-chip {
-  display: inline-block;
-  font-size: 6px;
-  letter-spacing: 1.5px;
-  padding: 1px 6px;
-  text-transform: uppercase;
+  display: inline-block; font-size: 6px; letter-spacing: 1.5px;
+  padding: 1px 6px; text-transform: uppercase;
 }
 .task-status-chip.running  { color: #f39c12; border: 1px solid #f39c12; }
 .task-status-chip.complete { color: #2ecc71; border: 1px solid #2ecc71; }
-.task-status-chip.queued   { color: #555;    border: 1px solid #333; }
+.task-status-chip.queued   { color: #444;    border: 1px solid #252525; }
 .task-status-chip.error    { color: #e74c3c; border: 1px solid #e74c3c; }
-
-.task-progress-bar {
-  width: 60px;
-  height: 5px;
-  background: #1a1a1a;
-  border-radius: 1px;
-  overflow: hidden;
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 4px;
-}
-.task-progress-fill {
-  height: 100%;
-  background: var(--orange);
-  border-radius: 1px;
-  transition: width 1s ease;
-}
-
-.task-empty {
-  padding: 24px;
-  text-align: center;
-  color: #2a2a2a;
-  font-size: 8px;
-  letter-spacing: 2px;
-}
 </style>
 </head>
 <body>
@@ -396,138 +305,136 @@
   <button class="action-btn danger" onclick="triggerAction('HALT ALL AGENTS')">HALT ALL AGENTS</button>
   <button class="action-btn danger" onclick="triggerAction('RESET ORCHESTRATOR')">RESET ORCHESTRATOR</button>
   <button class="action-btn" onclick="deployTask()">DEPLOY TASK</button>
-  <button class="action-btn" onclick="triggerAction('SPAWN AGENT')">SPAWN AGENT</button>
   <button class="action-btn" onclick="triggerAction('EXPORT GRAPH')">EXPORT GRAPH</button>
 </div>
 
 <!-- MAIN ORCHESTRATOR LAYOUT -->
 <div class="orch-layout">
 
-  <!-- ── 2D CANVAS VISUALIZATION ─────────────────── -->
+  <!-- LEFT: DEPLOY + PROMPT + FILE -->
+  <div class="orch-panel orch-deploy-panel">
+    <div class="orch-panel-hdr">Deploy Task</div>
+    <div class="orch-panel-body">
+      <div class="deploy-sep">Task</div>
+      <div class="orch-label">Name</div>
+      <input class="orch-input" id="task-name-input" type="text" placeholder="e.g. debug agent loop..." />
+      <div class="orch-label">Prompt / Instructions</div>
+      <textarea class="orch-textarea" id="task-prompt-input" placeholder="Describe what you want BOB AI and agents to do..."></textarea>
+      <div class="orch-label">Attach Files</div>
+      <div class="orch-file-zone" id="file-drop-zone">
+        <input type="file" id="task-file-input" multiple />
+        <span id="file-zone-label">&#128206; CLICK OR DROP FILES</span>
+      </div>
+      <div class="orch-attach-list" id="attach-list"></div>
+      <div class="deploy-sep" style="margin-top:2px;">Config</div>
+      <div class="orch-label">Task Type</div>
+      <select class="orch-select" id="task-type-select">
+        <option value="code">CODE GENERATION</option>
+        <option value="debug">DEBUG / INSPECT</option>
+        <option value="research">RESEARCH</option>
+        <option value="pipeline">PIPELINE RUN</option>
+        <option value="eval">EVALUATION</option>
+        <option value="custom">CUSTOM</option>
+      </select>
+      <div class="orch-label">Assign Agent</div>
+      <select class="orch-select" id="task-agent-select">
+        <option value="auto">AUTO (Router)</option>
+        <option value="code">CODE AGENT</option>
+        <option value="doc">DOC AGENT</option>
+        <option value="analysis">ANALYSIS AGENT</option>
+        <option value="debug">DEBUG AGENT</option>
+        <option value="search">SEARCH AGENT</option>
+      </select>
+      <div class="orch-label">Orchestrator Model</div>
+      <select class="orch-select" id="task-model-select">
+        <option value="claude-haiku-4-5-20251001">HAIKU 4.5 — fast</option>
+        <option value="claude-sonnet-4-5-20250929">SONNET 4.5 — balanced</option>
+        <option value="claude-sonnet-4-6">SONNET 4.6 — latest</option>
+        <option value="claude-opus-4-5-20251101">OPUS 4.5 — powerful</option>
+        <option value="claude-opus-4-6">OPUS 4.6 — flagship</option>
+        <option value="local">LOCAL (llama3.3:70b)</option>
+      </select>
+      <div class="orch-label">Priority</div>
+      <select class="orch-select" id="task-priority-select">
+        <option value="normal">NORMAL</option>
+        <option value="high">HIGH</option>
+        <option value="critical">CRITICAL</option>
+        <option value="low">LOW</option>
+      </select>
+      <button class="orch-submit" onclick="deployTask()">&#9654; DISPATCH TASK</button>
+    </div>
+  </div>
+
+  <!-- CENTER: AGENT NETWORK CANVAS -->
   <div class="orch-canvas-wrap">
     <div class="orch-canvas-hdr">
-      <div class="orch-canvas-hdr-left">
-        <span class="orch-canvas-title">Agent Network — DGX Spark</span>
-        <span class="orch-canvas-badge" id="net-status-badge" style="color:#555;border-color:#333;">NO API</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="orch-canvas-title">Agent Network</span>
+        <span class="orch-canvas-badge" id="net-status-badge" style="color:#333;border-color:#252525;">IDLE</span>
       </div>
       <div class="orch-canvas-controls">
-        <button class="orch-ctrl-btn active-ctrl" id="btn-view-network" onclick="setView('network')">NETWORK</button>
+        <button class="orch-ctrl-btn active-ctrl" id="btn-view-tree" onclick="setView('tree')">TREE</button>
         <button class="orch-ctrl-btn" id="btn-view-flow" onclick="setView('flow')">FLOW</button>
-        <button class="orch-ctrl-btn" onclick="resetZoom()">RESET</button>
+        <button class="orch-ctrl-btn" onclick="resetCanvas()">RESET</button>
       </div>
     </div>
     <canvas id="orch-canvas"></canvas>
-    <!-- TOOLTIP -->
     <div id="orch-tooltip">
       <div class="tt-name" id="tt-name">NODE</div>
       <div class="tt-row"><span>STATUS</span><span class="tt-val" id="tt-status">--</span></div>
       <div class="tt-row"><span>TASKS</span><span class="tt-val" id="tt-tasks">--</span></div>
       <div class="tt-row"><span>TYPE</span><span class="tt-val" id="tt-type">--</span></div>
     </div>
-    <!-- LEGEND -->
     <div class="orch-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#DA7756;box-shadow:0 0 6px #DA7756;"></div>ORCHESTRATOR</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#7fb3cc;box-shadow:0 0 6px #7fb3cc;"></div>SUB-AGENT</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#2ecc71;box-shadow:0 0 6px #2ecc71;"></div>TOOL</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#f39c12;"></div>TASK</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#DA7756;box-shadow:0 0 5px #DA7756;"></div>ORCHESTRATOR</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7fb3cc;box-shadow:0 0 5px #7fb3cc;"></div>AGENT</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2ecc71;box-shadow:0 0 4px #2ecc71;"></div>ACTIVE</div>
     </div>
   </div>
 
-  <!-- ── RIGHT CONTROL PANEL ──────────────────────── -->
-  <div class="orch-ctrl-panel">
-    <div class="orch-ctrl-panel-hdr">Deploy &amp; Control</div>
-    <div class="orch-ctrl-body">
-
-      <!-- DEPLOY TASK -->
-      <div class="deploy-section">
-        <div class="deploy-section-label">Deploy Task</div>
-        <div class="orch-label">Task Name</div>
-        <input class="orch-input" id="task-name-input" type="text" placeholder="e.g. debug agent loop..." />
-        <div class="orch-label">Task Type</div>
-        <select class="orch-select" id="task-type-select">
-          <option value="code">CODE GENERATION</option>
-          <option value="debug">DEBUG / INSPECT</option>
-          <option value="research">RESEARCH</option>
-          <option value="pipeline">PIPELINE RUN</option>
-          <option value="eval">EVALUATION</option>
-          <option value="custom">CUSTOM</option>
-        </select>
-        <div class="orch-label">Assign Agent</div>
-        <select class="orch-select" id="task-agent-select">
-          <option value="auto">AUTO (LangChain Router)</option>
-          <option value="code">CODE AGENT</option>
-          <option value="debug">DEBUG AGENT</option>
-          <option value="search">SEARCH AGENT</option>
-          <option value="file">FILE AGENT</option>
-          <option value="eval">EVAL AGENT</option>
-        </select>
-        <div class="orch-label">Orchestrator Model</div>
-        <select class="orch-select" id="task-model-select">
-          <option value="claude-haiku-4-5-20251001">CLAUDE HAIKU 4.5 — fast/cheap</option>
-          <option value="claude-sonnet-4-5-20250929">CLAUDE SONNET 4.5 — balanced</option>
-          <option value="claude-sonnet-4-6">CLAUDE SONNET 4.6 — latest</option>
-          <option value="claude-opus-4-5-20251101">CLAUDE OPUS 4.5 — powerful</option>
-          <option value="claude-opus-4-6">CLAUDE OPUS 4.6 — flagship</option>
-          <option value="local">LOCAL ONLY (llama3.3:70b)</option>
-        </select>
-        <div class="orch-label">Priority</div>
-        <select class="orch-select" id="task-priority-select">
-          <option value="normal">NORMAL</option>
-          <option value="high">HIGH</option>
-          <option value="critical">CRITICAL</option>
-          <option value="low">LOW</option>
-        </select>
-        <button class="orch-submit" onclick="deployTask()">&#9654; DISPATCH TASK</button>
-      </div>
-
-      <!-- AGENT STATUS -->
-      <div class="deploy-section">
-        <div class="deploy-section-label">Sub-Agent Status</div>
-        <div class="agent-status-list" id="agent-status-list">
-          <!-- injected by JS -->
+  <!-- RIGHT: STATUS CARDS -->
+  <div class="orch-panel orch-cards-panel">
+    <div class="orch-panel-hdr">Agent Status</div>
+    <div class="orch-panel-body" id="cards-body">
+      <div class="oc-section-label">Orchestrator</div>
+      <div class="oc-orch-card">
+        <div class="oc-orch-hdr">
+          <div class="oc-orch-dot idle" id="bob-dot"></div>
+          <div class="oc-orch-name">BOB AI</div>
+          <div class="oc-orch-chip" id="bob-chip">IDLE</div>
+        </div>
+        <div class="oc-model-label" id="bob-model-label">HAIKU 4.5</div>
+        <div class="oc-orch-stats">
+          <div class="oc-stat"><div class="oc-stat-label">RUNNING</div><div class="oc-stat-val" id="lc-running">--</div></div>
+          <div class="oc-stat"><div class="oc-stat-label">TOTAL</div><div class="oc-stat-val" id="lc-total">--</div></div>
+          <div class="oc-stat"><div class="oc-stat-label">SUCCESS</div><div class="oc-stat-val" id="lc-success">--</div></div>
+        </div>
+        <div class="oc-orch-stats">
+          <div class="oc-stat"><div class="oc-stat-label">TOKENS</div><div class="oc-stat-val" id="lc-tokens">--</div></div>
+          <div class="oc-stat"><div class="oc-stat-label">AVG DUR</div><div class="oc-stat-val" id="lc-avgdur">--</div></div>
         </div>
       </div>
-
-      <!-- SYSTEM INFO -->
-      <div class="deploy-section">
-        <div class="deploy-section-label">LangChain System</div>
-        <div style="font-size:8px;color:#333;letter-spacing:1px;line-height:2;">
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">CHAIN MODE</span><span style="color:var(--orange);">MULTI-AGENT</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">ROUTER</span><span style="color:#7fb3cc;">SUPERVISOR+LLM</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">MEMORY</span><span style="color:#2ecc71;">POSTGRES</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">RUNNING</span><span id="lc-running" style="color:#7fb3cc;">--</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">TOTAL RUNS</span><span id="lc-total" style="color:#7fb3cc;">--</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">TOKENS USED</span><span id="lc-tokens" style="color:#7fb3cc;">--</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">SUCCESS RATE</span><span id="lc-success" style="color:#2ecc71;">--</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">AVG DURATION</span><span id="lc-avgdur" style="color:#555;">--</span></div>
-        </div>
-      </div>
-
-      <!-- NODE HARDWARE METRICS -->
-      <div class="deploy-section">
-        <div class="deploy-section-label">Node Hardware</div>
-        <div style="font-size:8px;color:#333;letter-spacing:1px;line-height:2;">
-          <div style="color:#888;letter-spacing:2px;margin-bottom:2px;font-size:7px;">SPARK-BOB</div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">CPU</span><span id="orch-spark-cpu" style="color:#7fb3cc;">--%</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">GPU</span><span id="orch-spark-gpu" style="color:#7fb3cc;">--%</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">VRAM</span><span id="orch-spark-vram" style="color:#7fb3cc;">--</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">TEMP</span><span id="orch-spark-temp" style="color:#555;">--</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">UPTIME</span><span id="orch-spark-uptime" style="color:#555;">--</span></div>
-          <div style="color:#888;letter-spacing:2px;margin:4px 0 2px;font-size:7px;">LINUX-DSKTP</div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">CPU</span><span id="orch-linux-cpu" style="color:#7fb3cc;">--%</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">RAM</span><span id="orch-linux-ram" style="color:#7fb3cc;">--</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">TEMP</span><span id="orch-linux-temp" style="color:#555;">--</span></div>
-          <div style="display:flex;justify-content:space-between;"><span style="color:#3a3a3a;">UPTIME</span><span id="orch-linux-uptime" style="color:#555;">--</span></div>
-        </div>
-      </div>
-
+      <div class="oc-section-label" id="agents-section-label" style="display:none;">Active Agents</div>
+      <div id="agent-cards-list"></div>
+      <div class="oc-section-label" style="margin-top:4px;">Node Hardware</div>
+      <div style="font-size:7px;color:#2a2a2a;letter-spacing:1.5px;margin-bottom:2px;">SPARK-BOB (DGX)</div>
+      <div class="oc-hw-row"><span class="oc-hw-key">CPU</span><span class="oc-hw-val" id="orch-spark-cpu">--%</span></div>
+      <div class="oc-hw-row"><span class="oc-hw-key">GPU</span><span class="oc-hw-val" id="orch-spark-gpu">--%</span></div>
+      <div class="oc-hw-row"><span class="oc-hw-key">VRAM</span><span class="oc-hw-val" id="orch-spark-vram">--</span></div>
+      <div class="oc-hw-row"><span class="oc-hw-key">TEMP</span><span class="oc-hw-val" id="orch-spark-temp">--</span></div>
+      <div class="oc-hw-row"><span class="oc-hw-key">UPTIME</span><span class="oc-hw-val" id="orch-spark-uptime">--</span></div>
+      <div style="font-size:7px;color:#2a2a2a;letter-spacing:1.5px;margin:6px 0 2px;">LINUX-DSKTP</div>
+      <div class="oc-hw-row"><span class="oc-hw-key">CPU</span><span class="oc-hw-val" id="orch-linux-cpu">--%</span></div>
+      <div class="oc-hw-row"><span class="oc-hw-key">RAM</span><span class="oc-hw-val" id="orch-linux-ram">--</span></div>
+      <div class="oc-hw-row"><span class="oc-hw-key">TEMP</span><span class="oc-hw-val" id="orch-linux-temp">--</span></div>
+      <div class="oc-hw-row"><span class="oc-hw-key">UPTIME</span><span class="oc-hw-val" id="orch-linux-uptime">--</span></div>
     </div>
   </div>
 
-  <!-- ── TASK LOG / ACTIVE TASKS ───────────────────── -->
+  <!-- BOTTOM: TASK TABLE -->
   <div class="orch-task-panel">
     <div class="orch-task-hdr">
-      <span>Active Tasks &amp; Task Log</span>
+      <span>Active Tasks &amp; Log</span>
       <div class="orch-task-hdr-right">
         <span id="orch-task-count">0 TASKS</span>
         <button class="orch-ctrl-btn" onclick="clearCompletedTasks()">CLEAR DONE</button>
@@ -535,18 +442,10 @@
     </div>
     <div class="orch-task-table-wrap">
       <table class="orch-task-table">
-        <thead>
-          <tr>
-            <th>TASK ID</th>
-            <th>NAME</th>
-            <th>TYPE</th>
-            <th>ASSIGNED AGENT</th>
-            <th>PROGRESS</th>
-            <th>PRIORITY</th>
-            <th>ELAPSED</th>
-            <th>STATUS</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th>ID</th><th>NAME</th><th>TYPE</th>
+          <th>AGENT</th><th>PROGRESS</th><th>PRI</th><th>TIME</th><th>STATUS</th>
+        </tr></thead>
         <tbody id="task-tbody">
           <tr><td colspan="8" class="task-empty">NO ACTIVE TASKS — DISPATCH A TASK TO BEGIN</td></tr>
         </tbody>
@@ -556,20 +455,19 @@
 
 </div><!-- end .orch-layout -->
 
-<!-- FOOTER -->
 <div class="footer">
-  <span>BOB-AI // BCOM-C v0.1 — ORCHESTRATOR</span>
+  <span>BOB AI // BCOM-C v0.1 — ORCHESTRATOR</span>
   <span id="footer-date"></span>
-  <span>LANGCHAIN SYSTEM READY</span>
+  <span id="footer-status">LANGGRAPH READY</span>
 </div>
 
 <!-- TERMINAL DOCK -->
 <div class="terminal-dock" id="terminal-dock">
   <div class="terminal-bar">
     <div class="terminal-tabs">
-      <div class="terminal-tab active" data-term="orch" onclick="switchTerm('orch')">ORCHESTRATOR</div>
-      <div class="terminal-tab" data-term="agent" onclick="switchTerm('agent')">AGENT LOG</div>
-      <div class="terminal-tab" data-term="history" onclick="switchTerm('history')">RUN HISTORY</div>
+      <div class="terminal-tab active" data-term="orch"    onclick="switchTerm('orch')">ORCHESTRATOR</div>
+      <div class="terminal-tab"        data-term="agent"   onclick="switchTerm('agent')">AGENT LOG</div>
+      <div class="terminal-tab"        data-term="history" onclick="switchTerm('history')">RUN HISTORY</div>
     </div>
     <div class="terminal-controls">
       <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
@@ -577,18 +475,14 @@
   </div>
   <div class="terminal-body" id="terminal-body">
     <div class="terminal-output" id="term-out-orch">
-      <div class="term-line sys">[orchestrator] LangChain multi-agent system initialized</div>
-      <div class="term-line sys">[orchestrator] DGX Spark LLM backend — awaiting API connection</div>
-      <div class="term-line dim">[orchestrator] dispatch a task or connect API to begin</div>
+      <div class="term-line sys">[bob-ai] LangGraph multi-agent system initialized</div>
+      <div class="term-line dim">[bob-ai] awaiting dispatch — select model and describe your task</div>
     </div>
     <div class="terminal-output" id="term-out-agent" style="display:none">
       <div class="term-line sys">[agent-log] sub-agent monitor active</div>
-      <div class="term-line dim">[agent-log] no agents currently running</div>
     </div>
     <div class="terminal-output" id="term-out-history" style="display:none">
-      <div id="run-history-body">
-        <div class="term-line dim">[run-history] loading...</div>
-      </div>
+      <div id="run-history-body"><div class="term-line dim">[run-history] loading...</div></div>
     </div>
     <div class="terminal-input-row">
       <span class="term-prompt" id="term-prompt">orch $</span>
@@ -600,333 +494,368 @@
 <script src="../assets/js/bcom.js?v=5"></script>
 <script>
 /* ══════════════════════════════════════════════════════════
-   ORCHESTRATOR — Canvas 2D Agent Network Visualization
+   ORCHESTRATOR — Dynamic Tree Canvas + Agent Spawn System
    ══════════════════════════════════════════════════════════ */
 
-// ── Agent Node Definitions ──────────────────────────────
-const NODES = [
-  {
-    id: 'spark',
-    label: 'SPARK-BOB',
-    sublabel: 'DGX LLM',
-    type: 'orchestrator',
-    status: 'active',
-    tasks: 0,
-    tools: ['LangChain Router', 'Memory', 'Planner'],
-    x: 0.5, y: 0.45,
-    radius: 38,
-    color: '#DA7756',
-    glow: 'rgba(218,119,86,0.35)',
-  },
-  {
-    id: 'code',
-    label: 'CODE AGENT',
-    sublabel: 'Python · JS · Bash',
-    type: 'agent',
-    status: 'idle',
-    tasks: 0,
-    tools: ['exec_code', 'write_file', 'lint'],
-    x: 0.22, y: 0.22,
-    radius: 26,
-    color: '#7fb3cc',
-    glow: 'rgba(127,179,204,0.3)',
-  },
-  {
-    id: 'debug',
-    label: 'DEBUG AGENT',
-    sublabel: 'Inspect · Trace',
-    type: 'agent',
-    status: 'idle',
-    tasks: 0,
-    tools: ['stack_trace', 'breakpoint', 'diff'],
-    x: 0.76, y: 0.20,
-    radius: 26,
-    color: '#7fb3cc',
-    glow: 'rgba(127,179,204,0.3)',
-  },
-  {
-    id: 'search',
-    label: 'SEARCH AGENT',
-    sublabel: 'Web · Docs · Vector',
-    type: 'agent',
-    status: 'idle',
-    tasks: 0,
-    tools: ['web_search', 'vector_query', 'rag'],
-    x: 0.82, y: 0.65,
-    radius: 26,
-    color: '#7fb3cc',
-    glow: 'rgba(127,179,204,0.3)',
-  },
-  {
-    id: 'file',
-    label: 'FILE AGENT',
-    sublabel: 'Read · Write · Parse',
-    type: 'agent',
-    status: 'idle',
-    tasks: 0,
-    tools: ['read_file', 'write_file', 'parse_json'],
-    x: 0.18, y: 0.68,
-    radius: 26,
-    color: '#7fb3cc',
-    glow: 'rgba(127,179,204,0.3)',
-  },
-  {
-    id: 'eval',
-    label: 'EVAL AGENT',
-    sublabel: 'Score · Validate',
-    type: 'agent',
-    status: 'idle',
-    tasks: 0,
-    tools: ['run_eval', 'compare', 'score'],
-    x: 0.50, y: 0.12,
-    radius: 26,
-    color: '#7fb3cc',
-    glow: 'rgba(127,179,204,0.3)',
-  },
-  // Tool Nodes
-  {
-    id: 'tool-exec',
-    label: 'EXEC',
-    sublabel: 'exec_code',
-    type: 'tool',
-    status: 'idle',
-    tasks: 0,
-    tools: [],
-    x: 0.10, y: 0.40,
-    radius: 14,
-    color: '#2ecc71',
-    glow: 'rgba(46,204,113,0.25)',
-  },
-  {
-    id: 'tool-rag',
-    label: 'RAG',
-    sublabel: 'vector_store',
-    type: 'tool',
-    status: 'idle',
-    tasks: 0,
-    tools: [],
-    x: 0.90, y: 0.42,
-    radius: 14,
-    color: '#2ecc71',
-    glow: 'rgba(46,204,113,0.25)',
-  },
-  {
-    id: 'tool-mem',
-    label: 'MEM',
-    sublabel: 'buffer_memory',
-    type: 'tool',
-    status: 'idle',
-    tasks: 0,
-    tools: [],
-    x: 0.50, y: 0.78,
-    radius: 14,
-    color: '#2ecc71',
-    glow: 'rgba(46,204,113,0.25)',
-  },
-];
+// ── Model label map ─────────────────────────────────────
+const MODEL_SHORT = {
+  'claude-haiku-4-5-20251001':  'HAIKU 4.5',
+  'claude-sonnet-4-5-20250929': 'SONNET 4.5',
+  'claude-sonnet-4-6':          'SONNET 4.6',
+  'claude-opus-4-5-20251101':   'OPUS 4.5',
+  'claude-opus-4-6':            'OPUS 4.6',
+  'local':                      'LLAMA 3.3:70B',
+};
 
-// ── Edge Definitions (connections between nodes) ────────
-const EDGES = [
-  { from: 'spark', to: 'code',      type: 'agent' },
-  { from: 'spark', to: 'debug',     type: 'agent' },
-  { from: 'spark', to: 'search',    type: 'agent' },
-  { from: 'spark', to: 'file',      type: 'agent' },
-  { from: 'spark', to: 'eval',      type: 'agent' },
-  { from: 'code',  to: 'tool-exec', type: 'tool'  },
-  { from: 'search',to: 'tool-rag',  type: 'tool'  },
-  { from: 'spark', to: 'tool-mem',  type: 'tool'  },
-  { from: 'file',  to: 'tool-exec', type: 'tool'  },
-];
+// ── Agent definitions (spawnable) ───────────────────────
+const AGENT_DEFS = {
+  code:     { label: 'CODE AGENT',     sub: 'Py · JS · Bash',    color: '#7fb3cc', glow: 'rgba(127,179,204,0.28)' },
+  doc:      { label: 'DOC AGENT',      sub: 'Write · Format',    color: '#7fb3cc', glow: 'rgba(127,179,204,0.28)' },
+  analysis: { label: 'ANALYSIS AGENT', sub: 'Inspect · Score',   color: '#a8d8a8', glow: 'rgba(168,216,168,0.25)' },
+  debug:    { label: 'DEBUG AGENT',    sub: 'Trace · Inspect',   color: '#e8b89a', glow: 'rgba(232,184,154,0.25)' },
+  search:   { label: 'SEARCH AGENT',   sub: 'Web · Docs · RAG',  color: '#c8b0d8', glow: 'rgba(200,176,216,0.25)' },
+};
 
-// ── Canvas state ────────────────────────────────────────
+// ── BOB AI orchestrator node (always present) ────────────
+const BOB = {
+  id: 'bob', label: 'BOB AI', sub: 'HAIKU 4.5',
+  type: 'orchestrator', status: 'idle', tasks: 0,
+  x: 0.5, y: 0.22, radius: 40,
+  color: '#DA7756', glow: 'rgba(218,119,86,0.32)',
+  alpha: 1,
+};
+
+let NODES = [BOB];
+let EDGES = [];
+const activeAgents = {};   // id → { node, despawning }
+const particles    = [];
+
+// ── Canvas setup ─────────────────────────────────────────
 const canvas = document.getElementById('orch-canvas');
 const ctx    = canvas.getContext('2d');
-let W = 0, H = 0;
-let animFrame;
-let tick = 0;
-let hoveredNode = null;
-let currentView = 'network';
+let W = 0, H = 0, tick = 0;
+let hoveredNode = null, currentView = 'tree';
 
-// Particles are driven by real API events only — empty until connected
-const particles = [];
-
-// ── Resize handler ──────────────────────────────────────
 function resizeCanvas() {
   const wrap = canvas.parentElement;
   W = wrap.clientWidth;
-  H = wrap.clientHeight - 36; // minus header
+  H = wrap.clientHeight - 36;
   canvas.width  = W;
   canvas.height = H;
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// ── World → screen coords ───────────────────────────────
+// ── Coordinate helpers ───────────────────────────────────
 function wx(n) { return n.x * W; }
 function wy(n) { return n.y * H; }
 
-// ── Drawing helpers ─────────────────────────────────────
-function drawEdge(from, to, edgeType, alpha) {
-  const fx = wx(from), fy = wy(from);
-  const tx = wx(to),   ty = wy(to);
-  const col = edgeType === 'agent' ? '#3a1e10' : '#0e2a1a';
+// ── Agent spawn / despawn ────────────────────────────────
+function getAgentPositions(count) {
+  if (count === 0) return [];
+  const y = 0.70;
+  const maxSpread = 0.76;
+  const spacing = Math.min(0.20, maxSpread / Math.max(count, 1));
+  const startX = 0.5 - ((count - 1) * spacing) / 2;
+  return Array.from({ length: count }, (_, i) => ({ x: startX + i * spacing, y }));
+}
+
+function repositionAgents() {
+  const ids = Object.keys(activeAgents);
+  const positions = getAgentPositions(ids.length);
+  ids.forEach((id, i) => {
+    activeAgents[id].node.targetX = positions[i].x;
+    activeAgents[id].node.targetY = positions[i].y;
+  });
+}
+
+function spawnAgent(agentId) {
+  if (activeAgents[agentId]) {
+    // already spawned — mark busy
+    activeAgents[agentId].node.status = 'busy';
+    updateAgentCard(agentId, 'busy');
+    return;
+  }
+  const def = AGENT_DEFS[agentId];
+  if (!def) return;
+
+  const node = {
+    id: agentId, label: def.label, sub: def.sub,
+    type: 'agent', status: 'busy', tasks: 1,
+    x: 0.5, y: 0.22, targetX: 0.5, targetY: 0.70,
+    radius: 28, color: def.color, glow: def.glow,
+    alpha: 0, _spawning: true,
+  };
+  activeAgents[agentId] = { node, despawning: false };
+  NODES.push(node);
+  EDGES.push({ from: 'bob', to: agentId, type: 'agent' });
+  repositionAgents();
+
+  // Show agents section label
+  document.getElementById('agents-section-label').style.display = '';
+  addAgentCard(agentId, def, 'busy');
+  agentLog(`[spawn] ${def.label} spawned`, 'sys');
+}
+
+function despawnAgent(agentId) {
+  const rec = activeAgents[agentId];
+  if (!rec) return;
+  rec.despawning = true;
+  rec.node._spawning = false;
+  rec.node.status = 'idle';
+
+  // Fade out card
+  const card = document.getElementById('agent-card-' + agentId);
+  if (card) {
+    card.classList.add('despawning');
+    setTimeout(() => card.remove(), 500);
+  }
+
+  // Remove node + edge after fade
+  setTimeout(() => {
+    NODES = NODES.filter(n => n.id !== agentId);
+    EDGES = EDGES.filter(e => e.to !== agentId);
+    delete activeAgents[agentId];
+    repositionAgents();
+    if (Object.keys(activeAgents).length === 0) {
+      document.getElementById('agents-section-label').style.display = 'none';
+    }
+  }, 700);
+}
+
+function despawnAll() {
+  Object.keys(activeAgents).forEach(id => despawnAgent(id));
+  BOB.status = 'idle';
+  setBobStatus('idle');
+}
+
+// ── Agent cards (right panel) ────────────────────────────
+function addAgentCard(id, def, status) {
+  const list = document.getElementById('agent-cards-list');
+  const card = document.createElement('div');
+  card.className = 'oc-agent-card';
+  card.id = 'agent-card-' + id;
+  card.innerHTML = `
+    <div class="oc-agent-hdr">
+      <div class="oc-agent-dot ${status}" id="acdot-${id}"></div>
+      <div class="oc-agent-name">${def.label}</div>
+      <div class="oc-agent-chip ${status}" id="acchip-${id}">${status.toUpperCase()}</div>
+    </div>
+    <div class="oc-agent-sub">${def.sub}</div>`;
+  list.appendChild(card);
+}
+
+function updateAgentCard(id, status) {
+  const dot  = document.getElementById('acdot-'  + id);
+  const chip = document.getElementById('acchip-' + id);
+  if (dot)  { dot.className  = 'oc-agent-dot '  + status; }
+  if (chip) { chip.className = 'oc-agent-chip ' + status; chip.textContent = status.toUpperCase(); }
+}
+
+function setBobStatus(status) {
+  const dot  = document.getElementById('bob-dot');
+  const chip = document.getElementById('bob-chip');
+  const badge = document.getElementById('net-status-badge');
+  if (dot)  { dot.className  = 'oc-orch-dot ' + status; }
+  if (chip) {
+    chip.className = 'oc-orch-chip ' + status;
+    chip.textContent = status.toUpperCase();
+  }
+  if (badge) {
+    const isActive = status === 'running' || status === 'active';
+    badge.style.color       = isActive ? '#2ecc71' : '#333';
+    badge.style.borderColor = isActive ? '#2ecc71' : '#252525';
+    badge.textContent       = isActive ? 'RUNNING' : 'IDLE';
+  }
+  const footer = document.getElementById('footer-status');
+  if (footer) footer.textContent = status === 'running' ? 'BOB AI — RUNNING' : 'LANGGRAPH READY';
+}
+
+// ── Model selector sync ──────────────────────────────────
+function updateBobModel() {
+  const sel = document.getElementById('task-model-select');
+  const short = MODEL_SHORT[sel.value] || sel.value;
+  BOB.sub = short;
+  const el = document.getElementById('bob-model-label');
+  if (el) el.textContent = short;
+}
+document.getElementById('task-model-select').addEventListener('change', updateBobModel);
+updateBobModel();
+
+// ── Draw helpers ─────────────────────────────────────────
+function drawEdge(from, to, alpha) {
+  const a = (to.alpha ?? 1) * alpha;
+  if (a <= 0.01) return;
+  const fx = wx(from), fy = wy(from) + from.radius * 0.7;
+  const tx = wx(to),   ty = wy(to)   - to.radius   * 0.7;
+  const isActive = to.status === 'busy' || to.status === 'active';
   ctx.save();
-  ctx.globalAlpha = alpha || 0.6;
-  ctx.strokeStyle = col;
-  ctx.lineWidth = edgeType === 'agent' ? 1.5 : 1;
-  ctx.setLineDash([4, 8]);
+  ctx.globalAlpha = isActive ? 0.7 * a : 0.3 * a;
+  ctx.strokeStyle = isActive ? '#5a2e14' : '#1e1a16';
+  ctx.lineWidth   = isActive ? 2 : 1;
+  ctx.setLineDash(isActive ? [] : [3, 8]);
   ctx.beginPath();
+  // S-curve bezier
   ctx.moveTo(fx, fy);
-  ctx.lineTo(tx, ty);
+  ctx.bezierCurveTo(fx, fy + 40, tx, ty - 40, tx, ty);
   ctx.stroke();
+  // Animated dot on active edges
+  if (isActive) {
+    const t2 = (tick % 80) / 80;
+    const bx = bezierPoint(fx, fx, tx, tx, t2);
+    const by = bezierPoint(fy, fy + 40, ty - 40, ty, t2);
+    ctx.beginPath();
+    ctx.arc(bx, by, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = from.color;
+    ctx.globalAlpha = 0.8 * a;
+    ctx.fill();
+  }
   ctx.restore();
 }
 
+function bezierPoint(p0, p1, p2, p3, t) {
+  const mt = 1 - t;
+  return mt*mt*mt*p0 + 3*mt*mt*t*p1 + 3*mt*t*t*p2 + t*t*t*p3;
+}
+
 function drawNode(n) {
-  const x = wx(n), y = wy(n);
-  const r = n.radius;
-  const isHovered = hoveredNode && hoveredNode.id === n.id;
-  const scale = isHovered ? 1.12 : 1.0;
-  const sr = r * scale;
+  // Animate alpha for spawn
+  if (n._spawning && (n.alpha ?? 1) < 1) {
+    n.alpha = Math.min(1, (n.alpha ?? 0) + 0.045);
+    if (n.alpha >= 1) { n.alpha = 1; n._spawning = false; }
+  }
+  // Animate position for spawn (slide from BOB down)
+  if (n.targetX !== undefined) {
+    n.x += (n.targetX - n.x) * 0.06;
+    n.y += (n.targetY - n.y) * 0.06;
+  }
+  // Animate alpha for despawn
+  if (activeAgents[n.id]?.despawning) {
+    n.alpha = Math.max(0, (n.alpha ?? 1) - 0.04);
+  }
+
+  const a = n.alpha ?? 1;
+  if (a <= 0.01) return;
+
+  const x = wx(n), y = wy(n), r = n.radius;
+  const hovered = hoveredNode?.id === n.id;
+  const sr = hovered ? r * 1.1 : r;
 
   // Glow
-  const glowR = isHovered ? sr * 2.4 : sr * 1.8;
-  const grd = ctx.createRadialGradient(x, y, sr * 0.3, x, y, glowR);
+  const glowR = sr * (hovered ? 2.6 : 2.0);
+  const grd = ctx.createRadialGradient(x, y, sr * 0.2, x, y, glowR);
   grd.addColorStop(0, n.glow);
   grd.addColorStop(1, 'transparent');
   ctx.beginPath();
   ctx.arc(x, y, glowR, 0, Math.PI * 2);
   ctx.fillStyle = grd;
+  ctx.globalAlpha = a;
   ctx.fill();
 
-  // Outer ring (status)
-  const statusColor = n.status === 'active' ? '#2ecc71'
-                    : n.status === 'busy'   ? '#f39c12'
-                    : n.status === 'error'  ? '#e74c3c'
-                    : '#333';
+  // Status ring
+  const statusCol = n.status === 'active' ? '#2ecc71'
+                  : n.status === 'busy'   ? '#f39c12'
+                  : n.status === 'error'  ? '#e74c3c' : '#2a2a2a';
   ctx.beginPath();
   ctx.arc(x, y, sr + 3, 0, Math.PI * 2);
-  ctx.strokeStyle = statusColor;
-  ctx.lineWidth = 1.5;
-  ctx.globalAlpha = n.status === 'idle' ? 0.3 : 0.8;
-  ctx.stroke();
-  ctx.globalAlpha = 1;
-
-  // Node body
-  ctx.beginPath();
-  ctx.arc(x, y, sr, 0, Math.PI * 2);
-  ctx.fillStyle = n.type === 'orchestrator' ? '#1a0d06'
-                : n.type === 'agent'        ? '#0a1a24'
-                : '#061a0e';
-  ctx.fill();
-  ctx.strokeStyle = n.color;
-  ctx.lineWidth = isHovered ? 2.5 : 1.8;
+  ctx.strokeStyle = statusCol;
+  ctx.lineWidth = n.status === 'idle' ? 1 : 1.8;
+  ctx.globalAlpha = (n.status === 'idle' ? 0.25 : 0.85) * a;
   ctx.stroke();
 
-  // Pulse ring for active nodes
-  if (n.status === 'active' || n.status === 'busy') {
-    const pulseR = sr + 3 + Math.sin(tick * 0.06) * 5;
+  // Pulse ring
+  if (n.status !== 'idle') {
+    const pulseR = sr + 4 + Math.sin(tick * 0.07) * 6;
     ctx.beginPath();
     ctx.arc(x, y, pulseR, 0, Math.PI * 2);
-    ctx.strokeStyle = n.status === 'busy' ? '#f39c12' : n.color;
+    ctx.strokeStyle = statusCol;
     ctx.lineWidth = 1;
-    ctx.globalAlpha = 0.2 + Math.sin(tick * 0.06) * 0.15;
+    ctx.globalAlpha = (0.15 + Math.sin(tick * 0.07) * 0.1) * a;
     ctx.stroke();
-    ctx.globalAlpha = 1;
   }
 
+  // Node fill
+  ctx.beginPath();
+  ctx.arc(x, y, sr, 0, Math.PI * 2);
+  ctx.fillStyle = n.type === 'orchestrator' ? '#160e08' : '#071018';
+  ctx.globalAlpha = a;
+  ctx.fill();
+  ctx.strokeStyle = n.color;
+  ctx.lineWidth = hovered ? 2.5 : 1.8;
+  ctx.stroke();
+
   // Label
-  const fontSize = n.type === 'orchestrator' ? 9 : n.type === 'tool' ? 7 : 8;
+  const fontSize = n.type === 'orchestrator' ? 10 : 8;
   ctx.font = `700 ${fontSize}px "Courier New", monospace`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = n.color;
   ctx.shadowColor = n.color;
-  ctx.shadowBlur = 6;
-  ctx.fillText(n.label, x, n.type === 'tool' ? y : y - 5);
+  ctx.shadowBlur = 7;
+  ctx.globalAlpha = a;
+  ctx.fillText(n.label, x, y - 6);
   ctx.shadowBlur = 0;
 
-  if (n.type !== 'tool') {
-    ctx.font = `600 7px "Courier New", monospace`;
-    ctx.fillStyle = '#444';
-    ctx.fillText(n.sublabel, x, y + 7);
-  }
+  // Sub-label (model name for BOB AI)
+  ctx.font = `600 7px "Courier New", monospace`;
+  ctx.fillStyle = n.type === 'orchestrator' ? '#c87a5a' : '#2e5a78';
+  ctx.fillText(n.sub, x, y + 6);
 
   // Task badge
   if (n.tasks > 0) {
     ctx.beginPath();
     ctx.arc(x + sr * 0.65, y - sr * 0.65, 8, 0, Math.PI * 2);
     ctx.fillStyle = '#f39c12';
+    ctx.globalAlpha = a;
     ctx.fill();
     ctx.font = `700 7px "Courier New", monospace`;
     ctx.fillStyle = '#000';
+    ctx.shadowBlur = 0;
     ctx.fillText(n.tasks, x + sr * 0.65, y - sr * 0.65);
   }
-}
 
-function drawParticle(p) {
-  const e    = EDGES[p.edgeIdx];
-  const from = NODES.find(n => n.id === e.from);
-  const to   = NODES.find(n => n.id === e.to);
-  if (!from || !to) return;
-  const px = wx(from) + (wx(to) - wx(from)) * p.t;
-  const py = wy(from) + (wy(to) - wy(from)) * p.t;
-  ctx.beginPath();
-  ctx.arc(px, py, p.size, 0, Math.PI * 2);
-  ctx.fillStyle = p.color;
-  ctx.globalAlpha = 0.7;
-  ctx.fill();
   ctx.globalAlpha = 1;
+  ctx.shadowBlur  = 0;
 }
 
-// ── Main render loop ────────────────────────────────────
+// ── Render loop ──────────────────────────────────────────
 function render() {
   ctx.clearRect(0, 0, W, H);
 
-  // Subtle grid background
+  // Grid
   ctx.save();
-  ctx.strokeStyle = '#1a1a1a';
+  ctx.strokeStyle = '#141414';
   ctx.lineWidth = 0.5;
-  const gridStep = 40;
-  for (let gx = 0; gx < W; gx += gridStep) {
-    ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
-  }
-  for (let gy = 0; gy < H; gy += gridStep) {
-    ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
-  }
+  const gs = 44;
+  for (let gx = 0; gx < W; gx += gs) { ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke(); }
+  for (let gy = 0; gy < H; gy += gs) { ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke(); }
   ctx.restore();
 
   // Edges
   for (const e of EDGES) {
     const from = NODES.find(n => n.id === e.from);
     const to   = NODES.find(n => n.id === e.to);
-    if (from && to) drawEdge(from, to, e.type);
+    if (from && to) drawEdge(from, to, 1);
   }
 
   // Nodes
   for (const n of NODES) drawNode(n);
 
   tick++;
-  animFrame = requestAnimationFrame(render);
+  requestAnimationFrame(render);
 }
 render();
 
-// ── Mouse hover / tooltip ───────────────────────────────
+// ── Mouse hover tooltip ──────────────────────────────────
 canvas.addEventListener('mousemove', e => {
   const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
   const tip = document.getElementById('orch-tooltip');
-
   hoveredNode = null;
   for (const n of NODES) {
     const dx = mx - wx(n), dy = my - wy(n);
-    if (Math.sqrt(dx * dx + dy * dy) < n.radius + 4) {
-      hoveredNode = n;
-      break;
-    }
+    if (Math.sqrt(dx*dx + dy*dy) < n.radius + 6) { hoveredNode = n; break; }
   }
-
   if (hoveredNode) {
     document.getElementById('tt-name').textContent   = hoveredNode.label;
     document.getElementById('tt-status').textContent = hoveredNode.status.toUpperCase();
@@ -944,218 +873,245 @@ canvas.addEventListener('mouseleave', () => {
   hoveredNode = null;
 });
 
-// ── View toggle ─────────────────────────────────────────
+// ── View / reset ─────────────────────────────────────────
 function setView(v) {
   currentView = v;
-  document.getElementById('btn-view-network').classList.toggle('active-ctrl', v === 'network');
+  document.getElementById('btn-view-tree').classList.toggle('active-ctrl', v === 'tree');
   document.getElementById('btn-view-flow').classList.toggle('active-ctrl', v === 'flow');
-  orchLog(`View switched to ${v.toUpperCase()} mode`, 'sys');
+  orchLog(`View: ${v.toUpperCase()}`, 'dim');
 }
+function resetCanvas() { orchLog('Canvas reset', 'dim'); }
 
-function resetZoom() {
-  orchLog('Canvas reset', 'dim');
-}
-
-// ── Agent status list (right panel) ─────────────────────
-const AGENT_DEFS = [
-  { id: 'code',   label: 'CODE AGENT',   tag: 'PY·JS·BASH', status: 'idle'   },
-  { id: 'debug',  label: 'DEBUG AGENT',  tag: 'TRACE',      status: 'idle'   },
-  { id: 'search', label: 'SEARCH AGENT', tag: 'WEB·RAG',    status: 'idle'   },
-  { id: 'file',   label: 'FILE AGENT',   tag: 'IO',         status: 'idle'   },
-  { id: 'eval',   label: 'EVAL AGENT',   tag: 'SCORE',      status: 'idle'   },
-];
-
-function renderAgentStatusList() {
-  const list = document.getElementById('agent-status-list');
-  list.innerHTML = AGENT_DEFS.map(a => {
-    const chipClass = `chip-${a.status}`;
-    const dotClass  = a.status === 'idle' ? 'idle'
-                    : a.status === 'busy' ? 'busy'
-                    : a.status === 'active' ? 'active' : 'error';
-    return `
-      <div class="agent-status-row" id="agent-row-${a.id}">
-        <div class="agent-st-dot ${dotClass}" id="agent-dot-${a.id}"></div>
-        <span class="agent-st-name">${a.label}</span>
-        <span class="agent-st-tag">${a.tag}</span>
-        <span class="agent-st-chip ${chipClass}" id="agent-chip-${a.id}">${a.status.toUpperCase()}</span>
-      </div>`;
-  }).join('');
-}
-renderAgentStatusList();
-
-function setAgentStatus(agentId, status) {
-  const def = AGENT_DEFS.find(a => a.id === agentId);
-  if (!def) return;
-  def.status = status;
-  const dot  = document.getElementById('agent-dot-' + agentId);
-  const chip = document.getElementById('agent-chip-' + agentId);
-  if (dot)  { dot.className  = 'agent-st-dot ' + status; }
-  if (chip) { chip.className = 'agent-st-chip chip-' + status; chip.textContent = status.toUpperCase(); }
-  // Update canvas node status
-  const n = NODES.find(nd => nd.id === agentId);
-  if (n) n.status = status;
-}
-
-// ── Task management ─────────────────────────────────────
-let tasks = [];
-let taskCounter = 1;
-
-const TYPE_LABELS = {
-  code: 'CODE GEN', debug: 'DEBUG', research: 'RESEARCH',
-  pipeline: 'PIPELINE', eval: 'EVAL', custom: 'CUSTOM',
-};
-const PRIORITY_COLORS = {
-  low: '#444', normal: '#7fb3cc', high: '#f39c12', critical: '#e74c3c',
+// ── Map SSE agent names → AGENT_DEFS keys ────────────────
+const AGENT_NODE_MAP = {
+  supervisor:     'bob',
+  code_agent:     'code',
+  doc_agent:      'doc',
+  analysis_agent: 'analysis',
+  debug_agent:    'debug',
+  search_agent:   'search',
+  done:           'bob',
 };
 
-/* ── API base (Caddy proxies /api/* → DGX:9010) ─────────── */
-const API = '';   // same-origin via Caddy reverse proxy
+function _setActiveNode(agentName) {
+  const nodeId = AGENT_NODE_MAP[agentName] || agentName;
+  if (nodeId === 'bob' || !nodeId) {
+    BOB.status = 'busy';
+    setBobStatus('running');
+    return;
+  }
+  BOB.status = 'busy';
+  setBobStatus('running');
+  spawnAgent(nodeId);
+}
 
-/* ── Active SSE connections keyed by run_id ─────────────── */
+/* ── API base ──────────────────────────────────────────── */
+const API = '';
 const _sseConns = {};
+
+// ── File attachment handling ─────────────────────────────
+let _attachedFiles = []; // { name, size, content }
+
+const fileInput = document.getElementById('task-file-input');
+const fileZone  = document.getElementById('file-drop-zone');
+
+fileInput.addEventListener('change', () => handleFileList(fileInput.files));
+
+fileZone.addEventListener('dragover',  e => { e.preventDefault(); fileZone.classList.add('drag-over'); });
+fileZone.addEventListener('dragleave', ()  => fileZone.classList.remove('drag-over'));
+fileZone.addEventListener('drop', e => {
+  e.preventDefault(); fileZone.classList.remove('drag-over');
+  handleFileList(e.dataTransfer.files);
+});
+
+async function handleFileList(files) {
+  for (const f of files) {
+    const content = await readFileText(f);
+    _attachedFiles.push({ name: f.name, size: f.size, content: content.slice(0, 60000) });
+  }
+  renderAttachList();
+}
+
+function readFileText(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload  = e => res(e.target.result);
+    r.onerror = () => rej(new Error('read error'));
+    r.readAsText(file);
+  });
+}
+
+function renderAttachList() {
+  const el = document.getElementById('attach-list');
+  if (_attachedFiles.length === 0) {
+    el.innerHTML = '';
+    document.getElementById('file-zone-label').textContent = '📄 CLICK OR DROP FILES';
+    return;
+  }
+  document.getElementById('file-zone-label').textContent = `${_attachedFiles.length} FILE${_attachedFiles.length>1?'S':''} ATTACHED`;
+  el.innerHTML = _attachedFiles.map((f, i) =>
+    `<div class="orch-attach-item">
+      <span>&#9654; ${f.name}</span>
+      <span class="orch-attach-rm" onclick="removeAttach(${i})">&#10005;</span>
+    </div>`
+  ).join('');
+}
+
+function removeAttach(i) {
+  _attachedFiles.splice(i, 1);
+  renderAttachList();
+}
+
+// ── Deploy Task ──────────────────────────────────────────
+const TYPE_LABELS = {
+  code:'CODE GEN', debug:'DEBUG', research:'RESEARCH',
+  pipeline:'PIPELINE', eval:'EVAL', custom:'CUSTOM',
+};
+const PRIORITY_COLORS = { low:'#444', normal:'#7fb3cc', high:'#f39c12', critical:'#e74c3c' };
+let tasks = [];
 
 async function deployTask() {
   const name      = document.getElementById('task-name-input').value.trim() || 'Unnamed Task';
+  const prompt    = document.getElementById('task-prompt-input').value.trim();
   const type      = document.getElementById('task-type-select').value;
   const agentRaw  = document.getElementById('task-agent-select').value;
   const priority  = document.getElementById('task-priority-select').value;
   const modelRaw  = document.getElementById('task-model-select').value;
   const orchModel = modelRaw === 'local' ? null : modelRaw;
 
-  orchLog(`DISPATCHING: "${name}" [${type.toUpperCase()}] model=${orchModel || 'local'} …`, 'sys');
+  // Build full task description
+  let fullTask = name;
+  if (prompt) fullTask += '\n\n' + prompt;
+  if (_attachedFiles.length > 0) {
+    fullTask += '\n\n[Attached files: ' + _attachedFiles.map(f=>f.name).join(', ') + ']\n';
+    _attachedFiles.forEach(f => { fullTask += `\n--- ${f.name} ---\n${f.content}\n`; });
+  }
+
+  orchLog(`DISPATCH: "${name}" [${(orchModel ? MODEL_SHORT[orchModel] : 'LOCAL')}] ${_attachedFiles.length > 0 ? `+${_attachedFiles.length}file(s)` : ''}`, 'sys');
+
   document.getElementById('task-name-input').value = '';
+  document.getElementById('task-prompt-input').value = '';
+  _attachedFiles = [];
+  renderAttachList();
 
   let runId;
   try {
     const res = await fetch(`${API}/api/runs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task: name, config: { type, agent: agentRaw, priority, orchestrator_model: orchModel }, queued: false }),
+      body: JSON.stringify({
+        task: fullTask,
+        config: { type, agent: agentRaw, priority, orchestrator_model: orchModel },
+        queued: false,
+      }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     runId = data.run_id;
   } catch (err) {
-    orchLog(`ERROR dispatching task: ${err.message}`, 'err');
+    orchLog(`ERROR dispatching: ${err.message}`, 'err');
     return;
   }
 
-  // Add to local task table immediately
+  BOB.tasks++;
+  setBobStatus('running');
+
   const task = {
-    id: runId,
-    name,
-    type,
+    id: runId, name, type,
     agentId: agentRaw === 'auto' ? 'supervisor' : agentRaw,
-    priority,
-    status: 'running',
-    progress: 0,
-    elapsed: 0,
+    priority, status: 'running', progress: 0,
     queuedAt: Date.now(),
   };
   tasks.push(task);
   renderTaskTable();
   updateTaskCount();
-  orchLog(`STARTED run ${runId.slice(0,8)}… — streaming live events`, 'sys');
-
-  // Open SSE stream for this run
+  orchLog(`RUN ${runId.slice(0,8)} — streaming live events`, 'sys');
   _streamRun(runId, task);
 }
 
+// ── SSE stream ───────────────────────────────────────────
 function _streamRun(runId, taskRef) {
   if (_sseConns[runId]) return;
   const es = new EventSource(`${API}/api/runs/${runId}/stream`);
   _sseConns[runId] = es;
 
   es.onmessage = (e) => {
-    let ev;
-    try { ev = JSON.parse(e.data); } catch { return; }
-
-    const etype = ev.event_type || '';
-    const node  = ev.node || '';
-    const data  = ev.data || {};
+    let ev; try { ev = JSON.parse(e.data); } catch { return; }
+    const etype = ev.event_type || '', node = ev.node || '', data = ev.data || {};
 
     if (etype === 'stream_end') {
-      es.close();
-      delete _sseConns[runId];
-      const finalStatus = data.status || 'completed';
+      es.close(); delete _sseConns[runId];
+      const fs = data.status || 'completed';
       if (taskRef) {
-        taskRef.status = finalStatus === 'completed' ? 'complete' : finalStatus === 'failed' ? 'error' : finalStatus;
-        taskRef.progress = finalStatus === 'completed' ? 100 : taskRef.progress;
+        taskRef.status   = fs === 'completed' ? 'complete' : fs === 'failed' ? 'error' : fs;
+        taskRef.progress = fs === 'completed' ? 100 : taskRef.progress;
         renderTaskTable();
       }
-      orchLog(`RUN ${runId.slice(0,8)} → ${finalStatus.toUpperCase()}`, finalStatus === 'completed' ? 'sys' : 'err');
-      refreshRunHistory();
-      refreshAnalytics();
+      BOB.tasks = Math.max(0, BOB.tasks - 1);
+      orchLog(`RUN ${runId.slice(0,8)} → ${fs.toUpperCase()}`, fs === 'completed' ? 'sys' : 'err');
+      setTimeout(despawnAll, 1200);
+      refreshRunHistory(); refreshAnalytics();
       return;
     }
 
     if (etype === 'node_update') {
       const agent   = data.active_agent || node;
-      const snippet = data.snippet ? ` — ${data.snippet.slice(0,80)}` : '';
-      const tokStr  = data.tokens_out != null ? ` [tok:${data.tokens_in||0}/${data.tokens_out}]` : '';
+      const snippet = data.snippet  ? ` — ${data.snippet.slice(0,80)}`   : '';
+      const tokStr  = data.tokens_out != null ? ` [${data.tokens_in||0}→${data.tokens_out}tok]` : '';
       orchLog(`[${agent.toUpperCase()}]${tokStr}${snippet}`, agent === 'supervisor' ? 'sys' : '');
-      // Update task progress heuristic
       if (taskRef && data.iteration != null) {
         taskRef.progress = Math.min(95, Math.round((data.iteration / (data.max_iter || 6)) * 100));
-        taskRef.status = 'running';
-        renderTaskTable();
+        taskRef.status = 'running'; renderTaskTable();
       }
-      // Highlight active node on canvas
       _setActiveNode(agent);
       agentLog(`[${node}] iter:${data.iteration||'?'} next:${data.next_node||'?'}${tokStr}`, '');
     } else if (etype === 'error') {
-      orchLog(`ERROR in run ${runId.slice(0,8)}: ${data.message || '?'}`, 'err');
+      orchLog(`ERROR: ${data.message || '?'}`, 'err');
     } else if (etype === 'status') {
       orchLog(`STATUS: ${data.message || etype}`, 'dim');
     }
   };
 
-  es.onerror = () => {
-    es.close();
-    delete _sseConns[runId];
-  };
+  es.onerror = () => { es.close(); delete _sseConns[runId]; };
 }
 
-/* Map agent names to canvas node IDs for visual highlighting */
-const AGENT_NODE_MAP = {
-  supervisor: 'spark', code_agent: 'code', doc_agent: 'analysis',
-  analysis_agent: 'analysis', done: 'spark',
-};
-function _setActiveNode(agentName) {
-  const nodeId = AGENT_NODE_MAP[agentName];
-  if (!nodeId) return;
-  NODES.forEach(n => { n.status = n.id === nodeId ? 'active' : (n.id === 'spark' ? 'active' : 'idle'); });
-  drawCanvas();
-}
-
+// ── Task table ───────────────────────────────────────────
 function renderTaskTable() {
   const tbody = document.getElementById('task-tbody');
   if (tasks.length === 0) {
     tbody.innerHTML = '<tr><td colspan="8" class="task-empty">NO ACTIVE TASKS — DISPATCH A TASK TO BEGIN</td></tr>';
     return;
   }
-  const agentLabel = id => AGENT_DEFS.find(a => a.id === id)?.label || id.toUpperCase();
   tbody.innerHTML = tasks.slice().reverse().map(t => {
-    const sc = t.status === 'complete' ? 'complete' : t.status === 'error' ? 'error' : t.status === 'running' ? 'running' : 'queued';
-    const pc_color = PRIORITY_COLORS[t.priority] || '#555';
-    const elapsed = Math.floor((Date.now() - t.queuedAt) / 1000);
-    const progBar = `<div style="width:100%;background:#1a1a1a;border-radius:2px;height:6px;overflow:hidden">
-      <div style="width:${t.progress}%;background:${t.status==='error'?'#e74c3c':'var(--orange)'};height:6px;border-radius:2px;transition:width .4s"></div></div>`;
-    const shortId = t.id.length > 12 ? t.id.slice(0,8)+'…' : t.id;
+    const sc  = t.status === 'complete' ? 'complete' : t.status === 'error' ? 'error' : t.status === 'running' ? 'running' : 'queued';
+    const pc  = PRIORITY_COLORS[t.priority] || '#555';
+    const el  = Math.floor((Date.now() - t.queuedAt) / 1000);
+    const bar = `<div style="width:100%;background:#111;border-radius:1px;height:5px;overflow:hidden">
+      <div style="width:${t.progress}%;background:${t.status==='error'?'#e74c3c':'var(--orange)'};height:5px;border-radius:1px;transition:width .4s"></div></div>`;
+    const sid = t.id.length > 12 ? t.id.slice(0,8)+'…' : t.id;
     return `<tr onclick="viewRun('${t.id}')" style="cursor:pointer">
-      <td class="task-id" title="${t.id}">${shortId}</td>
-      <td class="task-name">${t.name}</td>
-      <td>${TYPE_LABELS[t.type] || t.type}</td>
-      <td class="task-agent">${agentLabel(t.agentId)}</td>
-      <td class="task-prog">${progBar}</td>
-      <td style="color:${pc_color}">${t.priority.toUpperCase()}</td>
-      <td class="task-time">${elapsed}s</td>
+      <td class="task-id" title="${t.id}">${sid}</td>
+      <td class="task-name">${t.name.slice(0,40)}${t.name.length>40?'…':''}</td>
+      <td>${TYPE_LABELS[t.type]||t.type}</td>
+      <td class="task-agent">${(AGENT_DEFS[t.agentId]?.label || t.agentId || 'AUTO').replace(' AGENT','')}</td>
+      <td>${bar}</td>
+      <td style="color:${pc}">${t.priority.toUpperCase()}</td>
+      <td style="color:#333">${el}s</td>
       <td><span class="task-status-chip ${sc}">${t.status.toUpperCase()}</span></td>
     </tr>`;
   }).join('');
 }
 
-/* ── View a single run detail in the terminal ─────────────── */
+function updateTaskCount() {
+  document.getElementById('orch-task-count').textContent = `${tasks.length} TASK${tasks.length !== 1 ? 'S' : ''}`;
+}
+function clearCompletedTasks() {
+  tasks = tasks.filter(t => t.status === 'running');
+  renderTaskTable(); updateTaskCount();
+  orchLog('Completed tasks cleared', 'dim');
+}
+
+// ── View run detail ──────────────────────────────────────
 async function viewRun(runId) {
   switchTerm('orch');
   orchLog(`Fetching run ${runId.slice(0,8)}…`, 'dim');
@@ -1163,38 +1119,31 @@ async function viewRun(runId) {
     const res = await fetch(`${API}/api/runs/${runId}`);
     if (!res.ok) throw new Error('not found');
     const { run, events } = await res.json();
-    orchLog(`── RUN ${runId.slice(0,8)} [${run.status.toUpperCase()}] task:"${run.task}" ──`, 'sys');
-    orchLog(`   model:${run.model||'?'} tokens:${run.tokens_in||0}in/${run.tokens_out||0}out dur:${run.duration_s||0}s`, 'dim');
+    orchLog(`── RUN ${runId.slice(0,8)} [${run.status.toUpperCase()}] ──`, 'sys');
+    orchLog(`   model:${run.model||'?'} tok:${run.tokens_in||0}in/${run.tokens_out||0}out dur:${run.duration_s||0}s`, 'dim');
     events.forEach(ev => {
       const d = ev.data || {};
-      if (ev.event_type === 'node_update') {
-        orchLog(`  [${ev.node||'?'}] ${d.snippet||''} tok:${d.tokens_out||0}`, '');
-      } else {
-        orchLog(`  [${ev.event_type}] ${d.message||JSON.stringify(d).slice(0,80)}`, 'dim');
-      }
+      if (ev.event_type === 'node_update') orchLog(`  [${ev.node||'?'}] ${d.snippet||''} tok:${d.tokens_out||0}`, '');
+      else orchLog(`  [${ev.event_type}] ${d.message||JSON.stringify(d).slice(0,80)}`, 'dim');
     });
-  } catch (err) {
-    orchLog(`ERROR fetching run: ${err.message}`, 'err');
-  }
+  } catch (err) { orchLog(`ERROR: ${err.message}`, 'err'); }
 }
 
-/* ── Analytics refresh — updates LangChain System panel ───── */
+// ── Analytics ────────────────────────────────────────────
 async function refreshAnalytics() {
   try {
     const res = await fetch(`${API}/api/runs/analytics`);
     if (!res.ok) return;
     const data = await res.json();
     const t = data.totals || {};
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-    set('lc-running',  t.running  ?? '--');
-    set('lc-total',    t.total_runs ?? '--');
-    set('lc-tokens',   t.total_tokens ? _fmtNum(t.total_tokens) : '--');
-    const successRate = t.total_runs > 0 ? Math.round((t.completed / t.total_runs) * 100) + '%' : '--';
-    set('lc-success',  successRate);
-    set('lc-avgdur',   t.avg_duration_s ? t.avg_duration_s + 's' : '--');
-    // Update footer
-    const fRunning = document.querySelector('.footer span:last-child');
-    if (fRunning) fRunning.textContent = `LANGGRAPH — ${t.running > 0 ? t.running + ' RUNNING' : 'IDLE'}`;
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('lc-running', t.running  ?? '--');
+    set('lc-total',   t.total_runs ?? '--');
+    set('lc-tokens',  t.total_tokens ? _fmtNum(t.total_tokens) : '--');
+    const sr = t.total_runs > 0 ? Math.round((t.completed / t.total_runs) * 100) + '%' : '--';
+    set('lc-success', sr);
+    set('lc-avgdur',  t.avg_duration_s ? t.avg_duration_s + 's' : '--');
+    if (t.running > 0 && BOB.status === 'idle') setBobStatus('running');
   } catch (_) {}
 }
 
@@ -1204,7 +1153,7 @@ function _fmtNum(n) {
   return String(n);
 }
 
-/* ── Run History tab ─────────────────────────────────────── */
+// ── Run history tab ──────────────────────────────────────
 async function refreshRunHistory() {
   const body = document.getElementById('run-history-body');
   if (!body) return;
@@ -1213,106 +1162,82 @@ async function refreshRunHistory() {
     if (!res.ok) throw new Error('fetch failed');
     const { runs } = await res.json();
     if (!runs.length) {
-      body.innerHTML = '<div class="term-line dim">[run-history] no runs yet — dispatch a task to begin</div>';
+      body.innerHTML = '<div class="term-line dim">[run-history] no runs yet</div>';
       return;
     }
-    const statusColor = s => ({ completed:'#2ecc71', failed:'#e74c3c', running:'var(--orange)', queued:'#7fb3cc', cancelled:'#888' }[s] || '#555');
+    const sc = s => ({ completed:'#2ecc71', failed:'#e74c3c', running:'var(--orange)', queued:'#7fb3cc', cancelled:'#888' }[s] || '#555');
     body.innerHTML = runs.map(r => {
-      const ts = r.created_at ? new Date(r.created_at).toLocaleTimeString() : '?';
+      const ts  = r.created_at ? new Date(r.created_at).toLocaleTimeString() : '?';
       const dur = r.duration_s != null ? `${r.duration_s}s` : '--';
       const tok = (r.tokens_in + r.tokens_out) > 0 ? ` ${_fmtNum(r.tokens_in+r.tokens_out)}tok` : '';
-      const shortId = r.id.slice(0,8);
       return `<div class="term-line" style="cursor:pointer;font-size:9px" onclick="viewRun('${r.id}')">
-        <span style="color:#555">[${ts}]</span>
-        <span style="color:${statusColor(r.status)};margin:0 4px">${r.status.toUpperCase()}</span>
-        <span style="color:#aaa">${shortId}</span>
-        <span style="color:#666;margin:0 4px">${dur}${tok}</span>
-        <span style="color:#888">${r.task.slice(0,60)}${r.task.length>60?'…':''}</span>
+        <span style="color:#444">[${ts}]</span>
+        <span style="color:${sc(r.status)};margin:0 4px">${r.status.toUpperCase()}</span>
+        <span style="color:#888">${r.id.slice(0,8)}</span>
+        <span style="color:#555;margin:0 4px">${dur}${tok}</span>
+        <span style="color:#666">${r.task.slice(0,55)}${r.task.length>55?'…':''}</span>
       </div>`;
     }).join('');
   } catch (err) {
-    body.innerHTML = `<div class="term-line err">[run-history] error: ${err.message}</div>`;
+    body.innerHTML = `<div class="term-line err">[run-history] ${err.message}</div>`;
   }
-}
-
-function updateTaskCount() {
-  document.getElementById('orch-task-count').textContent = `${tasks.length} TASK${tasks.length !== 1 ? 'S' : ''}`;
-}
-
-function clearCompletedTasks() {
-  tasks = [];
-  renderTaskTable();
-  updateTaskCount();
-  orchLog('Task queue cleared', 'dim');
 }
 
 // ── Terminal ─────────────────────────────────────────────
 let _termNode = 'orch';
-
 function switchTerm(node) {
   _termNode = node;
   document.querySelectorAll('.terminal-tab').forEach(t =>
     t.classList.toggle('active', t.dataset.term === node));
-  ['orch', 'agent', 'history'].forEach(n => {
+  ['orch','agent','history'].forEach(n => {
     const el = document.getElementById('term-out-' + n);
     if (el) el.style.display = n === node ? 'block' : 'none';
   });
-  const prompts = { orch: 'orch $', agent: 'agent $', history: 'hist $' };
-  document.getElementById('term-prompt').textContent = prompts[node] || 'orch $';
+  document.getElementById('term-prompt').textContent =
+    { orch:'orch $', agent:'agent $', history:'hist $' }[node] || 'orch $';
   document.getElementById('terminal-input').focus();
   if (node === 'history') refreshRunHistory();
 }
 
 function orchLog(msg, cls) {
-  const out = document.getElementById('term-out-orch');
-  if (!out) return;
-  const div = document.createElement('div');
-  div.className = 'term-line' + (cls ? ' ' + cls : '');
+  const out = document.getElementById('term-out-orch'); if (!out) return;
+  const d = document.createElement('div');
+  d.className = 'term-line' + (cls ? ' '+cls : '');
   const t = new Date().toTimeString().split(' ')[0];
-  div.textContent = `[${t}] ${msg}`;
-  out.appendChild(div);
-  out.scrollTop = out.scrollHeight;
+  d.textContent = `[${t}] ${msg}`;
+  out.appendChild(d); out.scrollTop = out.scrollHeight;
 }
-
 function agentLog(msg, cls) {
-  const out = document.getElementById('term-out-agent');
-  if (!out) return;
-  const div = document.createElement('div');
-  div.className = 'term-line' + (cls ? ' ' + cls : '');
+  const out = document.getElementById('term-out-agent'); if (!out) return;
+  const d = document.createElement('div');
+  d.className = 'term-line' + (cls ? ' '+cls : '');
   const t = new Date().toTimeString().split(' ')[0];
-  div.textContent = `[${t}] ${msg}`;
-  out.appendChild(div);
-  out.scrollTop = out.scrollHeight;
+  d.textContent = `[${t}] ${msg}`;
+  out.appendChild(d); out.scrollTop = out.scrollHeight;
 }
 
 document.getElementById('terminal-input').addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
-  const cmd = e.target.value.trim();
-  if (!cmd) return;
+  const cmd = e.target.value.trim(); if (!cmd) return;
   e.target.value = '';
-  if (_termNode === 'orch') {
-    orchLog('orch $ ' + cmd);
-    orchLog('[bcom-c] no API connection — command logged only', 'dim');
-  } else {
-    agentLog('agent $ ' + cmd);
-    agentLog('[bcom-c] no API connection — command logged only', 'dim');
-  }
+  if (_termNode === 'orch') { orchLog('orch $ ' + cmd); orchLog('[bcom-c] command logged', 'dim'); }
+  else { agentLog('agent $ ' + cmd); agentLog('[bcom-c] command logged', 'dim'); }
 });
 
 document.getElementById('term-minimize').addEventListener('click', () => {
-  const dock  = document.getElementById('terminal-dock');
-  const body  = document.getElementById('terminal-body');
-  const btn   = document.getElementById('term-minimize');
+  const dock = document.getElementById('terminal-dock');
+  const body = document.getElementById('terminal-body');
+  const btn  = document.getElementById('term-minimize');
   const isMin = dock.classList.toggle('minimized');
   body.style.display = isMin ? 'none' : '';
   btn.textContent    = isMin ? '▲' : '_';
   document.body.style.paddingBottom = isMin ? '34px' : '220px';
 });
 
-// ── Clock / date (shared bcom.js logic fallback) ─────────
-function padZ(n) { return n < 10 ? '0' + n : n; }
+// ── Clock ─────────────────────────────────────────────────
+function padZ(n) { return n < 10 ? '0'+n : n; }
 function tickClock() {
-  const d = new Date();
+  const d  = new Date();
   const cEl = document.getElementById('clock');
   const dEl = document.getElementById('datestamp');
   const fEl = document.getElementById('footer-date');
@@ -1320,41 +1245,35 @@ function tickClock() {
   if (dEl) dEl.textContent = `${d.getFullYear()}/${padZ(d.getMonth()+1)}/${padZ(d.getDate())}`;
   if (fEl) fEl.textContent = d.toDateString();
 }
-setInterval(tickClock, 1000);
-tickClock();
+setInterval(tickClock, 1000); tickClock();
 
-orchLog('Orchestrator UI ready — LangGraph backend connected', 'sys');
-orchLog('Dispatch a task to begin. Click a run row to inspect events.', 'dim');
-
-// Bootstrap analytics on load
-refreshAnalytics();
-
-/* ── Node Hardware polling ──────────────────────────────── */
+// ── Node Hardware polling ─────────────────────────────────
 async function pollOrchMetrics() {
   try {
     const res = await fetch('/api/metrics', { cache: 'no-store' });
     if (!res.ok) return;
     const d = await res.json();
-    const s = d.spark || {};
-    const l = d.linux  || {};
-
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
-    set('orch-spark-cpu',    s.cpu_pct  != null ? s.cpu_pct + '%'  : '--%');
-    set('orch-spark-gpu',    s.gpu_pct  != null ? s.gpu_pct + '%'  : '--%');
+    const s = d.spark || {}, l = d.linux || {};
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('orch-spark-cpu',    s.cpu_pct  != null ? s.cpu_pct+'%' : '--%');
+    set('orch-spark-gpu',    s.gpu_pct  != null ? s.gpu_pct+'%' : '--%');
     set('orch-spark-vram',   s.vram_gb  ?? '--');
-    set('orch-spark-temp',   s.cpu_temp != null ? s.cpu_temp + '°C' : '--');
+    set('orch-spark-temp',   s.cpu_temp != null ? s.cpu_temp+'°C' : '--');
     set('orch-spark-uptime', s.uptime   ?? '--');
-
-    set('orch-linux-cpu',    l.cpu_pct  != null ? l.cpu_pct + '%'  : '--%');
+    set('orch-linux-cpu',    l.cpu_pct  != null ? l.cpu_pct+'%' : '--%');
     set('orch-linux-ram',    l.ram_gb   ?? '--');
-    set('orch-linux-temp',   l.cpu_temp != null ? l.cpu_temp + '°C' : '--');
+    set('orch-linux-temp',   l.cpu_temp != null ? l.cpu_temp+'°C' : '--');
     set('orch-linux-uptime', l.uptime   ?? '--');
   } catch (_) {}
 }
+
+// ── Boot ──────────────────────────────────────────────────
+refreshAnalytics();
 pollOrchMetrics();
 setInterval(pollOrchMetrics, 10000);
 setInterval(refreshAnalytics, 15000);
+orchLog('BOB AI ready — select model, enter prompt, dispatch task', 'sys');
+
 </script>
 </body>
 </html>
