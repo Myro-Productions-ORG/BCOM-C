@@ -15,6 +15,22 @@ const BCOM = {
   _lastErr:     null
 };
 
+/* ── Theme management ──────────────────────────────────── */
+(function initTheme() {
+  const saved = localStorage.getItem('bcom-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+})();
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('bcom-theme', theme);
+}
+
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  setTheme(cur === 'dark' ? 'light' : 'dark');
+}
+
 /* ── Clock / Date ─────────────────────────────────────── */
 function updateClock() {
   const now = new Date();

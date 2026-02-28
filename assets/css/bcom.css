@@ -13,7 +13,75 @@
   --bg-deep:      #180e06;
   --border:       #b8613a;
   --border-dim:   #4a2a18;
+  /* text tokens */
+  --text:         #f0f0f0;
+  --text-dim:     #aaa;
+  --text-muted:   #555;
+  --text-label:   #3a3a3a;
+  /* nav hover */
+  --nav-hover-bg: #2a1a0e;
+  /* card/input bg for settings */
+  --input-bg:     #0e0e0e;
+  --input-border: #333;
 }
+
+/* ── LIGHT MODE ────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:           #f0e8de;
+  --bg-panel:     #e6ddd2;
+  --bg-bar:       #ddd0c3;
+  --bg-deep:      #d2c2b0;
+  --border-dim:   #c09070;
+  --text:         #1e0f06;
+  --text-dim:     #5a3a1e;
+  --text-muted:   #8b6040;
+  --text-label:   #2a1a08;
+  --nav-hover-bg: #c8b09a;
+  --input-bg:     #e8ddd0;
+  --input-border: #b89070;
+}
+[data-theme="light"] body                     { color: var(--text); }
+[data-theme="light"] .nav-btn                 { color: var(--orange-dark); background: var(--bg-deep); border-color: var(--text-muted); }
+[data-theme="light"] .nav-btn:hover           { background: var(--nav-hover-bg); color: var(--text); border-color: var(--orange); }
+[data-theme="light"] .nav-btn.active          { background: var(--orange); color: #fff; border-color: var(--orange-dark); }
+[data-theme="light"] .cog-btn                 { color: var(--orange-dark); background: var(--bg-deep); border-color: var(--text-muted); }
+[data-theme="light"] .cog-btn:hover           { background: var(--nav-hover-bg); border-color: var(--orange); }
+[data-theme="light"] .cog-btn.active          { background: var(--orange); color: #fff; }
+[data-theme="light"] .timestamp               { color: var(--text); }
+[data-theme="light"] .panel                   { background: var(--bg-panel); border-color: var(--orange-dark); }
+[data-theme="light"] .panel-header            { color: var(--text); border-color: var(--orange-dark); }
+[data-theme="light"] .action-btn              { background: var(--bg-deep); color: var(--orange-dark); }
+[data-theme="light"] .action-btn:hover        { background: var(--orange-dark); color: #fff; }
+[data-theme="light"] .log-panel               { background: var(--bg-panel); }
+[data-theme="light"] .log-msg                 { color: var(--text-dim); }
+[data-theme="light"] .log-msg.err             { color: var(--orange-dark); }
+[data-theme="light"] .form-input,
+[data-theme="light"] .form-select             { background: var(--input-bg); color: var(--text); border-color: var(--orange-dark); }
+[data-theme="light"] .ctr-row                 { border-color: var(--border-dim); }
+[data-theme="light"] .mdl-row                 { border-color: var(--border-dim); }
+[data-theme="light"] .mcp-row                 { border-color: var(--border-dim); }
+[data-theme="light"] .info-card               { background: var(--bg-panel); border-color: var(--orange-dark); }
+[data-theme="light"] .footer                  { background: var(--bg-bar); color: var(--text-dim); border-color: var(--orange-dark); }
+[data-theme="light"] .panel-status            { color: var(--text-dim) !important; }
+[data-theme="light"] .node-col-hdr            { color: var(--text-dim) !important; }
+[data-theme="light"] .ctr-image,
+[data-theme="light"] .ctr-uptime,
+[data-theme="light"] .mdl-backend,
+[data-theme="light"] .mdl-size,
+[data-theme="light"] .mcp-status              { color: var(--text-muted) !important; }
+/* keep terminal dark in light mode — it's a terminal */
+[data-theme="light"] .terminal-dock           { background: #080808; }
+[data-theme="light"] .terminal-bar            { background: #111; }
+[data-theme="light"] .terminal-output         { background: #080808; }
+[data-theme="light"] .terminal-input-row      { background: #080808; }
+/* settings page specific */
+[data-theme="light"] .sett-section            { background: var(--bg-panel); border-color: var(--orange-dark); }
+[data-theme="light"] .sett-row                { border-color: var(--border-dim); color: var(--text); }
+[data-theme="light"] .sett-row label          { color: var(--text-dim); }
+[data-theme="light"] .sett-input,
+[data-theme="light"] .sett-select             { background: var(--input-bg); color: var(--text); border-color: var(--orange-dark); }
+[data-theme="light"] .sett-toggle-track       { background: var(--bg-deep); }
+[data-theme="light"] .toggle-checked .sett-toggle-track { background: var(--orange-dark); }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -795,3 +863,228 @@ body { padding-bottom: 220px; }
 
 /* Await / placeholder row — keep dim, just bump size */
 .await-row            { font-size: 10px !important; }
+
+/* ══════════════════════════════════════════════════════
+   COG / SETTINGS BUTTON
+   ════════════════════════════════════════════════════ */
+.cog-btn {
+  background: var(--bg-deep);
+  border: 1.5px solid var(--border-dim);
+  color: var(--orange);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 15px;
+  line-height: 1;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.cog-btn:hover  { background: var(--nav-hover-bg); border-color: var(--orange); color: #fff; transform: rotate(30deg); }
+.cog-btn.active { background: var(--orange); color: #fff; border-color: #fff; }
+
+/* ══════════════════════════════════════════════════════
+   SETTINGS PAGE
+   ════════════════════════════════════════════════════ */
+.sett-layout {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-content: start;
+}
+
+.sett-section {
+  background: var(--bg-panel);
+  border: 2px solid var(--orange-dark);
+  display: flex;
+  flex-direction: column;
+}
+
+.sett-section.full-width {
+  grid-column: 1 / -1;
+}
+
+.sett-hdr {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--orange);
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--orange-dark);
+  text-transform: uppercase;
+  background: rgba(218,119,86,0.06);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sett-hdr-icon { font-size: 12px; }
+
+.sett-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-dim);
+  gap: 12px;
+  min-height: 36px;
+}
+.sett-row:last-child { border-bottom: none; }
+
+.sett-row label {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  flex-shrink: 0;
+  min-width: 140px;
+}
+
+.sett-row-desc {
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.sett-input {
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  padding: 4px 8px;
+  width: 180px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.sett-input:focus  { border-color: var(--orange); }
+.sett-input.narrow { width: 80px; }
+.sett-input.wide   { width: 240px; }
+
+.sett-select {
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  padding: 4px 8px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  width: 180px;
+}
+.sett-select:focus { border-color: var(--orange); }
+
+/* ── CSS Toggle Switch ─────────────────────────── */
+.sett-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 8px;
+}
+.sett-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.sett-toggle-track {
+  width: 40px;
+  height: 20px;
+  background: var(--bg-deep);
+  border: 1.5px solid var(--border-dim);
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.2s, border-color 0.2s;
+}
+.sett-toggle input:checked + .sett-toggle-track {
+  background: var(--orange-dark);
+  border-color: var(--orange);
+}
+.sett-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: #666;
+  border-radius: 50%;
+  transition: left 0.2s, background 0.2s;
+}
+.sett-toggle input:checked + .sett-toggle-track::after {
+  left: 22px;
+  background: #fff;
+}
+.sett-toggle-label {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  min-width: 32px;
+}
+
+/* ── Action buttons in settings ─────────────────── */
+.sett-btn {
+  background: var(--bg-deep);
+  border: 1.5px solid var(--orange-dark);
+  color: var(--orange);
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  padding: 5px 14px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.sett-btn:hover       { background: var(--orange-dark); color: #fff; }
+.sett-btn.danger      { border-color: #e05030; color: #e05030; }
+.sett-btn.danger:hover{ background: #6a1a08; color: #fff; border-color: #ff6040; }
+.sett-btn.success     { border-color: #2ecc71; color: #2ecc71; }
+.sett-btn.success:hover{ background: #1a5a30; color: #fff; }
+
+/* ── Theme picker ─────────────────────────────── */
+.theme-btn-group { display: flex; gap: 6px; }
+.theme-btn {
+  background: var(--bg-deep);
+  border: 1.5px solid var(--border-dim);
+  color: var(--text-dim);
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  padding: 5px 16px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.theme-btn.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+.theme-btn:hover:not(.active) { border-color: var(--orange); color: var(--orange); }
+
+/* ── About section ────────────────────────────── */
+.sett-about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+/* ── Save bar ─────────────────────────────────── */
+.sett-save-bar {
+  background: var(--bg-bar);
+  border-top: 2px solid var(--orange-dark);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+.sett-save-msg {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #2ecc71;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.sett-save-msg.show { opacity: 1; }

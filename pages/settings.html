@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BCOM-C — Settings</title>
+<link rel="stylesheet" href="../assets/css/bcom.css?v=4" />
+<script>
+  /* Apply theme before render to avoid flash */
+  (function(){ var t=localStorage.getItem('bcom-theme')||'dark'; document.documentElement.setAttribute('data-theme',t); })();
+</script>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-title">BCOM-C</div>
+  <div class="topbar-right">
+    <a class="nav-btn" href="../index.html"><span class="nav-arrow">&#8592;</span> DASHBOARD</a>
+    <a class="nav-btn" href="data-gen.html">DATA GEN</a>
+    <a class="nav-btn" href="pipeline.html">PIPELINE</a>
+    <a class="nav-btn" href="resources.html">RESOURCES</a>
+    <a class="nav-btn" href="reports.html">REPORTS</a>
+    <a class="nav-btn" href="orchestrator.html">ORCHESTRATOR</a>
+    <a class="cog-btn active" href="settings.html" title="Settings">⚙</a>
+    <div class="timestamp"><span id="clock">--:--:--</span>&nbsp;&nbsp;<span id="datestamp">----/--/--</span></div>
+  </div>
+</div>
+
+<!-- ACTION BAR -->
+<div class="actionbar">
+  <span style="font-size:9px;letter-spacing:2px;color:var(--orange);font-weight:700;">BCOM-C SETTINGS</span>
+  <span style="font-size:8px;letter-spacing:1px;color:var(--text-muted);margin-left:8px;">Configure dashboard, nodes, inference, and orchestration</span>
+</div>
+
+<!-- SETTINGS LAYOUT -->
+<div class="sett-layout">
+
+  <!-- ── APPEARANCE ─────────────────────────────────────────── -->
+  <div class="sett-section">
+    <div class="sett-hdr"><span class="sett-hdr-icon">🎨</span> Appearance</div>
+
+    <div class="sett-row">
+      <label>Theme</label>
+      <div class="theme-btn-group">
+        <button class="theme-btn" id="btn-dark"  onclick="applyTheme('dark')">◼ DARK</button>
+        <button class="theme-btn" id="btn-light" onclick="applyTheme('light')">◻ LIGHT</button>
+      </div>
+    </div>
+
+    <div class="sett-row">
+      <label>Accent Color</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="color" id="accent-color" value="#DA7756"
+               style="width:32px;height:24px;border:1.5px solid var(--orange-dark);background:transparent;cursor:pointer;padding:1px;"
+               oninput="previewAccent(this.value)" />
+        <span style="font-size:9px;color:var(--text-muted);letter-spacing:1px;" id="accent-hex">#DA7756</span>
+        <button class="sett-btn" onclick="resetAccent()" style="padding:3px 10px;font-size:8px;">RESET</button>
+      </div>
+    </div>
+
+    <div class="sett-row">
+      <label>Clock Format</label>
+      <select class="sett-select" id="clock-format" style="width:120px;">
+        <option value="24h">24-HOUR</option>
+        <option value="12h">12-HOUR</option>
+      </select>
+    </div>
+
+    <div class="sett-row">
+      <label>Compact Density</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-compact" onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-compact">OFF</span>
+      </label>
+    </div>
+
+    <div class="sett-row">
+      <label>Animate Gauges</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-animate" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-animate">ON</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ── API & CONNECTIVITY ──────────────────────────────────── -->
+  <div class="sett-section">
+    <div class="sett-hdr"><span class="sett-hdr-icon">🔌</span> API &amp; Connectivity</div>
+
+    <div class="sett-row">
+      <label>FastAPI Base URL</label>
+      <input class="sett-input wide" id="api-base-url" type="text" value="" placeholder="https://bcom.myroproductions.com" />
+    </div>
+
+    <div class="sett-row">
+      <label>API Key</label>
+      <input class="sett-input wide" id="api-key" type="password" placeholder="leave empty if none" />
+    </div>
+
+    <div class="sett-row">
+      <label>Dashboard Poll Rate</label>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input class="sett-input narrow" id="poll-rate" type="number" min="2" max="60" value="5" />
+        <span style="font-size:9px;color:var(--text-muted);">SEC</span>
+      </div>
+    </div>
+
+    <div class="sett-row">
+      <label>Metrics Poll Rate</label>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input class="sett-input narrow" id="metrics-poll" type="number" min="5" max="60" value="10" />
+        <span style="font-size:9px;color:var(--text-muted);">SEC</span>
+      </div>
+    </div>
+
+    <div class="sett-row">
+      <label>Request Timeout</label>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input class="sett-input narrow" id="req-timeout" type="number" min="1" max="30" value="8" />
+        <span style="font-size:9px;color:var(--text-muted);">SEC</span>
+      </div>
+    </div>
+
+    <div class="sett-row">
+      <label>Connection Status</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div id="conn-dot" style="width:8px;height:8px;border-radius:50%;background:#555;"></div>
+        <span id="conn-label" style="font-size:9px;letter-spacing:1px;color:var(--text-muted);">UNKNOWN</span>
+        <button class="sett-btn" onclick="testConnection()" style="padding:3px 10px;font-size:8px;">TEST</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NODE CONFIGURATION ──────────────────────────────────── -->
+  <div class="sett-section">
+    <div class="sett-hdr"><span class="sett-hdr-icon">🖥</span> Node Configuration</div>
+
+    <div class="sett-row" style="background:rgba(218,119,86,0.04);">
+      <label style="color:var(--orange);font-weight:700;">SPARK-BOB (DGX GB10)</label>
+      <span style="font-size:8px;color:var(--text-muted);">Primary inference node</span>
+    </div>
+
+    <div class="sett-row">
+      <label>Spark Host</label>
+      <input class="sett-input" id="spark-host" type="text" value="10.0.0.69" />
+    </div>
+
+    <div class="sett-row">
+      <label>Spark FastAPI Port</label>
+      <input class="sett-input narrow" id="spark-port" type="number" value="9010" />
+    </div>
+
+    <div class="sett-row">
+      <label>node_exporter Port</label>
+      <input class="sett-input narrow" id="spark-ne-port" type="number" value="9100" />
+    </div>
+
+    <div class="sett-row" style="background:rgba(218,119,86,0.04);margin-top:4px;">
+      <label style="color:var(--orange);font-weight:700;">LINUX-DSKTP</label>
+      <span style="font-size:8px;color:var(--text-muted);">UBNTxWINDesktop</span>
+    </div>
+
+    <div class="sett-row">
+      <label>Linux Host</label>
+      <input class="sett-input" id="linux-host" type="text" value="10.0.0.10" />
+    </div>
+
+    <div class="sett-row">
+      <label>node_exporter Port</label>
+      <input class="sett-input narrow" id="linux-ne-port" type="number" value="9100" />
+    </div>
+
+    <div class="sett-row">
+      <label>Linux Node User</label>
+      <input class="sett-input" id="linux-user" type="text" value="myroproductions" />
+    </div>
+
+    <div class="sett-row" style="background:rgba(218,119,86,0.04);margin-top:4px;">
+      <label style="color:var(--orange);font-weight:700;">MAC MINI</label>
+      <span style="font-size:8px;color:var(--text-muted);">Caddy / hosting node</span>
+    </div>
+
+    <div class="sett-row">
+      <label>Mac Mini Host</label>
+      <input class="sett-input" id="mini-host" type="text" value="10.0.0.223" />
+    </div>
+  </div>
+
+  <!-- ── METRIC THRESHOLDS ───────────────────────────────────── -->
+  <div class="sett-section">
+    <div class="sett-hdr"><span class="sett-hdr-icon">🌡</span> Metric Thresholds &amp; Alerts</div>
+
+    <div class="sett-row" style="background:rgba(218,119,86,0.04);">
+      <label style="color:var(--text-dim);">CPU Temperature</label>
+      <span style="font-size:8px;color:var(--text-muted);">warn / critical °C</span>
+    </div>
+    <div class="sett-row">
+      <label>CPU Warn Threshold</label>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input class="sett-input narrow" id="cpu-warn-temp" type="number" value="70" />
+        <span style="font-size:9px;color:var(--text-muted);">°C</span>
+      </div>
+    </div>
+    <div class="sett-row">
+      <label>CPU Critical Threshold</label>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input class="sett-input narrow" id="cpu-crit-temp" type="number" value="85" />
+        <span style="font-size:9px;color:var(--text-muted);">°C</span>
+      </div>
+    </div>
+
+    <div class="sett-row" style="background:rgba(218,119,86,0.04);margin-top:4px;">
+      <label style="color:var(--text-dim);">GPU Temperature</label>
+      <span style="font-size:8px;color:var(--text-muted);">warn / critical °C</span>
+    </div>
+    <div class="sett-row">
+      <label>GPU Warn Threshold</label>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input class="sett-input narrow" id="gpu-warn-temp" type="number" value="75" />
+        <span style="font-size:9px;color:var(--text-muted);">°C</span>
+      </div>
+    </div>
+    <div class="sett-row">
+      <label>GPU Critical Threshold</label>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input class="sett-input narrow" id="gpu-crit-temp" type="number" value="90" />
+        <span style="font-size:9px;color:var(--text-muted);">°C</span>
+      </div>
+    </div>
+
+    <div class="sett-row" style="background:rgba(218,119,86,0.04);margin-top:4px;">
+      <label style="color:var(--text-dim);">Memory</label>
+      <span style="font-size:8px;color:var(--text-muted);">% thresholds</span>
+    </div>
+    <div class="sett-row">
+      <label>RAM Warn %</label>
+      <input class="sett-input narrow" id="ram-warn-pct" type="number" value="85" />
+    </div>
+    <div class="sett-row">
+      <label>VRAM Warn %</label>
+      <input class="sett-input narrow" id="vram-warn-pct" type="number" value="90" />
+    </div>
+
+    <div class="sett-row" style="background:rgba(218,119,86,0.04);margin-top:4px;">
+      <label style="color:var(--text-dim);">Node Offline Alert</label>
+    </div>
+    <div class="sett-row">
+      <label>Alert on Node Offline</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-offline-alert" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-offline-alert">ON</span>
+      </label>
+    </div>
+    <div class="sett-row">
+      <label>Browser Notification</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-browser-notif" onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-browser-notif">OFF</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ── DASHBOARD PANELS ────────────────────────────────────── -->
+  <div class="sett-section">
+    <div class="sett-hdr"><span class="sett-hdr-icon">📊</span> Dashboard Panels</div>
+
+    <div class="sett-row">
+      <label>Show Spark Node</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-show-spark" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-show-spark">ON</span>
+      </label>
+    </div>
+    <div class="sett-row">
+      <label>Show Linux Node</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-show-linux" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-show-linux">ON</span>
+      </label>
+    </div>
+    <div class="sett-row">
+      <label>Show Containers</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-show-containers" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-show-containers">ON</span>
+      </label>
+    </div>
+    <div class="sett-row">
+      <label>Show Models</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-show-models" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-show-models">ON</span>
+      </label>
+    </div>
+    <div class="sett-row">
+      <label>Show Evaluations</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-show-evals" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-show-evals">ON</span>
+      </label>
+    </div>
+    <div class="sett-row">
+      <label>Show MCP Servers</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-show-mcp" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-show-mcp">ON</span>
+      </label>
+    </div>
+    <div class="sett-row">
+      <label>Auto-Scroll Logs</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-autoscroll" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-autoscroll">ON</span>
+      </label>
+    </div>
+    <div class="sett-row">
+      <label>Max Log Lines</label>
+      <input class="sett-input narrow" id="max-log-lines" type="number" min="20" max="500" value="100" />
+    </div>
+  </div>
+
+  <!-- ── INFERENCE & MODEL SETTINGS ─────────────────────────── -->
+  <div class="sett-section">
+    <div class="sett-hdr"><span class="sett-hdr-icon">🤖</span> Inference &amp; Model Settings</div>
+
+    <div class="sett-row">
+      <label>Default Backend</label>
+      <select class="sett-select" id="default-backend">
+        <option value="vllm">vLLM</option>
+        <option value="ollama">Ollama</option>
+        <option value="tgi">TGI</option>
+        <option value="openai">OpenAI-compat</option>
+      </select>
+    </div>
+
+    <div class="sett-row">
+      <label>Default Model</label>
+      <input class="sett-input wide" id="default-model" type="text" placeholder="e.g. meta-llama/Llama-3-8B-Instruct" />
+    </div>
+
+    <div class="sett-row">
+      <label>Inference Endpoint</label>
+      <input class="sett-input wide" id="infer-endpoint" type="text" placeholder="http://spark:9010/v1" />
+    </div>
+
+    <div class="sett-row">
+      <label>Context Window (tokens)</label>
+      <input class="sett-input narrow" id="context-len" type="number" value="4096" />
+    </div>
+
+    <div class="sett-row">
+      <label>Max Output Tokens</label>
+      <input class="sett-input narrow" id="max-tokens" type="number" value="1024" />
+    </div>
+
+    <div class="sett-row">
+      <label>Default Temperature</label>
+      <input class="sett-input narrow" id="temperature" type="number" min="0" max="2" step="0.05" value="0.7" />
+    </div>
+
+    <div class="sett-row">
+      <label>Top-P</label>
+      <input class="sett-input narrow" id="top-p" type="number" min="0" max="1" step="0.01" value="0.9" />
+    </div>
+
+    <div class="sett-row">
+      <label>Stream Responses</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-stream" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-stream">ON</span>
+      </label>
+    </div>
+
+    <div class="sett-row">
+      <label>Auto-Load Model on Start</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-autoload" onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-autoload">OFF</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ── ORCHESTRATION SETTINGS ─────────────────────────────── -->
+  <div class="sett-section">
+    <div class="sett-hdr"><span class="sett-hdr-icon">🕸</span> Orchestration Settings</div>
+
+    <div class="sett-row">
+      <label>Orchestrator Mode</label>
+      <select class="sett-select" id="orch-mode">
+        <option value="langchain">LangChain Multi-Agent</option>
+        <option value="manual">Manual Dispatch</option>
+        <option value="crewai">CrewAI</option>
+        <option value="autogen">AutoGen</option>
+      </select>
+    </div>
+
+    <div class="sett-row">
+      <label>Router Strategy</label>
+      <select class="sett-select" id="router-strategy">
+        <option value="llm">LLM-Based</option>
+        <option value="keyword">Keyword</option>
+        <option value="roundrobin">Round-Robin</option>
+      </select>
+    </div>
+
+    <div class="sett-row">
+      <label>Agent Timeout</label>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input class="sett-input narrow" id="agent-timeout" type="number" value="120" />
+        <span style="font-size:9px;color:var(--text-muted);">SEC</span>
+      </div>
+    </div>
+
+    <div class="sett-row">
+      <label>Max Parallel Agents</label>
+      <input class="sett-input narrow" id="max-agents" type="number" min="1" max="16" value="4" />
+    </div>
+
+    <div class="sett-row">
+      <label>Task Queue Limit</label>
+      <input class="sett-input narrow" id="task-queue-limit" type="number" min="1" max="100" value="20" />
+    </div>
+
+    <div class="sett-row">
+      <label>Auto-Dispatch Tasks</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-auto-dispatch" onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-auto-dispatch">OFF</span>
+      </label>
+    </div>
+
+    <div class="sett-row">
+      <label>LangChain Tracing</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-lc-trace" onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-lc-trace">OFF</span>
+      </label>
+    </div>
+
+    <div class="sett-row">
+      <label>Memory Backend</label>
+      <select class="sett-select" id="memory-backend">
+        <option value="buffer">In-Memory Buffer</option>
+        <option value="vector">Vector Store</option>
+        <option value="redis">Redis</option>
+        <option value="postgres">PostgreSQL</option>
+      </select>
+    </div>
+
+    <div class="sett-row">
+      <label>Retry on Failure</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-retry" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-retry">ON</span>
+      </label>
+    </div>
+
+    <div class="sett-row">
+      <label>Max Retries</label>
+      <input class="sett-input narrow" id="max-retries" type="number" min="0" max="10" value="3" />
+    </div>
+  </div>
+
+  <!-- ── PIPELINE & DATAGEN SETTINGS ────────────────────────── -->
+  <div class="sett-section">
+    <div class="sett-hdr"><span class="sett-hdr-icon">⚗</span> Pipeline &amp; Data Gen</div>
+
+    <div class="sett-row">
+      <label>Default Pipeline</label>
+      <select class="sett-select" id="default-pipeline">
+        <option value="irs990">IRS 990 ETL</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+
+    <div class="sett-row">
+      <label>Output Format</label>
+      <select class="sett-select" id="output-format">
+        <option value="json">JSON</option>
+        <option value="csv">CSV</option>
+        <option value="parquet">Parquet</option>
+        <option value="jsonl">JSONL</option>
+      </select>
+    </div>
+
+    <div class="sett-row">
+      <label>Data Output Path</label>
+      <input class="sett-input wide" id="data-output-path" type="text" placeholder="/data/output" />
+    </div>
+
+    <div class="sett-row">
+      <label>Batch Size</label>
+      <input class="sett-input narrow" id="batch-size" type="number" value="32" />
+    </div>
+
+    <div class="sett-row">
+      <label>Parallel Workers</label>
+      <input class="sett-input narrow" id="parallel-workers" type="number" min="1" max="32" value="4" />
+    </div>
+
+    <div class="sett-row">
+      <label>Auto-Retry Failed Jobs</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-job-retry" checked onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-job-retry">ON</span>
+      </label>
+    </div>
+
+    <div class="sett-row">
+      <label>Save Intermediate Steps</label>
+      <label class="sett-toggle">
+        <input type="checkbox" id="tog-save-steps" onchange="saveSettings()" />
+        <span class="sett-toggle-track"></span>
+        <span class="sett-toggle-label" id="lbl-save-steps">OFF</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ── MAINTENANCE ─────────────────────────────────────────── -->
+  <div class="sett-section">
+    <div class="sett-hdr"><span class="sett-hdr-icon">🔧</span> Maintenance</div>
+
+    <div class="sett-row">
+      <label>Clear Action Log</label>
+      <button class="sett-btn" onclick="maintAction('clear-log')">CLEAR LOG</button>
+    </div>
+
+    <div class="sett-row">
+      <label>Clear Terminal History</label>
+      <button class="sett-btn" onclick="maintAction('clear-term')">CLEAR TERMINAL</button>
+    </div>
+
+    <div class="sett-row">
+      <label>Export Settings</label>
+      <button class="sett-btn success" onclick="exportSettings()">EXPORT JSON</button>
+    </div>
+
+    <div class="sett-row">
+      <label>Import Settings</label>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importSettings(event)" />
+        <button class="sett-btn" onclick="document.getElementById('import-file').click()">IMPORT JSON</button>
+      </div>
+    </div>
+
+    <div class="sett-row">
+      <label>Restart FastAPI Service</label>
+      <button class="sett-btn danger" onclick="confirmAction('RESTART FASTAPI', '/api/system/restart')">RESTART API</button>
+    </div>
+
+    <div class="sett-row">
+      <label>Restart vLLM</label>
+      <button class="sett-btn danger" onclick="triggerAction('RESTART VLLM')">RESTART VLLM</button>
+    </div>
+
+    <div class="sett-row">
+      <label>Restart LLM Backend</label>
+      <button class="sett-btn danger" onclick="triggerAction('RESTART LLM')">RESTART LLM</button>
+    </div>
+
+    <div class="sett-row">
+      <label style="color:#e05030;font-weight:700;">Reset All Settings</label>
+      <button class="sett-btn danger" onclick="resetAllSettings()">⚠ FACTORY RESET</button>
+    </div>
+  </div>
+
+  <!-- ── ABOUT ───────────────────────────────────────────────── -->
+  <div class="sett-section">
+    <div class="sett-hdr"><span class="sett-hdr-icon">ℹ</span> About</div>
+
+    <div class="sett-about-grid">
+      <div class="sett-row" style="border-right:1px solid var(--border-dim);">
+        <label>Version</label>
+        <span style="font-size:10px;color:var(--orange);letter-spacing:1px;">BCOM-C v0.1</span>
+      </div>
+      <div class="sett-row">
+        <label>Build Date</label>
+        <span style="font-size:10px;color:var(--text-dim);" id="about-build-date">2026-02-28</span>
+      </div>
+      <div class="sett-row" style="border-right:1px solid var(--border-dim);">
+        <label>API Host</label>
+        <span style="font-size:10px;color:var(--text-dim);">spark:9010</span>
+      </div>
+      <div class="sett-row">
+        <label>Dashboard URL</label>
+        <span style="font-size:9px;color:var(--text-muted);">bcom.myroproductions.com</span>
+      </div>
+      <div class="sett-row" style="border-right:1px solid var(--border-dim);">
+        <label>Inference Node</label>
+        <span style="font-size:10px;color:var(--text-dim);">DGX Spark GB10</span>
+      </div>
+      <div class="sett-row">
+        <label>Hosting Node</label>
+        <span style="font-size:10px;color:var(--text-dim);">Mac Mini M4</span>
+      </div>
+      <div class="sett-row" style="border-right:1px solid var(--border-dim);">
+        <label>Metrics Node</label>
+        <span style="font-size:10px;color:var(--text-dim);">UBNTxWINDesktop</span>
+      </div>
+      <div class="sett-row">
+        <label>Caddy + Cloudflare</label>
+        <span style="font-size:10px;color:#2ecc71;">ACTIVE</span>
+      </div>
+    </div>
+
+    <div class="sett-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="https://github.com/Myro-Productions-ORG/BCOM-C" target="_blank"
+           style="font-size:8px;color:var(--orange);letter-spacing:1px;text-decoration:none;">
+          ↗ GITHUB REPO
+        </a>
+        <span style="font-size:8px;color:var(--border-dim);">|</span>
+        <a href="https://bcom.myroproductions.com" target="_blank"
+           style="font-size:8px;color:var(--orange);letter-spacing:1px;text-decoration:none;">
+          ↗ LIVE DASHBOARD
+        </a>
+        <span style="font-size:8px;color:var(--border-dim);">|</span>
+        <a href="../index.html"
+           style="font-size:8px;color:var(--orange);letter-spacing:1px;text-decoration:none;">
+          ← BACK TO DASHBOARD
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .sett-layout -->
+
+<!-- SAVE BAR -->
+<div class="sett-save-bar">
+  <span class="sett-save-msg" id="save-msg">✓ SETTINGS SAVED</span>
+  <button class="sett-btn" onclick="loadSettings()">REVERT</button>
+  <button class="sett-btn success" onclick="saveSettings(true)">SAVE SETTINGS</button>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span>BOB-AI // BCOM-C v0.1 — SETTINGS</span>
+  <span id="footer-date"></span>
+  <span>CONFIGURE &amp; MANAGE</span>
+</div>
+
+<script src="../assets/js/bcom.js?v=5"></script>
+<script>
+
+/* ── Theme button state sync ─────────────────── */
+function syncThemeBtns() {
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  document.getElementById('btn-dark').classList.toggle('active',  cur === 'dark');
+  document.getElementById('btn-light').classList.toggle('active', cur === 'light');
+}
+
+function applyTheme(t) {
+  setTheme(t);
+  syncThemeBtns();
+}
+
+/* ── Toggle label sync ───────────────────────── */
+function syncToggleLabel(inputId, labelId) {
+  const cb  = document.getElementById(inputId);
+  const lbl = document.getElementById(labelId);
+  if (cb && lbl) lbl.textContent = cb.checked ? 'ON' : 'OFF';
+}
+
+const TOGGLES = [
+  ['tog-compact','lbl-compact'],
+  ['tog-animate','lbl-animate'],
+  ['tog-offline-alert','lbl-offline-alert'],
+  ['tog-browser-notif','lbl-browser-notif'],
+  ['tog-show-spark','lbl-show-spark'],
+  ['tog-show-linux','lbl-show-linux'],
+  ['tog-show-containers','lbl-show-containers'],
+  ['tog-show-models','lbl-show-models'],
+  ['tog-show-evals','lbl-show-evals'],
+  ['tog-show-mcp','lbl-show-mcp'],
+  ['tog-autoscroll','lbl-autoscroll'],
+  ['tog-stream','lbl-stream'],
+  ['tog-autoload','lbl-autoload'],
+  ['tog-auto-dispatch','lbl-auto-dispatch'],
+  ['tog-lc-trace','lbl-lc-trace'],
+  ['tog-retry','lbl-retry'],
+  ['tog-job-retry','lbl-job-retry'],
+  ['tog-save-steps','lbl-save-steps'],
+];
+
+function syncAllLabels() { TOGGLES.forEach(([i,l]) => syncToggleLabel(i,l)); }
+
+document.querySelectorAll('.sett-toggle input[type="checkbox"]').forEach(cb => {
+  cb.addEventListener('change', function() {
+    const lbl = this.id.replace('tog-','lbl-');
+    syncToggleLabel(this.id, lbl);
+  });
+});
+
+/* ── Settings persistence ────────────────────── */
+const SETT_KEY = 'bcom-settings';
+
+const FIELDS = [
+  'api-base-url','api-key','poll-rate','metrics-poll','req-timeout',
+  'spark-host','spark-port','spark-ne-port','linux-host','linux-ne-port',
+  'linux-user','mini-host',
+  'cpu-warn-temp','cpu-crit-temp','gpu-warn-temp','gpu-crit-temp',
+  'ram-warn-pct','vram-warn-pct','max-log-lines',
+  'default-backend','default-model','infer-endpoint','context-len',
+  'max-tokens','temperature','top-p',
+  'orch-mode','router-strategy','agent-timeout','max-agents',
+  'task-queue-limit','memory-backend','max-retries',
+  'default-pipeline','output-format','data-output-path',
+  'batch-size','parallel-workers','clock-format',
+];
+
+const TOGGLE_IDS = TOGGLES.map(([i]) => i);
+
+function saveSettings(showMsg) {
+  const obj = {};
+  FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) obj[id] = el.value;
+  });
+  TOGGLE_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) obj[id] = el.checked;
+  });
+  obj['accent-color'] = document.getElementById('accent-color')?.value;
+  localStorage.setItem(SETT_KEY, JSON.stringify(obj));
+  syncAllLabels();
+  if (showMsg) {
+    const msg = document.getElementById('save-msg');
+    if (msg) { msg.classList.add('show'); setTimeout(() => msg.classList.remove('show'), 2500); }
+  }
+}
+
+function loadSettings() {
+  const raw = localStorage.getItem(SETT_KEY);
+  if (!raw) return;
+  try {
+    const obj = JSON.parse(raw);
+    FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && obj[id] !== undefined) el.value = obj[id];
+    });
+    TOGGLE_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && obj[id] !== undefined) el.checked = obj[id];
+    });
+    if (obj['accent-color']) {
+      const ac = document.getElementById('accent-color');
+      if (ac) { ac.value = obj['accent-color']; previewAccent(obj['accent-color']); }
+    }
+    syncAllLabels();
+  } catch(_) {}
+}
+
+function resetAllSettings() {
+  if (!confirm('Reset all settings to defaults?')) return;
+  localStorage.removeItem(SETT_KEY);
+  location.reload();
+}
+
+/* ── Accent color preview ────────────────────── */
+function previewAccent(hex) {
+  document.documentElement.style.setProperty('--orange', hex);
+  const hexEl = document.getElementById('accent-hex');
+  if (hexEl) hexEl.textContent = hex.toUpperCase();
+}
+
+function resetAccent() {
+  const def = '#DA7756';
+  document.getElementById('accent-color').value = def;
+  previewAccent(def);
+}
+
+/* ── Connection test ─────────────────────────── */
+async function testConnection() {
+  const dot   = document.getElementById('conn-dot');
+  const label = document.getElementById('conn-label');
+  if (dot) dot.style.background = '#f39c12';
+  if (label) label.textContent = 'TESTING...';
+  try {
+    const r = await fetch('/api/metrics', { cache: 'no-store', signal: AbortSignal.timeout(5000) });
+    if (r.ok) {
+      if (dot)   dot.style.background   = '#2ecc71';
+      if (label) label.textContent = 'ONLINE';
+    } else {
+      throw new Error('HTTP ' + r.status);
+    }
+  } catch(e) {
+    if (dot)   dot.style.background   = '#e74c3c';
+    if (label) label.textContent = 'OFFLINE';
+  }
+}
+
+/* ── Maintenance actions ─────────────────────── */
+function maintAction(action) {
+  if (action === 'clear-log') {
+    localStorage.removeItem('bcom-log');
+    alert('Log cleared. Reload the dashboard to see changes.');
+  } else if (action === 'clear-term') {
+    localStorage.removeItem('bcom-terminal');
+    alert('Terminal history cleared.');
+  }
+}
+
+function confirmAction(label, endpoint) {
+  if (!confirm('Are you sure you want to: ' + label + '?')) return;
+  fetch(endpoint, { method: 'POST' }).catch(()=>{});
+  alert(label + ' dispatched.');
+}
+
+/* ── Export / Import ─────────────────────────── */
+function exportSettings() {
+  saveSettings();
+  const raw  = localStorage.getItem(SETT_KEY) || '{}';
+  const blob = new Blob([JSON.stringify(JSON.parse(raw), null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'bcom-settings.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importSettings(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const obj = JSON.parse(e.target.result);
+      localStorage.setItem(SETT_KEY, JSON.stringify(obj));
+      loadSettings();
+      const msg = document.getElementById('save-msg');
+      if (msg) { msg.textContent = '✓ SETTINGS IMPORTED'; msg.classList.add('show'); setTimeout(() => { msg.classList.remove('show'); msg.textContent = '✓ SETTINGS SAVED'; }, 2500); }
+    } catch(_) { alert('Invalid settings file.'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ── triggerAction (from bcom.js) ────────────── */
+function triggerAction(name) {
+  alert('Dispatching: ' + name + '\n\nThis will POST to /api/action with { action: "' + name + '" }');
+}
+
+/* ── Init ────────────────────────────────────── */
+syncThemeBtns();
+loadSettings();
+syncAllLabels();
+
+/* Auto-run connection test on load */
+setTimeout(testConnection, 800);
+
+</script>
+</body>
+</html>
