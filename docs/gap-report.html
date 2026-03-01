@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BCOM-C vs Ross — Feature Gap Report</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050a0f;--bg-card:#0a0f18;--bg-row:#0d1520;
+  --border:rgba(255,255,255,.07);--border-hi:rgba(255,255,255,.14);
+  --fg:#bcc8d8;--fg-dim:#4a5a6a;--fg-bright:#e8f0f8;
+  --green:#00cc66;--red:#ff4455;--amber:#ffaa00;
+  --blue:#3388ff;--cyan:#00e8ff;--purple:#aa66ff;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.6}
+body{padding:40px 48px}
+
+h1{font-size:22px;font-weight:300;color:var(--fg-bright);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+h2{font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim);margin:48px 0 20px}
+h3{font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);margin:28px 0 12px}
+
+.subtitle{font-size:12px;color:var(--fg-dim);letter-spacing:.1em;margin-bottom:40px}
+.ts{font-size:11px;color:var(--fg-dim);margin-top:4px;font-family:var(--mono)}
+
+/* Summary score row */
+.summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:40px}
+.sum-card{border:1px solid var(--border);background:var(--bg-card);padding:20px 24px}
+.sum-card .label{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--fg-dim)}
+.sum-card .val{font-size:36px;font-weight:300;line-height:1.1;margin-top:6px}
+.sum-card .sub{font-size:10px;color:var(--fg-dim);margin-top:4px}
+
+/* Priority table */
+.gap-table{width:100%;border-collapse:collapse;margin-bottom:32px}
+.gap-table th{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--fg-dim);padding:10px 14px;text-align:left;border-bottom:2px solid var(--border-hi);white-space:nowrap}
+.gap-table td{padding:10px 14px;font-size:12px;vertical-align:top;border-bottom:1px solid var(--border)}
+.gap-table tbody tr:hover{background:rgba(0,230,255,.02)}
+
+.badge{display:inline-block;font-size:9px;padding:2px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);white-space:nowrap}
+.badge.p1{color:#ff2244;border:1px solid rgba(255,34,68,.4);background:rgba(255,34,68,.07)}
+.badge.p2{color:#ffaa00;border:1px solid rgba(255,170,0,.4);background:rgba(255,170,0,.07)}
+.badge.p3{color:#4488ff;border:1px solid rgba(68,136,255,.4);background:rgba(68,136,255,.07)}
+.badge.missing{color:#ff4455;border:1px solid rgba(255,68,85,.35);background:rgba(255,68,85,.06)}
+.badge.partial{color:#ffaa00;border:1px solid rgba(255,170,0,.35);background:rgba(255,170,0,.06)}
+.badge.ok{color:#00cc66;border:1px solid rgba(0,204,102,.35);background:rgba(0,204,102,.06)}
+.badge.page-miss{color:#aa66ff;border:1px solid rgba(170,102,255,.4);background:rgba(170,102,255,.07)}
+
+.tag{display:inline-block;font-size:9px;font-family:var(--mono);padding:1px 6px;border:1px solid var(--border);color:var(--fg-dim);margin:0 2px 2px 0;border-radius:2px}
+.tag.api{border-color:rgba(0,230,255,.25);color:rgba(0,230,255,.7)}
+.tag.fe{border-color:rgba(170,102,255,.25);color:rgba(170,102,255,.7)}
+.tag.chart{border-color:rgba(0,204,102,.25);color:rgba(0,204,102,.7)}
+
+.page-section{border:1px solid var(--border);background:var(--bg-card);margin-bottom:24px}
+.page-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.25)}
+.page-header .name{font-family:var(--mono);font-size:12px;color:var(--fg-bright)}
+.page-header .sizes{font-size:10px;color:var(--fg-dim)}
+.page-body{padding:16px 20px}
+
+.feat-row{display:flex;align-items:flex-start;gap:12px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.feat-row:last-child{border-bottom:none}
+.feat-name{flex:1;font-size:12px;color:var(--fg)}
+.feat-status{width:80px;text-align:right;flex-shrink:0}
+.feat-note{width:300px;flex-shrink:0;font-size:11px;color:var(--fg-dim);line-height:1.5}
+
+.api-block{font-family:var(--mono);font-size:10px;color:rgba(0,230,255,.6);background:rgba(0,20,30,.5);border:1px solid rgba(0,230,255,.08);padding:10px 14px;margin:10px 0;line-height:1.8}
+.api-block span.m{color:rgba(255,68,85,.7)}
+.api-block span.ok{color:rgba(0,204,102,.7)}
+
+.divider{height:1px;background:var(--border-hi);margin:32px 0}
+
+footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padding-top:20px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<h1>BCOM-C ← → SPARK MISSION CONTROL</h1>
+<div class="subtitle">FEATURE GAP ANALYSIS &nbsp;·&nbsp; Generated 2026-03-01 &nbsp;·&nbsp; <span style="color:var(--green)">Updated 2026-03-01</span></div>
+<div class="ts">Ross's dashboard @ 192.168.3.30:9010 &nbsp;|&nbsp; BCOM-C @ 10.0.0.223 (Mac Mini)</div>
+
+<h2>Executive Summary</h2>
+<div class="summary-grid">
+  <div class="sum-card">
+    <div class="label">Pages in Ross</div>
+    <div class="val" style="color:var(--cyan)">8</div>
+    <div class="sub">dashboard, pipelines, pipeline detail, datagen list, datagen run detail, datasets, models, reports</div>
+  </div>
+  <div class="sum-card">
+    <div class="label">Pages in BCOM-C</div>
+    <div class="val" style="color:var(--blue)">7</div>
+    <div class="sub">index, pipeline, data-gen, reports, resources, settings, orchestrator</div>
+  </div>
+  <div class="sum-card">
+    <div class="label">Pages Missing Entirely</div>
+    <div class="val" style="color:var(--red)">3</div>
+    <div class="sub">datagen run detail, datasets, models/leaderboard</div>
+  </div>
+  <div class="sum-card">
+    <div class="label">Missing API Endpoints</div>
+    <div class="val" style="color:var(--amber)">24+</div>
+    <div class="sub">coordinator, datagen monitor, model-registry, finetune, reports endpoints</div>
+  </div>
+  <div class="sum-card" style="border-color:rgba(0,204,102,.25);background:rgba(0,204,102,.04)">
+    <div class="label" style="color:var(--green)">Gaps Closed This Session</div>
+    <div class="val" style="color:var(--green)">2</div>
+    <div class="sub">Live Stream worker cards (P1 #1) · Pipeline finetune visibility (fake sim removed)</div>
+  </div>
+</div>
+
+<h2>Priority Gap List</h2>
+<table class="gap-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Priority</th>
+      <th>Feature</th>
+      <th>Page / Location</th>
+      <th>Ross Has</th>
+      <th>BCOM-C Has</th>
+      <th>Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><span class="badge p1">P1 CRITICAL</span></td>
+      <td><strong>Live Generation Stream</strong> — per-slot worker cards showing tok/s + partial text as it generates</td>
+      <td>datagen run detail</td>
+      <td>✓ Full SSE stream + slot cards (spark01 slot 01–08, spark02, yori, vlad)</td>
+      <td><span class="badge ok">DONE</span> Worker card grid + SSE stream (<code style="font-size:10px">/api/runs/{id}/stream</code>) · tok/s EMA · partial text snippet · batch 1–18 workers · cancel per-run</td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><span class="badge p1">P1 CRITICAL</span></td>
+      <td><strong>Q&A History Feed</strong> — completed pairs scrolling in with source, difficulty, grounding, full Q+A + citations</td>
+      <td>datagen run detail</td>
+      <td>✓ /api/datagen/monitor/qa?limit=10 polling, scrollable feed</td>
+      <td><span class="badge missing">MISSING</span></td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><span class="badge p1">P1 CRITICAL</span></td>
+      <td><strong>Datagen Run Detail Page</strong> — dedicated URL per datagen job with full live monitoring</td>
+      <td>/datagen-run?id=…</td>
+      <td>✓ Full page with SSE, analytics, job controls</td>
+      <td><span class="badge page-miss">PAGE MISSING</span></td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><span class="badge p1">P1 CRITICAL</span></td>
+      <td><strong>Coordinator Job System</strong> — multi-node job dispatch, add/remove/pause/resume nodes on running jobs</td>
+      <td>datagen run detail</td>
+      <td>✓ /api/coordinator/jobs/active/add-node, /pause, /resume</td>
+      <td><span class="badge missing">MISSING</span> BCOM uses single /api/jobs/ (no coordinator)</td>
+      <td><span class="tag api">API</span><span class="tag fe">FE</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><span class="badge p1">P1 CRITICAL</span></td>
+      <td><strong>Datasets Page</strong> — list + hero stats + grounding distribution bars + detail slide-out + provenance chain</td>
+      <td>/datasets</td>
+      <td>✓ Full datasets page with Chart.js, slide-out panel, provenance</td>
+      <td><span class="badge page-miss">PAGE MISSING</span></td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><span class="badge p2">P2 HIGH</span></td>
+      <td><strong>Datagen Analytics Charts</strong> — Node Constellation Radar, Quality Signal Matrix, Difficulty Spectrum, Service Completion Waterfall, Throughput Heatmap</td>
+      <td>datagen run detail</td>
+      <td>✓ 5 distinct Chart.js charts (radar + line + bar + scatter)</td>
+      <td><span class="badge missing">MISSING</span> BCOM has no charts on data-gen.html</td>
+      <td><span class="tag chart">CHART</span><span class="tag fe">FE</span></td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td><span class="badge p2">P2 HIGH</span></td>
+      <td><strong>Service Queue / Backlog Panel</strong> — shows services awaiting generation with queue depth</td>
+      <td>datagen run detail</td>
+      <td>✓ /api/datagen/monitor/service-queue polling</td>
+      <td><span class="badge missing">MISSING</span></td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td><span class="badge p2">P2 HIGH</span></td>
+      <td><strong>Models / Leaderboard Page</strong> — full model registry with leaderboard, lineage, compare, Bedrock library tabs</td>
+      <td>/models</td>
+      <td>✓ 5-tab model page with filter dropdowns</td>
+      <td><span class="badge partial">PARTIAL</span> resources.html shows model list but no leaderboard/lineage/compare/Bedrock tabs</td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td><span class="badge p2">P2 HIGH</span></td>
+      <td><strong>Pipeline Detail — Training Loss + Pass Rate Charts</strong></td>
+      <td>pipeline detail</td>
+      <td>✓ Chart.js line charts inline in pipeline detail view</td>
+      <td><span class="badge missing">MISSING</span> BCOM pipeline.html has no charts at all</td>
+      <td><span class="tag chart">CHART</span><span class="tag fe">FE</span></td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td><span class="badge p2">P2 HIGH</span></td>
+      <td><strong>Pipeline Detail — 6-Step Flow Visual</strong> — Evaluate → Analyze → Generate → Fine-Tune → Deploy → Re-Eval with per-step status badges</td>
+      <td>pipeline detail</td>
+      <td>✓ Visual step-flow with status per step</td>
+      <td><span class="badge missing">MISSING</span></td>
+      <td><span class="tag fe">FE</span></td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td><span class="badge p2">P2 HIGH</span></td>
+      <td><strong>Pipeline Detail — Iteration History Table</strong> — each loop iteration with eval score, pass rate, dataset count</td>
+      <td>pipeline detail</td>
+      <td>✓ Full iteration history table</td>
+      <td><span class="badge missing">MISSING</span></td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td><span class="badge p2">P2 HIGH</span></td>
+      <td><strong>Reports — Model Leaderboard</strong> — all evaluated models ranked by average score with suite filter</td>
+      <td>/reports</td>
+      <td>✓ Sortable leaderboard by suite</td>
+      <td><span class="badge missing">MISSING</span> BCOM reports shows evals/runs/training tables only</td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td><span class="badge p2">P2 HIGH</span></td>
+      <td><strong>Reports — Per-Test Heatmap</strong> — pass/fail matrix per model × test case</td>
+      <td>/reports</td>
+      <td>✓ Full heatmap using scatter chart type</td>
+      <td><span class="badge missing">MISSING</span></td>
+      <td><span class="tag chart">CHART</span><span class="tag fe">FE</span></td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td><span class="badge p2">P2 HIGH</span></td>
+      <td><strong>Reports — Fine-Tune History + LoRA Config</strong></td>
+      <td>/reports</td>
+      <td>✓ Training loss chart + LoRA rank/epochs/lr display</td>
+      <td><span class="badge missing">MISSING</span></td>
+      <td><span class="tag chart">CHART</span><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td><span class="badge p3">P3 MEDIUM</span></td>
+      <td><strong>Reports — Cross-Suite Model×Suite Matrix</strong></td>
+      <td>/reports</td>
+      <td>✓ Full matrix table</td>
+      <td><span class="badge missing">MISSING</span></td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td><span class="badge p3">P3 MEDIUM</span></td>
+      <td><strong>Reports — Pipeline Timeline</strong> — eval/generate/fine-tune cycles on timeline axis</td>
+      <td>/reports</td>
+      <td>✓ /api/reports/pipeline-timeline</td>
+      <td><span class="badge missing">MISSING</span></td>
+      <td><span class="tag chart">CHART</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>17</td>
+      <td><span class="badge p3">P3 MEDIUM</span></td>
+      <td><strong>Dashboard WebSocket — Realtime Updates</strong></td>
+      <td>index.html</td>
+      <td>✓ WebSocket on main dashboard + datagen list for live status updates</td>
+      <td><span class="badge missing">MISSING</span> BCOM dashboard does not poll/stream</td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td><span class="badge p3">P3 MEDIUM</span></td>
+      <td><strong>Datagen List — Named Run Cards with Progress Bar</strong></td>
+      <td>/datagen-runs</td>
+      <td>✓ Cards with run name, services X/Y, examples count, elapsed, progress bar, status badge</td>
+      <td><span class="badge missing">MISSING</span> BCOM data-gen.html is a job submission form, not a run list</td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td><span class="badge p3">P3 MEDIUM</span></td>
+      <td><strong>Inference / Test Endpoint UI</strong></td>
+      <td>dashboard (index)</td>
+      <td>✓ /api/inference/test panel on main dashboard</td>
+      <td><span class="badge missing">MISSING</span></td>
+      <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td><span class="badge p3">P3 MEDIUM</span></td>
+      <td><strong>Training Analyze + Recommendations</strong></td>
+      <td>dashboard (index)</td>
+      <td>✓ /api/training/analyze, /api/training/recommendations</td>
+      <td><span class="badge missing">MISSING</span></td>
+      <td><span class="tag api">API</span><span class="tag fe">FE</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="divider"></div>
+
+<h2>Page-by-Page Analysis</h2>
+
+<!-- DATAGEN RUN DETAIL -->
+<div class="page-section">
+  <div class="page-header">
+    <div class="name">datagen run detail</div>
+    <div class="sizes">Ross: 159 KB &nbsp;|&nbsp; BCOM equivalent: data-gen.html 16 KB</div>
+  </div>
+  <div class="page-body">
+    <p style="font-size:12px;color:var(--fg-dim);margin-bottom:16px">This is the biggest gap. Ross's datagen run detail page is a full live monitoring console. BCOM's data-gen.html is a static job submission form with no realtime output at all.</p>
+    <div class="feat-row"><div class="feat-name">Live Generation Stream via SSE (<code style="font-size:10px">/api/runs/{id}/stream</code>)</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">Worker card grid live on data-gen.html — per-card tok/s (EMA delta), partial text (snippet field), iter counter, status badge, CANCEL button. Batch launch 1–18 workers with 300ms stagger. Uses <code style="font-size:10px">node_update / status / stream_end</code> SSE events. Done/error cards persist; CLEAR DONE sweeps them.</div></div>
+    <div class="feat-row"><div class="feat-name">Q&A History Feed (<code style="font-size:10px">/api/datagen/monitor/qa</code>)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Completed Q&A pairs appear with service name, difficulty, grounding level, full question and answer with source citations</div></div>
+    <div class="feat-row"><div class="feat-name">Service Queue Panel (<code style="font-size:10px">/api/datagen/monitor/service-queue</code>)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Shows services waiting for generation workers, queue depth and priority order</div></div>
+    <div class="feat-row"><div class="feat-name">Node Constellation Radar Chart</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Chart.js radar showing per-node throughput, quality, and grounding performance simultaneously</div></div>
+    <div class="feat-row"><div class="feat-name">Quality Signal Matrix</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Grid heatmap of quality metrics across nodes and service categories</div></div>
+    <div class="feat-row"><div class="feat-name">Difficulty Spectrum Chart</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Distribution of easy/medium/hard examples being generated across the run</div></div>
+    <div class="feat-row"><div class="feat-name">Service Completion Waterfall</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Waterfall/bar chart of service completion order and count over time</div></div>
+    <div class="feat-row"><div class="feat-name">Throughput Heatmap (time × node)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Scatter/heatmap showing generation rate per node over time</div></div>
+    <div class="feat-row"><div class="feat-name">Live Telemetry section</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Combined telemetry panel with total tok/s, pairs/min, and time-remaining estimate</div></div>
+    <div class="feat-row"><div class="feat-name">Add / Remove node from running job</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/coordinator/jobs/active/add-node allows hot-adding compute mid-run</div></div>
+    <div class="feat-row"><div class="feat-name">Pause / Resume individual node</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Per-node pause/resume controls while job continues on other nodes</div></div>
+    <div class="feat-row"><div class="feat-name">Job config display (services, examples-per-svc, nodes)</div><div class="feat-status"><span class="badge ok">PARTIAL</span></div><div class="feat-note">BCOM has job submission form; Ross shows live config summary at top of detail view</div></div>
+  </div>
+</div>
+
+<!-- DATASETS PAGE -->
+<div class="page-section">
+  <div class="page-header">
+    <div class="name">/datasets page</div>
+    <div class="sizes">Ross: 156 KB &nbsp;|&nbsp; BCOM equivalent: <em>does not exist</em></div>
+  </div>
+  <div class="page-body">
+    <p style="font-size:12px;color:var(--fg-dim);margin-bottom:16px">Entire page missing from BCOM-C. Ross's datasets page provides a permanent catalog of all generated training data with rich drill-down capability.</p>
+    <div class="feat-row"><div class="feat-name">Hero stats bar (total datasets, examples, high/medium/low confidence)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note"></div></div>
+    <div class="feat-row"><div class="feat-name">Filterable datasets table (status + type dropdowns)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Columns: dataset name/type, status badge, example count, services, grounding bar, node pills, created date</div></div>
+    <div class="feat-row"><div class="feat-name">Stacked grounding distribution bar per row (high/medium/low)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">4px inline bar in each table row showing confidence breakdown proportionally</div></div>
+    <div class="feat-row"><div class="feat-name">Per-dataset node pills (color-coded by node name hash)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Each worker node that contributed examples shown as a colored pill</div></div>
+    <div class="feat-row"><div class="feat-name">Dataset detail slide-out panel</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Click row → slide-in panel showing full stats: examples, services, grounding breakdown, by-service/node/model distribution bars</div></div>
+    <div class="feat-row"><div class="feat-name">Provenance chain display (docs → nodes → dataset → finetune → models)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/datasets/{id}/provenance endpoint shows full lineage chain</div></div>
+    <div class="feat-row"><div class="feat-name">Sample examples viewer (first 20 Q&A pairs from dataset)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/datasets/{id}/examples?limit=20 with question/difficulty/grounding display</div></div>
+    <div class="feat-row"><div class="feat-name">Service distribution bar chart (Chart.js)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Top 20 services by example count, horizontal bar</div></div>
+    <div class="feat-row"><div class="feat-name">Grounding confidence doughnut chart</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Aggregate high/medium/low breakdown across all datasets</div></div>
+  </div>
+</div>
+
+<!-- MODELS PAGE -->
+<div class="page-section">
+  <div class="page-header">
+    <div class="name">/models page (leaderboard)</div>
+    <div class="sizes">Ross: 95 KB &nbsp;|&nbsp; BCOM equivalent: resources.html 20 KB (model registry only)</div>
+  </div>
+  <div class="page-body">
+    <p style="font-size:12px;color:var(--fg-dim);margin-bottom:16px">BCOM has a model list in resources.html but it only shows running models. Ross has a full model intelligence center with 5 tabs.</p>
+    <div class="feat-row"><div class="feat-name">Model Registry tab (with type/judge/suite/backend filter dropdowns)</div><div class="feat-status"><span class="badge partial">PARTIAL</span></div><div class="feat-note">BCOM shows model list but no filter tabs or per-model pass rate history</div></div>
+    <div class="feat-row"><div class="feat-name">Leaderboard tab — ranked by avg score across all evals</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Sortable table of all evaluated models with pass rate, suite, judge, backend columns</div></div>
+    <div class="feat-row"><div class="feat-name">Lineage tab — shows base→finetune→deploy chain for each model</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/model-registry provides full lineage data per model</div></div>
+    <div class="feat-row"><div class="feat-name">Compare tab — side-by-side model performance comparison</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Select 2 models, compare eval scores, pass rates, generation times</div></div>
+    <div class="feat-row"><div class="feat-name">Bedrock Library tab — Anthropic deployed models</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Separate tab for Claude/Bedrock models used as judges or vlad-bedrock workers</div></div>
+    <div class="feat-row"><div class="feat-name">Model detail slide-out panel (click row)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Detailed view: full eval history, training data source, LoRA config, deployment status</div></div>
+    <div class="feat-row"><div class="feat-name">Hero stats: Total Models, Best Pass Rate, Bedrock Deployed, Fine-Tune Jobs, Total Evals</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">BCOM has no aggregate model stats bar</div></div>
+  </div>
+</div>
+
+<!-- PIPELINE DETAIL -->
+<div class="page-section">
+  <div class="page-header">
+    <div class="name">pipeline detail</div>
+    <div class="sizes">Ross: 139 KB &nbsp;|&nbsp; BCOM pipeline.html: 36 KB</div>
+  </div>
+  <div class="page-body">
+    <div class="feat-row"><div class="feat-name">6-step pipeline flow visual (Eval → Analyze → Generate → Fine-Tune → Deploy → Re-Eval)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Visual flow diagram with per-step status badge and elapsed time</div></div>
+    <div class="feat-row"><div class="feat-name">Training Loss chart (per iteration)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Line chart showing loss curve for each fine-tune job in this pipeline run</div></div>
+    <div class="feat-row"><div class="feat-name">Pass Rate by Iteration chart</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Line chart showing eval pass rate improving across pipeline iterations</div></div>
+    <div class="feat-row"><div class="feat-name">Iteration History table (iteration N → score → pass rate → dataset examples → status)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Full per-iteration breakdown, each row shows what happened in that loop</div></div>
+    <div class="feat-row"><div class="feat-name">Live output / step log panel</div><div class="feat-status"><span class="badge partial">PARTIAL</span></div><div class="feat-note">BCOM orchestrator.html has a STEP LOG section via SSE — pipeline.html itself does not</div></div>
+    <div class="feat-row" style="background:rgba(0,204,102,.03)"><div class="feat-name" style="color:var(--green)">&#10003; Active Finetune Banner (fake sim removed)</div><div class="feat-status"><span class="badge ok">FIXED</span></div><div class="feat-note">pipeline.html was 100% fake animation. Now polls <code style="font-size:10px">/api/finetune/</code> + <code style="font-size:10px">/api/jobs/</code> every 8s — shows real run ID, model, epoch progress, elapsed. Deploy poll guarded to prevent banner-flip conflict. Zombie DB records (5×) cleaned.</div></div>
+    <div class="feat-row"><div class="feat-name">Pipeline config display (model, backend, node, suite, target score, max iter, LoRA, LR)</div><div class="feat-status"><span class="badge partial">PARTIAL</span></div><div class="feat-note">BCOM pipeline.html has form fields for these — Ross shows them as a read-only config card at top of detail view</div></div>
+    <div class="feat-row"><div class="feat-name">Multi-node cluster status panel on pipeline detail</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Shows which nodes are participating in this pipeline run with health status</div></div>
+    <div class="feat-row"><div class="feat-name">Eval run trigger button (inline in pipeline detail)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/evals/run — BCOM has no inline re-eval capability from pipeline detail view</div></div>
+  </div>
+</div>
+
+<!-- REPORTS -->
+<div class="page-section">
+  <div class="page-header">
+    <div class="name">reports</div>
+    <div class="sizes">Ross: 112 KB &nbsp;|&nbsp; BCOM reports.html: 14 KB</div>
+  </div>
+  <div class="page-body">
+    <div class="feat-row"><div class="feat-name">Pipeline Summary hero stats (eval runs, models evaluated, training examples, fine-tune jobs)</div><div class="feat-status"><span class="badge partial">PARTIAL</span></div><div class="feat-note">BCOM reports uses /api/reports/summary but renders minimal stats. Ross shows 4 hero stat cards prominently.</div></div>
+    <div class="feat-row"><div class="feat-name">Model Leaderboard ranked by average score with suite dropdown filter</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/reports/model-leaderboard</div></div>
+    <div class="feat-row"><div class="feat-name">Cross-Suite Comparison — model × suite matrix</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/reports/model-suite-matrix — grid table showing each model's score per eval suite</div></div>
+    <div class="feat-row"><div class="feat-name">Pass Rate by Model (avg/min/max bar chart)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/reports/eval-comparison</div></div>
+    <div class="feat-row"><div class="feat-name">Per-Run Pass Rate Distribution (histogram)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Distribution of pass rates per eval run, shows variance not just average</div></div>
+    <div class="feat-row"><div class="feat-name">Per-Test Heatmap — pass/fail matrix (model × test case)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/reports/test-heatmap — most granular view of which tests each model passes/fails</div></div>
+    <div class="feat-row"><div class="feat-name">Training Data Generation charts (output volume + grounding confidence dist)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/reports/datagen-stats</div></div>
+    <div class="feat-row"><div class="feat-name">Service coverage chart (which AWS/gov services have training data)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Bar chart showing example count per service across all datasets</div></div>
+    <div class="feat-row"><div class="feat-name">Datagen Jobs Timeline</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Horizontal timeline of all datagen runs showing overlap and duration</div></div>
+    <div class="feat-row"><div class="feat-name">Fine-Tune History chart + LoRA config table</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/reports/finetune-history — training loss curves + LoRA rank/epochs/lr for each job</div></div>
+    <div class="feat-row"><div class="feat-name">Pipeline Timeline (eval/generate/finetune cycle view)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/reports/pipeline-timeline — full pipeline lifecycle on a timeline axis</div></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<h2>Missing API Endpoints Summary</h2>
+<h3>Datagen Monitor (all missing from BobSpark-APIs)</h3>
+<div class="api-block">
+<span class="ok">IN USE</span>   GET /api/runs/{run_id}/stream               <span style="color:var(--fg-dim)"># SSE — node_update/status/stream_end events (used by worker cards)</span>
+<span class="ok">IN USE</span>   POST /api/runs                               <span style="color:var(--fg-dim)"># submit run (task, model, max_iter, queued:false)</span>
+<span class="m">MISSING</span>  GET /api/datagen/monitor/stream/all          <span style="color:var(--fg-dim)"># Ross-style — all worker slot tokens via single SSE</span>
+<span class="m">MISSING</span>  GET /api/datagen/monitor/nodes               <span style="color:var(--fg-dim)"># active node list for current job</span>
+<span class="m">MISSING</span>  GET /api/datagen/monitor/qa?limit=10         <span style="color:var(--fg-dim)"># completed Q&A pairs feed</span>
+<span class="m">MISSING</span>  GET /api/datagen/monitor/service-queue       <span style="color:var(--fg-dim)"># services queued for generation</span>
+<span class="m">MISSING</span>  GET /api/datagen/monitor/{jobId}             <span style="color:var(--fg-dim)"># per-job monitor state</span>
+</div>
+
+<h3>Coordinator System (multi-node job dispatch)</h3>
+<div class="api-block">
+<span class="m">MISSING</span>  POST /api/coordinator/jobs/active/add-node
+<span class="m">MISSING</span>  PUT  /api/coordinator/jobs/{id}/nodes/{name}/pause
+<span class="m">MISSING</span>  PUT  /api/coordinator/jobs/{id}/nodes/{name}/resume
+<span class="ok">EXISTS</span>   GET  /api/jobs/            <span style="color:var(--fg-dim)"># BCOM's version — single-node job list only</span>
+</div>
+
+<h3>Datasets</h3>
+<div class="api-block">
+<span class="m">MISSING</span>  GET /api/datasets
+<span class="m">MISSING</span>  GET /api/datasets/{id}
+<span class="m">MISSING</span>  GET /api/datasets/{id}/stats
+<span class="m">MISSING</span>  GET /api/datasets/{id}/provenance
+<span class="m">MISSING</span>  GET /api/datasets/{id}/examples?limit=20
+</div>
+
+<h3>Model Registry</h3>
+<div class="api-block">
+<span class="m">MISSING</span>  GET /api/model-registry
+<span class="m">MISSING</span>  GET /api/model-registry/filters
+<span class="ok">EXISTS</span>   GET /api/models/          <span style="color:var(--fg-dim)"># BCOM — Ollama running models only</span>
+<span class="ok">EXISTS</span>   GET /api/models/linux     <span style="color:var(--fg-dim)"># BCOM — Linux Desktop Ollama</span>
+</div>
+
+<h3>Reports</h3>
+<div class="api-block">
+<span class="m">MISSING</span>  GET /api/reports/model-leaderboard
+<span class="m">MISSING</span>  GET /api/reports/model-suite-matrix
+<span class="m">MISSING</span>  GET /api/reports/eval-comparison
+<span class="m">MISSING</span>  GET /api/reports/test-heatmap
+<span class="m">MISSING</span>  GET /api/reports/datagen-stats
+<span class="m">MISSING</span>  GET /api/reports/finetune-history
+<span class="m">MISSING</span>  GET /api/reports/pipeline-timeline
+<span class="ok">EXISTS</span>   GET /api/reports/summary  <span style="color:var(--fg-dim)"># BCOM has this</span>
+</div>
+
+<h3>Evals + Fine-Tune Triggers</h3>
+<div class="api-block">
+<span class="m">MISSING</span>  POST /api/evals/run
+<span class="m">MISSING</span>  GET  /api/evals/suites
+<span class="ok">EXISTS</span>   GET  /api/evals/           <span style="color:var(--fg-dim)"># BCOM has eval history list</span>
+<span class="m">MISSING</span>  POST /api/finetune/start
+<span class="ok">EXISTS</span>   GET  /api/finetune/          <span style="color:var(--fg-dim)"># returns job list with status/pid/config (used by pipeline.html banner)</span>
+<span class="m">MISSING</span>  GET  /api/training/analyze
+<span class="m">MISSING</span>  GET  /api/training/recommendations
+<span class="ok">EXISTS</span>   GET  /api/training/runs/   <span style="color:var(--fg-dim)"># BCOM has this</span>
+</div>
+
+<div class="divider"></div>
+
+<h2>What BCOM-C Has That Ross Does Not</h2>
+<table class="gap-table">
+  <thead><tr><th>Feature</th><th>BCOM-C Page</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>System health stats (CPU/GPU/VRAM load per node)</td><td>index.html, resources.html</td><td>Ross's dashboard doesn't show hardware metrics directly — it's pipeline-focused. BCOM shows real-time GPU/CPU stats via /api/system/stats and /api/system/linux/stats.</td></tr>
+    <tr><td>Storage breakdown (disk usage per path)</td><td>resources.html</td><td>/api/system/storage — not present in Ross's dashboard</td></tr>
+    <tr><td>Full settings page (themes, system config, service credentials)</td><td>settings.html</td><td>Ross has no settings UI</td></tr>
+    <tr><td>Orchestrator with agent step log (SSE)</td><td>orchestrator.html</td><td>Ross doesn't have an orchestrator concept — pipeline steps are pre-defined. BCOM's orchestrator shows active agents, pending queue, step log.</td></tr>
+    <tr><td>VLLM / LLM restart controls</td><td>All pages (header buttons)</td><td>RESTART VLLM / RESTART LLM buttons — not present in Ross</td></tr>
+    <tr><td>Linux Desktop node integration</td><td>resources.html</td><td>BCOM fetches from 10.0.0.10:11434 for Linux Desktop models. Ross only tracks its own Spark cluster.</td></tr>
+  </tbody>
+</table>
+
+<footer>BCOM-C Gap Report · Generated 2026-03-01 by Claude · Source data: 8 pages scraped from 192.168.3.30:9010 + 7 pages from BCOM-C Mac Mini</footer>
+
+</body>
+</html>
