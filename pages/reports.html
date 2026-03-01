@@ -1,296 +1,539 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>BCOM-C — Reports</title>
-<script>
-  (function(){
-    var t=localStorage.getItem("bcom-theme")||"dark";
-    document.documentElement.setAttribute("data-theme",t);
-    try { var raw=localStorage.getItem("bcom-theme-vars"); if(raw){ var vars=JSON.parse(raw); Object.keys(vars).forEach(function(k){ document.documentElement.style.setProperty(k,vars[k]); }); } } catch(_) {}
-  })();
-</script>
-<link rel="stylesheet" href="../assets/css/bcom.css?v=3" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports — BCOM-C</title>
+<link rel="stylesheet" href="../bcom.css?v=3">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  .rpt-table { width:100%; border-collapse:collapse; font-size:12px; letter-spacing:.5px; }
-  .rpt-table th { background:#0e0a06; color:#ccc; font-weight:600; letter-spacing:1.5px; padding:7px 10px; text-align:left; border-bottom:1px solid #1e1008; }
-  .rpt-table td { padding:7px 10px; border-bottom:1px solid #120b04; vertical-align:middle; color:#ccc; }
-  .rpt-table tr:hover td { background:#0e0905; }
-  .rpt-table .empty { text-align:center; color:#2a2a2a; padding:24px; letter-spacing:2px; }
-  .rpt-pill { display:inline-block; font-size:9px; letter-spacing:1.5px; padding:2px 7px; border:1px solid; }
-  .rpt-pill.pass  { color:#27ae60; border-color:#27ae60; }
-  .rpt-pill.fail  { color:#e74c3c; border-color:#e74c3c; }
-  .rpt-pill.error { color:#f39c12; border-color:#f39c12; }
-  .score-hi  { color:#27ae60; font-weight:700; }
-  .score-mid { color:var(--orange); font-weight:700; }
-  .score-lo  { color:#e74c3c; font-weight:700; }
-  .summary-row { display:flex; gap:12px; flex-wrap:wrap; }
-  .sum-chip { border:1px solid #1a0e05; padding:8px 14px; background:#090603; font-size:11px; letter-spacing:1px; color:#ccc; }
-  .sum-chip span { display:block; font-size:16px; font-weight:700; color:var(--orange); margin-top:2px; }
-  .filter-bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .filter-bar label { font-size:10px; letter-spacing:1px; color:#ccc; }
+.rpt-hero{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.rpt-chip{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 20px;min-width:130px}
+.rpt-chip-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.rpt-chip-val{font-size:26px;font-weight:700;color:var(--fg)}
+
+.rpt-section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px}
+.rpt-section-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+
+.rpt-table{width:100%;border-collapse:collapse;font-size:12px}
+.rpt-table th{text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.rpt-table th:hover{color:var(--fg)}
+.rpt-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--fg);vertical-align:middle}
+.rpt-table tr:hover td{background:rgba(255,255,255,.025)}
+
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.pill-pass{background:rgba(40,180,40,.18);color:#6f6}
+.pill-fail{background:rgba(220,60,60,.18);color:#f88}
+.score-hi{color:#6f6;font-weight:700}
+.score-mid{color:var(--orange-dark);font-weight:700}
+.score-lo{color:#f88;font-weight:700}
+
+/* Chart grids */
+.chart-2col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+@media(max-width:700px){.chart-2col{grid-template-columns:1fr}}
+.chart-wrap{position:relative;height:220px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px}
+.chart-card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+
+/* Heatmap */
+.heatmap-wrap{overflow-x:auto}
+.heatmap-table{border-collapse:collapse;font-size:11px}
+.heatmap-table th{padding:6px 12px;text-align:center;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.heatmap-table td{padding:0;border:1px solid rgba(255,255,255,.04)}
+.hm-cell{width:56px;height:36px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.hm-row-label{padding:4px 12px 4px 0;text-align:right;color:var(--muted);font-size:11px;white-space:nowrap}
+
+/* Filter row */
+.flt-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.flt-row input,.flt-row select{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:6px;padding:6px 10px;font-size:12px}
+.flt-row input{flex:1;min-width:140px}
+
+/* Timeline bars */
+.timeline-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px}
+.timeline-label{width:180px;flex-shrink:0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
+.timeline-track{flex:1;height:18px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden;position:relative}
+.timeline-bar{height:100%;border-radius:3px;display:flex;align-items:center;padding:0 6px;font-size:10px;font-weight:600;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;min-width:2px}
 </style>
 </head>
 <body>
-
-<div class="topbar">
-  <div class="topbar-title">BCOM-C</div>
-  <div class="topbar-right">
-    <a class="nav-btn" href="../index.html"><span class="nav-arrow">&#8592;</span> DASHBOARD</a>
-    <a class="nav-btn" href="data-gen.html">DATA GEN</a>
-    <a class="nav-btn" href="pipeline.html">PIPELINE</a>
-    <a class="nav-btn" href="resources.html">RESOURCES</a>
-    <a class="nav-btn active" href="reports.html">REPORTS</a>
-    <a class="nav-btn" href="orchestrator.html">ORCHESTRATOR</a>
-    <a class="cog-btn" href="settings.html" title="Settings">⚙</a>
-    <div class="timestamp"><span id="clock">--:--:--</span>&nbsp;&nbsp;<span id="datestamp">----/--/--</span></div>
+<nav class="bcom-nav">
+  <a href="../index.html" class="bcom-nav-brand">BCOM-C</a>
+  <div class="bcom-nav-links">
+    <a href="pipeline.html">PIPELINE</a>
+    <a href="data-gen.html">DATAGEN</a>
+    <a href="analytics.html">ANALYTICS</a>
+    <a href="coordinator.html">COORDINATOR</a>
+    <a href="datasets.html">DATASETS</a>
+    <a href="evals.html">EVALS</a>
+    <a href="models.html">MODELS</a>
+    <a href="monitor.html">MONITOR</a>
+    <a href="deploy.html">DEPLOY</a>
+    <a href="reports.html" class="active">REPORTS</a>
+    <a href="resources.html">⚙</a>
   </div>
-</div>
+</nav>
 
-<div class="actionbar">
-  <button class="action-btn danger" onclick="triggerAction('RESTART VLLM')">RESTART VLLM</button>
-  <button class="action-btn danger" onclick="triggerAction('RESTART LLM')">RESTART LLM</button>
-  <button class="action-btn" onclick="exportAll('eval')">&#8659; EXPORT EVALS</button>
-  <button class="action-btn" onclick="exportAll('runs')">&#8659; EXPORT RUNS</button>
-</div>
-
-<div class="main">
-  <div class="info-grid">
-
-    <!-- SUMMARY -->
-    <div class="info-card">
-      <div class="info-card-hdr">Session Summary</div>
-      <div class="summary-row">
-        <div class="sum-chip">EVAL RUNS<span id="sum-evals">--</span></div>
-        <div class="sum-chip">PIPELINE RUNS<span id="sum-pipelines">--</span></div>
-        <div class="sum-chip">DATA JOBS<span id="sum-datajobs">--</span></div>
-        <div class="sum-chip">BEST SCORE<span id="sum-bestscore">--</span></div>
-        <div class="sum-chip">AVG SCORE<span id="sum-avgscore">--</span></div>
-        <div class="sum-chip">FINE-TUNES<span id="sum-ft">--</span></div>
-      </div>
+<div class="bcom-page">
+  <div class="bcom-page-header">
+    <h1 class="bcom-page-title">Reports</h1>
+    <div class="bcom-page-actions">
+      <span id="rpt-refresh" style="font-size:11px;color:var(--muted)">—</span>
     </div>
-
-    <!-- EVAL HISTORY -->
-    <div class="info-card">
-      <div class="info-card-hdr" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <span>Eval History</span>
-        <div class="filter-bar">
-          <label>MODEL</label>
-          <input class="form-input" id="flt-model" type="text" placeholder="filter..." style="width:110px;font-size:10px;padding:3px 8px;" oninput="renderEvals()" />
-          <label>SUITE</label>
-          <input class="form-input" id="flt-suite" type="text" placeholder="filter..." style="width:80px;font-size:10px;padding:3px 8px;" oninput="renderEvals()" />
-          <select class="form-select" id="flt-status" style="font-size:10px;padding:2px 8px;width:auto;" onchange="renderEvals()">
-            <option value="all">ALL</option><option value="pass">PASS</option><option value="fail">FAIL</option>
-          </select>
-          <button class="action-btn" style="font-size:10px;padding:2px 10px;" onclick="exportAll('eval')">&#8659; CSV</button>
-        </div>
-      </div>
-      <div style="overflow-x:auto">
-        <table class="rpt-table">
-          <thead>
-            <tr><th>RUN ID</th><th>DATE</th><th>MODEL</th><th>BACKEND</th><th>JUDGE</th><th>SUITE</th><th>SCORE</th><th>PASS RATE</th><th>TIME</th><th>STATUS</th></tr>
-          </thead>
-          <tbody id="eval-tbody">
-            <tr><td colspan="10" class="empty">NO EVAL RUNS YET</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TRAINING RUNS -->
-    <div class="info-card">
-      <div class="info-card-hdr" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Training Run History</span>
-        <button class="action-btn" style="font-size:10px;padding:2px 10px;" onclick="exportAll('train')">&#8659; CSV</button>
-      </div>
-      <div style="overflow-x:auto">
-        <table class="rpt-table">
-          <thead>
-            <tr><th>RUN ID</th><th>MODEL</th><th>DATASET</th><th>RANK</th><th>EPOCHS</th><th>LR</th><th>NODE</th><th>DURATION</th><th>FINAL LOSS</th><th>STATUS</th></tr>
-          </thead>
-          <tbody id="train-tbody">
-            <tr><td colspan="10" class="empty">NO TRAINING RUNS YET</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- PIPELINE RUNS -->
-    <div class="info-card">
-      <div class="info-card-hdr" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Pipeline Run History</span>
-        <button class="action-btn" style="font-size:10px;padding:2px 10px;" onclick="exportAll('pipeline')">&#8659; CSV</button>
-      </div>
-      <div style="overflow-x:auto">
-        <table class="rpt-table">
-          <thead>
-            <tr><th>RUN ID</th><th>MODEL</th><th>BACKEND</th><th>SUITE</th><th>TARGET</th><th>ITERS</th><th>FINAL SCORE</th><th>NODE</th><th>DURATION</th><th>STATUS</th></tr>
-          </thead>
-          <tbody id="pipeline-tbody">
-            <tr><td colspan="10" class="empty">NO PIPELINE RUNS YET</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
   </div>
 
-  <div class="log-panel" id="log">
-    <div class="log-line"><span class="log-time">--:--:--</span><span class="log-msg info">REPORTS module ready. Historical data populates as runs complete.</span></div>
+  <!-- Hero chips — from /api/reports/summary -->
+  <div class="rpt-hero">
+    <div class="rpt-chip"><div class="rpt-chip-label">Eval Runs</div><div class="rpt-chip-val" id="chip-evals">—</div></div>
+    <div class="rpt-chip"><div class="rpt-chip-label">Pipelines</div><div class="rpt-chip-val" id="chip-pipelines">—</div></div>
+    <div class="rpt-chip"><div class="rpt-chip-label">Finetunes</div><div class="rpt-chip-val" id="chip-ft">—</div></div>
+    <div class="rpt-chip"><div class="rpt-chip-label">Datagen Jobs</div><div class="rpt-chip-val" id="chip-dg">—</div></div>
+    <div class="rpt-chip"><div class="rpt-chip-label">Best Score</div><div class="rpt-chip-val" id="chip-best">—</div></div>
+    <div class="rpt-chip"><div class="rpt-chip-label">Avg Score</div><div class="rpt-chip-val" id="chip-avg">—</div></div>
   </div>
-</div>
 
-<div class="footer">
-  <span>BOB-AI // BCOM-C v0.1</span>
-  <span id="footer-date"></span>
-  <span>SESSION ACTIVE</span>
-</div>
-
-<!-- TERMINAL DOCK -->
-<div class="terminal-dock" id="terminal-dock">
-  <div class="terminal-bar">
-    <div class="terminal-tabs">
-      <div class="terminal-tab active" data-term="spark" onclick="switchTerm('spark')">SPARK-BOB</div>
-      <div class="terminal-tab" data-term="linux" onclick="switchTerm('linux')">LINUX-DSKTP</div>
+  <!-- Chart row: Datagen Stats + Finetune History -->
+  <div class="chart-2col">
+    <div class="chart-card">
+      <div class="chart-card-title">Datagen Stats</div>
+      <div class="chart-wrap"><canvas id="chart-dg"></canvas></div>
     </div>
-      <div class="terminal-tab" data-term="shell">SHELL</div>
-    <div class="terminal-controls">
-      <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
+    <div class="chart-card">
+      <div class="chart-card-title">Finetune Loss History</div>
+      <div class="chart-wrap"><canvas id="chart-ft"></canvas></div>
     </div>
   </div>
-  <div class="terminal-body" id="terminal-body">
-    <div class="terminal-output" id="term-out-spark"><div class="term-line sys">[bcom-c] reports terminal ready</div></div>
-    <div class="terminal-output" id="term-out-linux" style="display:none"><div class="term-line sys">[bcom-c] reports terminal ready</div></div>
-    <div id="xterm-container" style="display:none;flex:1;min-height:0;width:100%;background:#080808;"></div>
-    <div class="terminal-input-row">
-      <span class="term-prompt" id="term-prompt">$</span>
-      <input class="terminal-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type command..." />
+
+  <!-- Model Leaderboard — /api/reports/model-leaderboard -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">
+      Model Leaderboard
+      <span style="font-size:11px;color:var(--muted);cursor:pointer" onclick="sortLeaderboard()">▼ sort</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="rpt-table" id="leaderboard-table">
+        <thead><tr>
+          <th onclick="sortLB('rank')">#</th>
+          <th onclick="sortLB('model')">Model</th>
+          <th onclick="sortLB('avg_score')">Avg Score</th>
+          <th onclick="sortLB('best_score')">Best</th>
+          <th onclick="sortLB('eval_count')">Evals</th>
+          <th onclick="sortLB('pass_rate')">Pass Rate</th>
+          <th>Status</th>
+        </tr></thead>
+        <tbody id="lb-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Eval Comparison — /api/reports/eval-comparison -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">Eval Comparison</div>
+    <div class="flt-row">
+      <input id="ec-search" type="text" placeholder="Filter model…" oninput="renderEvalComp()">
+      <select id="ec-suite" onchange="renderEvalComp()"><option value="">All Suites</option></select>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="rpt-table">
+        <thead><tr><th>Model</th><th>Suite</th><th>Score</th><th>Pass Rate</th><th>Evals</th><th>Trend</th><th>Status</th></tr></thead>
+        <tbody id="ec-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Test Heatmap — /api/reports/test-heatmap -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">Test Heatmap</div>
+    <div class="heatmap-wrap" id="heatmap-wrap">
+      <div style="color:var(--muted);font-size:13px">Loading…</div>
+    </div>
+  </div>
+
+  <!-- Finetune History table — /api/reports/finetune-history -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">Finetune History</div>
+    <div style="overflow-x:auto">
+      <table class="rpt-table">
+        <thead><tr><th>Run ID</th><th>Model</th><th>Dataset</th><th>Rank</th><th>Epochs</th><th>LR</th><th>Final Loss</th><th>Duration</th><th>Status</th></tr></thead>
+        <tbody id="ft-tbody"><tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pipeline Timeline — /api/reports/pipeline-timeline -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">Pipeline Timeline</div>
+    <div id="timeline-wrap"><div style="color:var(--muted);font-size:13px">Loading…</div></div>
+  </div>
+
+  <!-- Model-Suite Matrix — /api/reports/model-suite-matrix -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">Model × Suite Matrix</div>
+    <div class="heatmap-wrap" id="matrix-wrap">
+      <div style="color:var(--muted);font-size:13px">Loading…</div>
     </div>
   </div>
 </div>
 
-<script src="../assets/js/bcom.js?v=5"></script>
+<script src="../bcom.js?v=5"></script>
 <script>
-  BCOM.apiBase      = '';   // '' = same-origin (Caddy proxies /api/* → Spark)
-  BCOM.pollInterval = 5000;
-  startPolling();
+window.BCOM = window.BCOM || {};
+BCOM.apiBase = '';
 
-  // ── Live data arrays (populated by API) ─────────────────────────────
-  let _evals     = [];
-  let _trains    = [];
-  let _pipelines = [];
+var _lb = [], _lbSort = 'rank', _lbAsc = true;
+var _ec = [], _ecSuites = [];
+var ORANGE = 'rgba(180,90,20,1)';
+var ORANGE_DIM = 'rgba(180,90,20,0.15)';
 
-  function sc(n) { return n >= 80 ? 'score-hi' : n >= 65 ? 'score-mid' : 'score-lo'; }
+Chart.defaults.color = '#555';
+Chart.defaults.font.family = 'inherit';
 
-  function renderEvals() {
-    const fm  = document.getElementById('flt-model').value.toLowerCase();
-    const fs  = document.getElementById('flt-suite').value.toLowerCase();
-    const fst = document.getElementById('flt-status').value;
-    let d = _evals;
-    if (fm)          d = d.filter(r => r.model.toLowerCase().includes(fm));
-    if (fs)          d = d.filter(r => r.suite.toLowerCase().includes(fs));
-    if (fst !== 'all') d = d.filter(r => r.status === fst);
-    const tb = document.getElementById('eval-tbody');
-    if (!d.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">NO EVAL RUNS YET</td></tr>'; return; }
-    tb.innerHTML = d.map(r => `<tr>
-      <td style="color:var(--orange-dark)">${r.id}</td>
-      <td style="color:#999">${r.date}</td><td>${r.model}</td><td>${r.backend}</td>
-      <td>${r.judge}</td><td>${r.suite}</td>
-      <td class="${sc(r.score)}">${r.score}%</td>
-      <td>${r.passrate}</td><td style="color:#999">${r.time}</td>
-      <td><span class="rpt-pill ${r.status}">${r.status.toUpperCase()}</span></td>
-    </tr>`).join('');
+function apiFetch(url) {
+  return fetch(BCOM.apiBase + url, { cache: 'no-store' }).then(function(r) {
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  });
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function sc(n) { return n >= 0.80 ? 'score-hi' : n >= 0.60 ? 'score-mid' : 'score-lo'; }
+function scPct(n) { return sc(n / 100); }
+function pct(v) { return typeof v === 'number' ? (v > 1 ? v.toFixed(1) + '%' : (v * 100).toFixed(1) + '%') : '—'; }
+
+/* ── Summary ────────────────────────────────────────────── */
+function pollSummary() {
+  apiFetch('/api/reports/summary').then(function(d) {
+    document.getElementById('chip-evals').textContent     = d.eval_runs     || d.evals     || 0;
+    document.getElementById('chip-pipelines').textContent = d.pipelines     || d.pipeline_runs || 0;
+    document.getElementById('chip-ft').textContent        = d.finetune_jobs || d.finetunes  || 0;
+    document.getElementById('chip-dg').textContent        = d.datagen_jobs  || d.datagen   || 0;
+    var best = d.best_score;
+    var avg  = d.avg_score;
+    document.getElementById('chip-best').textContent = best !== undefined ? pct(best) : '—';
+    document.getElementById('chip-avg').textContent  = avg  !== undefined ? pct(avg)  : '—';
+    document.getElementById('rpt-refresh').textContent = 'updated ' + new Date().toLocaleTimeString();
+  }).catch(function(){});
+}
+
+/* ── Leaderboard ────────────────────────────────────────── */
+function pollLeaderboard() {
+  apiFetch('/api/reports/model-leaderboard').then(function(data) {
+    _lb = Array.isArray(data) ? data : (data.models || data.leaderboard || data.items || []);
+    renderLB();
+  }).catch(function() {
+    document.getElementById('lb-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No data</td></tr>';
+  });
+}
+
+function sortLB(field) {
+  if (_lbSort === field) _lbAsc = !_lbAsc;
+  else { _lbSort = field; _lbAsc = field === 'rank'; }
+  renderLB();
+}
+
+function renderLB() {
+  var sorted = _lb.slice().sort(function(a, b) {
+    var va = a[_lbSort] !== undefined ? a[_lbSort] : (a.metrics && a.metrics[_lbSort]);
+    var vb = b[_lbSort] !== undefined ? b[_lbSort] : (b.metrics && b.metrics[_lbSort]);
+    if (va === undefined) va = 0;
+    if (vb === undefined) vb = 0;
+    return _lbAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+
+  var tbody = document.getElementById('lb-tbody');
+  if (!sorted.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No data</td></tr>';
+    return;
+  }
+  tbody.innerHTML = sorted.map(function(m, i) {
+    var rank  = m.rank !== undefined ? m.rank : (i + 1);
+    var model = m.model_id || m.model || m.name || '—';
+    var avg   = m.avg_score !== undefined ? m.avg_score : (m.metrics && m.metrics.avg_score);
+    var best  = m.best_score !== undefined ? m.best_score : (m.metrics && m.metrics.best_score);
+    var cnt   = m.eval_count || m.evals || '—';
+    var pass  = m.pass_rate !== undefined ? m.pass_rate : (m.metrics && m.metrics.pass_rate);
+    var rankCls = rank === 1 ? 'color:#ffd700' : rank === 2 ? 'color:#c0c0c0' : rank === 3 ? 'color:#cd7f32' : 'color:var(--muted)';
+    return '<tr>' +
+      '<td style="font-weight:700;' + rankCls + '">' + rank + '</td>' +
+      '<td style="font-weight:600">' + esc(model) + '</td>' +
+      '<td class="' + sc(avg || 0) + '">' + pct(avg) + '</td>' +
+      '<td class="' + sc(best || 0) + '">' + pct(best) + '</td>' +
+      '<td>' + esc(String(cnt)) + '</td>' +
+      '<td>' + pct(pass) + '</td>' +
+      '<td><span class="pill ' + ((avg || 0) >= 0.7 ? 'pill-pass' : 'pill-fail') + '">' + ((avg || 0) >= 0.7 ? 'STRONG' : 'WEAK') + '</span></td>' +
+      '</tr>';
+  }).join('');
+}
+
+/* ── Eval Comparison ────────────────────────────────────── */
+function pollEvalComparison() {
+  apiFetch('/api/reports/eval-comparison').then(function(data) {
+    _ec = Array.isArray(data) ? data : (data.comparisons || data.evals || data.items || []);
+    var suites = [...new Set(_ec.map(function(e){ return e.suite || e.suite_id || ''; }).filter(Boolean))];
+    _ecSuites = suites;
+    var sel = document.getElementById('ec-suite');
+    sel.innerHTML = '<option value="">All Suites</option>' + suites.map(function(s){ return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join('');
+    renderEvalComp();
+  }).catch(function() {
+    document.getElementById('ec-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No data</td></tr>';
+  });
+}
+
+window.renderEvalComp = function() {
+  var search = (document.getElementById('ec-search').value || '').toLowerCase();
+  var suite  = document.getElementById('ec-suite').value;
+  var filtered = _ec.filter(function(e) {
+    var model = (e.model_id || e.model || '').toLowerCase();
+    if (search && model.indexOf(search) < 0) return false;
+    if (suite && (e.suite || e.suite_id) !== suite) return false;
+    return true;
+  });
+  var tbody = document.getElementById('ec-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No data</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(function(e) {
+    var model = e.model_id || e.model || '—';
+    var suite = e.suite || e.suite_id || '—';
+    var score = e.score !== undefined ? e.score : e.avg_score;
+    var pass  = e.pass_rate !== undefined ? e.pass_rate : e.passrate;
+    var cnt   = e.eval_count || e.count || '—';
+    var trend = e.trend || e.score_trend;
+    var trendHtml = trend > 0 ? '<span style="color:#6f6">▲ +' + trend.toFixed(2) + '</span>' :
+                   trend < 0 ? '<span style="color:#f88">▼ ' + trend.toFixed(2) + '</span>' : '—';
+    var status = e.status || 'unknown';
+    return '<tr>' +
+      '<td style="font-weight:600">' + esc(model) + '</td>' +
+      '<td style="color:var(--muted)">' + esc(suite) + '</td>' +
+      '<td class="' + sc(score || 0) + '">' + pct(score) + '</td>' +
+      '<td>' + pct(pass) + '</td>' +
+      '<td>' + esc(String(cnt)) + '</td>' +
+      '<td>' + trendHtml + '</td>' +
+      '<td><span class="pill ' + ((score || 0) >= 0.7 ? 'pill-pass' : 'pill-fail') + '">' + esc(status) + '</span></td>' +
+      '</tr>';
+  }).join('');
+};
+
+/* ── Test Heatmap ───────────────────────────────────────── */
+function pollTestHeatmap() {
+  apiFetch('/api/reports/test-heatmap').then(function(data) {
+    renderHeatmap(data, 'heatmap-wrap');
+  }).catch(function() {
+    document.getElementById('heatmap-wrap').innerHTML = '<div style="color:var(--muted);font-size:13px">No heatmap data</div>';
+  });
+}
+
+function renderHeatmap(data, containerId) {
+  var el = document.getElementById(containerId);
+  // Expected shape: { models: [...], tests: [...], matrix: [[...]] }
+  // or { rows: [...], cols: [...], values: [[...]] }
+  var models = data.models || data.rows || [];
+  var tests  = data.tests  || data.cols || data.columns || [];
+  var matrix = data.matrix || data.values || [];
+
+  if (!models.length || !tests.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px">No heatmap data available</div>';
+    return;
   }
 
-  function renderTrains() {
-    const tb = document.getElementById('train-tbody');
-    if (!_trains.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">NO TRAINING RUNS YET</td></tr>'; return; }
-    tb.innerHTML = _trains.map(r => `<tr>
-      <td style="color:var(--orange-dark)">${r.id}</td>
-      <td>${r.model}</td><td style="font-size:10px;color:#999">${r.dataset}</td>
-      <td>${r.rank}</td><td>${r.epochs}</td><td>${r.lr}</td><td>${r.node}</td>
-      <td>${r.dur}</td><td class="${sc(parseFloat(r.loss)<0.09?85:parseFloat(r.loss)<0.12?70:55)}">${r.loss}</td>
-      <td><span class="rpt-pill ${r.status}">${r.status.toUpperCase()}</span></td>
-    </tr>`).join('');
-  }
+  var html = '<table class="heatmap-table"><thead><tr><th></th>' +
+    tests.slice(0, 12).map(function(t){ return '<th>' + esc(String(t).slice(0,10)) + '</th>'; }).join('') +
+    '</tr></thead><tbody>' +
+    models.map(function(model, i) {
+      var row = matrix[i] || [];
+      return '<tr><td class="hm-row-label">' + esc(String(model).slice(0,20)) + '</td>' +
+        tests.slice(0, 12).map(function(_, j) {
+          var v = row[j];
+          var num = typeof v === 'number' ? v : null;
+          var bg = num !== null ? heatColor(num) : 'rgba(255,255,255,.03)';
+          var txt = num !== null ? (num > 1 ? num.toFixed(0) + '%' : (num * 100).toFixed(0) + '%') : '—';
+          return '<td><div class="hm-cell" style="background:' + bg + ';color:' + (num !== null && num >= 0.7 ? '#fff' : '#888') + '">' + txt + '</div></td>';
+        }).join('') + '</tr>';
+    }).join('') + '</tbody></table>';
+  el.innerHTML = html;
+}
 
-  function renderPipelines() {
-    const tb = document.getElementById('pipeline-tbody');
-    if (!_pipelines.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">NO PIPELINE RUNS YET</td></tr>'; return; }
-    tb.innerHTML = _pipelines.map(r => `<tr>
-      <td style="color:var(--orange-dark)">${r.id}</td>
-      <td>${r.model}</td><td>${r.backend}</td><td>${r.suite}</td><td>${r.target}</td>
-      <td>${r.iters}</td><td class="${sc(parseInt(r.score))}">${r.score}</td>
-      <td>${r.node}</td><td>${r.dur}</td>
-      <td><span class="rpt-pill ${r.status}">${r.status.toUpperCase()}</span></td>
-    </tr>`).join('');
-  }
+function heatColor(v) {
+  if (v > 1) v = v / 100;
+  var r, g;
+  if (v >= 0.5) { r = Math.round(255 * (1 - v) * 2); g = 140; }
+  else { r = 160; g = Math.round(255 * v * 2 * 0.55); }
+  return 'rgba(' + r + ',' + g + ',20,0.35)';
+}
 
-  // ── Live summary from API ────────────────────────────────────────────
-  async function pollReportsSummary() {
-    try {
-      const res = await fetch('/api/reports/summary', { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const d = await res.json();
-      setText('sum-evals',     d.eval_runs     ?? '--');
-      setText('sum-pipelines', d.pipelines     ?? '--');
-      setText('sum-datajobs',  d.datagen_jobs  ?? '--');
-      setText('sum-ft',        d.finetune_jobs ?? '--');
-      if (!d.eval_runs) {
-        setText('sum-bestscore', '--');
-        setText('sum-avgscore',  '--');
+/* ── Finetune History ───────────────────────────────────── */
+function pollFinetuneHistory() {
+  apiFetch('/api/reports/finetune-history').then(function(data) {
+    var runs = Array.isArray(data) ? data : (data.runs || data.history || data.items || []);
+    renderFTTable(runs);
+    renderFTChart(runs);
+  }).catch(function() {
+    document.getElementById('ft-tbody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">No data</td></tr>';
+  });
+}
+
+function renderFTTable(runs) {
+  var tbody = document.getElementById('ft-tbody');
+  if (!runs.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">No finetune runs</td></tr>';
+    return;
+  }
+  tbody.innerHTML = runs.slice(0, 30).map(function(r) {
+    var id     = r.finetune_id || r.run_id || r.id || '?';
+    var model  = r.model_id  || r.model   || '—';
+    var ds     = r.dataset   || r.dataset_id || '—';
+    var rank   = r.lora_rank || r.rank     || '—';
+    var epochs = r.epochs    || '—';
+    var lr     = r.learning_rate || r.lr  || '—';
+    var loss   = typeof r.final_loss === 'number' ? r.final_loss.toFixed(4) : '—';
+    var dur    = r.duration_s ? r.duration_s.toFixed(0) + 's' : (r.duration || '—');
+    var status = (r.status || 'unknown').toLowerCase();
+    return '<tr>' +
+      '<td style="font-family:monospace;font-size:11px;color:var(--orange-dark)">' + esc(id.slice(0,12)) + '</td>' +
+      '<td style="font-weight:600">' + esc(model) + '</td>' +
+      '<td style="color:var(--muted);font-size:11px">' + esc(String(ds).slice(0,20)) + '</td>' +
+      '<td>' + esc(String(rank)) + '</td>' +
+      '<td>' + esc(String(epochs)) + '</td>' +
+      '<td style="font-family:monospace">' + esc(String(lr)) + '</td>' +
+      '<td style="font-weight:600">' + loss + '</td>' +
+      '<td style="color:var(--muted)">' + dur + '</td>' +
+      '<td><span class="pill ' + (status === 'completed' || status === 'done' ? 'pill-pass' : status === 'failed' ? 'pill-fail' : '') + '">' + status + '</span></td>' +
+      '</tr>';
+  }).join('');
+}
+
+var _ftChart = null;
+function renderFTChart(runs) {
+  var completed = runs.filter(function(r){ return typeof r.final_loss === 'number'; });
+  if (!completed.length) return;
+  var labels = completed.map(function(r, i){ return r.model_id || r.model || ('run ' + (i+1)); });
+  var losses  = completed.map(function(r){ return r.final_loss; });
+  var ctx = document.getElementById('chart-ft').getContext('2d');
+  if (_ftChart) _ftChart.destroy();
+  _ftChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{ label: 'Final Loss', data: losses, borderColor: ORANGE,
+                   backgroundColor: ORANGE_DIM, borderWidth: 1.5, pointRadius: 3, tension: 0.3 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#ccc', bodyColor: '#ccc' } },
+      scales: {
+        x: { ticks: { color: '#555', font: { size: 10 }, maxRotation: 30 }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { ticks: { color: '#555', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } }
       }
-    } catch (err) {
-      logLine('Reports summary error: ' + err.message, 'warn');
     }
-  }
+  });
+}
 
-  // ── Live table data from API ─────────────────────────────────────────
-  async function pollReportsTables() {
-    const [evalsRes, trainsRes, plRes] = await Promise.allSettled([
-      fetch('/api/evals/',          { cache: 'no-store' }),
-      fetch('/api/training/runs/',  { cache: 'no-store' }),
-      fetch('/api/pipelines/runs/', { cache: 'no-store' }),
-    ]);
-    if (evalsRes.status === 'fulfilled' && evalsRes.value.ok)
-      try { _evals = await evalsRes.value.json(); } catch(_) {}
-    if (trainsRes.status === 'fulfilled' && trainsRes.value.ok)
-      try { _trains = await trainsRes.value.json(); } catch(_) {}
-    if (plRes.status === 'fulfilled' && plRes.value.ok)
-      try { _pipelines = await plRes.value.json(); } catch(_) {}
-    renderEvals(); renderTrains(); renderPipelines();
-  }
+/* ── Pipeline Timeline ──────────────────────────────────── */
+function pollPipelineTimeline() {
+  apiFetch('/api/reports/pipeline-timeline').then(function(data) {
+    renderTimeline(data);
+  }).catch(function() {
+    document.getElementById('timeline-wrap').innerHTML = '<div style="color:var(--muted);font-size:13px">No timeline data</div>';
+  });
+}
 
-  function renderSummary() { pollReportsSummary(); }
-
-  function exportAll(type) {
-    logLine(`CMD: EXPORT ${type.toUpperCase()} — CSV`, 'info');
-    if (BCOM.apiBase === null) logLine('No API — export unavailable', 'warn');
+function renderTimeline(data) {
+  var el = document.getElementById('timeline-wrap');
+  var runs = Array.isArray(data) ? data : (data.runs || data.pipelines || data.timeline || data.items || []);
+  if (!runs.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px">No pipeline runs to display</div>';
+    return;
   }
+  var maxDur = Math.max.apply(null, runs.map(function(r){ return r.duration_s || r.duration || 0; })) || 1;
+  var colors = ['rgba(180,90,20,.7)','rgba(80,140,220,.7)','rgba(60,180,100,.7)','rgba(220,80,80,.7)'];
+  var html = runs.slice(0, 20).map(function(r, i) {
+    var label = (r.model_id || r.model || r.pipeline_id || r.id || 'run').slice(0, 22);
+    var dur   = r.duration_s || r.duration || 0;
+    var pct   = Math.max(1, Math.round(dur / maxDur * 100));
+    var score = r.final_score !== undefined ? (r.final_score > 1 ? r.final_score.toFixed(0) : (r.final_score * 100).toFixed(0)) + '%' : '';
+    var color = colors[i % colors.length];
+    return '<div class="timeline-row">' +
+      '<div class="timeline-label">' + esc(label) + '</div>' +
+      '<div class="timeline-track">' +
+        '<div class="timeline-bar" style="width:' + pct + '%;background:' + color + '">' +
+          (dur ? (dur > 60 ? Math.round(dur/60) + 'm' : dur + 's') : '') + (score ? ' ' + score : '') +
+        '</div>' +
+      '</div>' +
+      '</div>';
+  }).join('');
+  el.innerHTML = html;
+}
 
-  renderSummary();
-  pollReportsTables();
-  setInterval(pollReportsTables, 30000);
+/* ── Datagen Stats Chart ────────────────────────────────── */
+var _dgChart = null;
+function pollDatagenStats() {
+  apiFetch('/api/reports/datagen-stats').then(function(data) {
+    renderDGChart(data);
+  }).catch(function(){});
+}
 
-  // Terminal
-  let _termNode = 'spark';
-  function switchTerm(node) {
-    _termNode = node;
-    document.querySelectorAll('.terminal-tab').forEach(t => t.classList.toggle('active', t.dataset.term === node));
-    ['spark','linux'].forEach(n => { const el = document.getElementById('term-out-'+n); if (el) el.style.display = n===node?'block':'none'; });
-    document.getElementById('term-prompt').textContent = (node==='spark'?'spark-bob':'linux-dsktp')+' $';
-    document.getElementById('terminal-input').focus();
+function renderDGChart(data) {
+  var ctx = document.getElementById('chart-dg').getContext('2d');
+  var labels = [], vals = [];
+  if (data.by_model) {
+    Object.keys(data.by_model).forEach(function(k) {
+      labels.push(k); vals.push(data.by_model[k]);
+    });
+  } else if (Array.isArray(data)) {
+    data.forEach(function(d){ labels.push(d.model || d.name || '?'); vals.push(d.count || d.tokens || d.value || 0); });
+  } else if (data.models) {
+    data.models.forEach(function(m){ labels.push(m.name || m.model_id || '?'); vals.push(m.count || m.tokens || 0); });
   }
-  function termLine(text, cls) {
-    const out = document.getElementById('term-out-'+_termNode); if (!out) return;
-    const div = document.createElement('div'); div.className = 'term-line'+(cls?' '+cls:''); div.textContent = text;
-    out.appendChild(div); out.scrollTop = out.scrollHeight;
-  }
-  // terminal input wired by bcom-terminal.js
-  // minimize wired by bcom-terminal.js
-  switchTerm('spark');
+  if (_dgChart) _dgChart.destroy();
+  _dgChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{ label: 'Datagen Jobs', data: vals, backgroundColor: ORANGE_DIM, borderColor: ORANGE, borderWidth: 1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#ccc', bodyColor: '#ccc' } },
+      scales: {
+        x: { ticks: { color: '#555', font: { size: 10 }, maxRotation: 30 }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { ticks: { color: '#555', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } }
+      }
+    }
+  });
+}
+
+/* ── Model-Suite Matrix ─────────────────────────────────── */
+function pollModelSuiteMatrix() {
+  apiFetch('/api/reports/model-suite-matrix').then(function(data) {
+    renderHeatmap(data, 'matrix-wrap');
+  }).catch(function() {
+    document.getElementById('matrix-wrap').innerHTML = '<div style="color:var(--muted);font-size:13px">No matrix data</div>';
+  });
+}
+
+/* ── Init ───────────────────────────────────────────────── */
+function startPolling() {
+  pollSummary();
+  pollLeaderboard();
+  pollEvalComparison();
+  pollTestHeatmap();
+  pollFinetuneHistory();
+  pollPipelineTimeline();
+  pollDatagenStats();
+  pollModelSuiteMatrix();
+
+  setInterval(pollSummary, 60000);
+  setInterval(pollLeaderboard, 30000);
+  setInterval(pollEvalComparison, 30000);
+  setInterval(pollFinetuneHistory, 30000);
+  setInterval(pollPipelineTimeline, 30000);
+  setInterval(pollDatagenStats, 60000);
+}
+
+document.addEventListener('DOMContentLoaded', startPolling);
 </script>
-  <script src="../assets/js/bcom-terminal.js?v=3"></script>
 </body>
 </html>
