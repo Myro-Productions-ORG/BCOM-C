@@ -5,6 +5,15 @@ on:
     branches: [main]
 
 jobs:
+  sync-nicolasmac:
+    name: Sync nicolasmac (website host)
+    runs-on: [self-hosted, nicolasmac, arm64]
+    steps:
+      - name: Pull latest
+        run: |
+          git -C /Volumes/DevDrive/Projects/websites/BCOM-C pull origin main
+          git -C /Volumes/DevDrive/Projects/websites/BCOM-C log --oneline -2
+
   sync-dgx:
     name: Sync DGX Spark
     runs-on: [self-hosted, dgx, arm64]
@@ -13,15 +22,6 @@ jobs:
         run: |
           git -C /home/nmyers/Projects/BCOM-C pull origin main
           git -C /home/nmyers/Projects/BCOM-C log --oneline -2
-
-  sync-m4pro:
-    name: Sync M4 Pro
-    runs-on: [self-hosted, m4pro, arm64]
-    steps:
-      - name: Pull latest
-        run: |
-          git -C /Users/myro-pro/Projects/BCOM-C pull origin main
-          git -C /Users/myro-pro/Projects/BCOM-C log --oneline -2
 
   sync-linux:
     name: Sync Linux Desktop
