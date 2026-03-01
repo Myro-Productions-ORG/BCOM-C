@@ -351,7 +351,7 @@
 <div class="topbar">
   <div class="topbar-title">BCOM-C</div>
   <div class="topbar-right">
-    <a class="nav-btn" href="../index.html"><span class="nav-arrow">&#8592;</span> DASHBOARD</a>
+    <a class="nav-btn" href="../index.html">DASHBOARD</a>
     <a class="nav-btn active" href="data-gen.html">DATA GEN</a>
     <a class="nav-btn" href="pipeline.html">PIPELINE</a>
     <a class="nav-btn" href="resources.html">RESOURCES</a>
@@ -359,6 +359,7 @@
     <a class="nav-btn" href="orchestrator.html">ORCHESTRATOR</a>
     <a class="cog-btn" href="settings.html" title="Settings">⚙</a>
     <div class="timestamp"><span id="clock">--:--:--</span>&nbsp;&nbsp;<span id="datestamp">----/--/--</span></div>
+  </div>
   </div>
 </div>
 
@@ -1049,6 +1050,7 @@
         '<span class="feed-model">model: ' + escHtml(d.model || '--') + '</span>' +
         '<span>' + tokOut + ' tok out</span>' +
         (tokIn !== '0' ? '<span>' + tokIn + ' tok in</span>' : '') +
+        '<a href="datagen-run.html?id=' + encodeURIComponent(runId) + '" class="feed-snippet-toggle" style="margin-left:auto;text-decoration:none">&#8599; VIEW DETAIL</a>' +
       '</div>';
 
     // Prepend — newest first

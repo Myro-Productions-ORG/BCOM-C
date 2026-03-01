@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>BCOM-C — Reports</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports — BCOM-C</title>
 <script>
   (function(){
     var t=localStorage.getItem("bcom-theme")||"dark";
@@ -11,33 +11,76 @@
     try { var raw=localStorage.getItem("bcom-theme-vars"); if(raw){ var vars=JSON.parse(raw); Object.keys(vars).forEach(function(k){ document.documentElement.style.setProperty(k,vars[k]); }); } } catch(_) {}
   })();
 </script>
-<link rel="stylesheet" href="../assets/css/bcom.css?v=3" />
+<link rel="stylesheet" href="../assets/css/bcom.css?v=3">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  .rpt-table { width:100%; border-collapse:collapse; font-size:12px; letter-spacing:.5px; }
-  .rpt-table th { background:#0e0a06; color:#ccc; font-weight:600; letter-spacing:1.5px; padding:7px 10px; text-align:left; border-bottom:1px solid #1e1008; }
-  .rpt-table td { padding:7px 10px; border-bottom:1px solid #120b04; vertical-align:middle; color:#ccc; }
-  .rpt-table tr:hover td { background:#0e0905; }
-  .rpt-table .empty { text-align:center; color:#2a2a2a; padding:24px; letter-spacing:2px; }
-  .rpt-pill { display:inline-block; font-size:9px; letter-spacing:1.5px; padding:2px 7px; border:1px solid; }
-  .rpt-pill.pass  { color:#27ae60; border-color:#27ae60; }
-  .rpt-pill.fail  { color:#e74c3c; border-color:#e74c3c; }
-  .rpt-pill.error { color:#f39c12; border-color:#f39c12; }
-  .score-hi  { color:#27ae60; font-weight:700; }
-  .score-mid { color:var(--orange); font-weight:700; }
-  .score-lo  { color:#e74c3c; font-weight:700; }
-  .summary-row { display:flex; gap:12px; flex-wrap:wrap; }
-  .sum-chip { border:1px solid #1a0e05; padding:8px 14px; background:#090603; font-size:11px; letter-spacing:1px; color:#ccc; }
-  .sum-chip span { display:block; font-size:16px; font-weight:700; color:var(--orange); margin-top:2px; }
-  .filter-bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .filter-bar label { font-size:10px; letter-spacing:1px; color:#ccc; }
+/* ── Hero chips ──────────────────────────────────────────── */
+.rpt-hero{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.rpt-chip{background:var(--bg-panel);border:1px solid var(--border-dim);border-radius:2px;padding:12px 16px;min-width:110px}
+.rpt-chip-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.rpt-chip-val{font-size:24px;font-weight:700;color:var(--fg)}
+
+/* ── Sections ────────────────────────────────────────────── */
+.rpt-section{background:var(--bg-panel);border:2px solid var(--border-dim);border-radius:2px;margin-bottom:14px;overflow:hidden}
+.rpt-section-title{font-size:11px;font-weight:700;color:var(--fg);text-transform:uppercase;letter-spacing:.08em;background:#1a0e06;border-bottom:1px solid var(--border-dim);padding:6px 14px;display:flex;align-items:center;justify-content:space-between}
+.rpt-section-body{padding:14px}
+.rpt-section-title .sort-btn{font-size:10px;color:var(--muted);cursor:pointer;font-weight:400;letter-spacing:0;text-transform:none}
+.rpt-section-title .sort-btn:hover{color:var(--fg)}
+
+/* ── Tables ──────────────────────────────────────────────── */
+.rpt-table{width:100%;border-collapse:collapse;font-size:12px}
+.rpt-table th{text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;padding:7px 10px;border-bottom:1px solid var(--border-dim);cursor:pointer;user-select:none}
+.rpt-table th:hover{color:var(--fg)}
+.rpt-table td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--fg);vertical-align:middle}
+.rpt-table tr:last-child td{border-bottom:none}
+.rpt-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* ── Pills / badges ──────────────────────────────────────── */
+.pill{display:inline-block;padding:1px 6px;border-radius:2px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.pill-pass{background:rgba(40,180,40,.15);color:#6f6;border:1px solid rgba(40,180,40,.25)}
+.pill-fail{background:rgba(220,60,60,.15);color:#f88;border:1px solid rgba(220,60,60,.25)}
+.pill-run {background:rgba(180,90,20,.15);color:var(--orange-dark);border:1px solid rgba(180,90,20,.3)}
+.score-hi {color:#6f6;font-weight:700}
+.score-mid{color:var(--orange-dark);font-weight:700}
+.score-lo {color:#f88;font-weight:700}
+
+/* ── Charts ──────────────────────────────────────────────── */
+.chart-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:700px){.chart-2col{grid-template-columns:1fr}}
+.chart-card{background:var(--bg-panel);border:2px solid var(--border-dim);border-radius:2px;overflow:hidden}
+.chart-card-title{font-size:11px;font-weight:700;color:var(--fg);text-transform:uppercase;letter-spacing:.08em;background:#1a0e06;border-bottom:1px solid var(--border-dim);padding:6px 14px}
+.chart-card-body{padding:14px;position:relative;height:200px;display:flex;align-items:center;justify-content:center}
+.chart-card-body canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important}
+.no-data-msg{font-size:11px;color:var(--muted);position:relative}
+
+/* ── Heatmap ─────────────────────────────────────────────── */
+.heatmap-wrap{overflow-x:auto}
+.heatmap-table{border-collapse:collapse;font-size:11px}
+.heatmap-table th{padding:5px 10px;text-align:center;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.heatmap-table td{padding:0;border:1px solid rgba(255,255,255,.03)}
+.hm-cell{width:52px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.hm-row-label{padding:4px 10px 4px 0;text-align:right;color:var(--muted);font-size:10px;white-space:nowrap}
+
+/* ── Filter row ──────────────────────────────────────────── */
+.flt-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.flt-row input,.flt-row select{background:var(--bg);border:1px solid var(--border-dim);color:var(--fg);border-radius:2px;padding:5px 8px;font-size:12px;outline:none}
+.flt-row input{flex:1;min-width:140px}
+.flt-row input:focus,.flt-row select:focus{border-color:var(--orange-dark)}
+
+/* ── Timeline ────────────────────────────────────────────── */
+.timeline-row{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px}
+.timeline-label{width:160px;flex-shrink:0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
+.timeline-track{flex:1;height:16px;background:rgba(255,255,255,.04);border-radius:0;overflow:hidden}
+.timeline-bar{height:100%;border-radius:0;display:flex;align-items:center;padding:0 6px;font-size:10px;font-weight:700;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;min-width:2px}
 </style>
 </head>
 <body>
 
+<!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-title">BCOM-C</div>
   <div class="topbar-right">
-    <a class="nav-btn" href="../index.html"><span class="nav-arrow">&#8592;</span> DASHBOARD</a>
+    <a class="nav-btn" href="../index.html">DASHBOARD</a>
     <a class="nav-btn" href="data-gen.html">DATA GEN</a>
     <a class="nav-btn" href="pipeline.html">PIPELINE</a>
     <a class="nav-btn" href="resources.html">RESOURCES</a>
@@ -48,249 +91,468 @@
   </div>
 </div>
 
-<div class="actionbar">
-  <button class="action-btn danger" onclick="triggerAction('RESTART VLLM')">RESTART VLLM</button>
-  <button class="action-btn danger" onclick="triggerAction('RESTART LLM')">RESTART LLM</button>
-  <button class="action-btn" onclick="exportAll('eval')">&#8659; EXPORT EVALS</button>
-  <button class="action-btn" onclick="exportAll('runs')">&#8659; EXPORT RUNS</button>
-</div>
-
+<!-- MAIN -->
 <div class="main">
-  <div class="info-grid">
 
-    <!-- SUMMARY -->
-    <div class="info-card">
-      <div class="info-card-hdr">Session Summary</div>
-      <div class="summary-row">
-        <div class="sum-chip">EVAL RUNS<span id="sum-evals">--</span></div>
-        <div class="sum-chip">PIPELINE RUNS<span id="sum-pipelines">--</span></div>
-        <div class="sum-chip">DATA JOBS<span id="sum-datajobs">--</span></div>
-        <div class="sum-chip">BEST SCORE<span id="sum-bestscore">--</span></div>
-        <div class="sum-chip">AVG SCORE<span id="sum-avgscore">--</span></div>
-        <div class="sum-chip">FINE-TUNES<span id="sum-ft">--</span></div>
-      </div>
+  <!-- Page header row -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Reports</div>
+    <span id="rpt-refresh" style="font-size:10px;color:var(--muted)">—</span>
+  </div>
+
+  <!-- Summary chips — /api/reports/summary -->
+  <div class="rpt-hero">
+    <div class="rpt-chip"><div class="rpt-chip-label">Eval Runs</div><div class="rpt-chip-val" id="chip-evals">—</div></div>
+    <div class="rpt-chip"><div class="rpt-chip-label">Pipelines</div><div class="rpt-chip-val" id="chip-pipelines">—</div></div>
+    <div class="rpt-chip"><div class="rpt-chip-label">Finetunes</div><div class="rpt-chip-val" id="chip-ft">—</div></div>
+    <div class="rpt-chip"><div class="rpt-chip-label">Datagen Jobs</div><div class="rpt-chip-val" id="chip-dg">—</div></div>
+    <div class="rpt-chip"><div class="rpt-chip-label">Best Score</div><div class="rpt-chip-val" id="chip-best">—</div></div>
+    <div class="rpt-chip"><div class="rpt-chip-label">Avg Score</div><div class="rpt-chip-val" id="chip-avg">—</div></div>
+  </div>
+
+  <!-- Chart row -->
+  <div class="chart-2col">
+    <div class="chart-card">
+      <div class="chart-card-title">Datagen Stats</div>
+      <div class="chart-card-body" id="dg-chart-wrap"><canvas id="chart-dg"></canvas></div>
     </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Finetune Loss History</div>
+      <div class="chart-card-body" id="ft-chart-wrap"><canvas id="chart-ft"></canvas></div>
+    </div>
+  </div>
 
-    <!-- EVAL HISTORY -->
-    <div class="info-card">
-      <div class="info-card-hdr" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <span>Eval History</span>
-        <div class="filter-bar">
-          <label>MODEL</label>
-          <input class="form-input" id="flt-model" type="text" placeholder="filter..." style="width:110px;font-size:10px;padding:3px 8px;" oninput="renderEvals()" />
-          <label>SUITE</label>
-          <input class="form-input" id="flt-suite" type="text" placeholder="filter..." style="width:80px;font-size:10px;padding:3px 8px;" oninput="renderEvals()" />
-          <select class="form-select" id="flt-status" style="font-size:10px;padding:2px 8px;width:auto;" onchange="renderEvals()">
-            <option value="all">ALL</option><option value="pass">PASS</option><option value="fail">FAIL</option>
-          </select>
-          <button class="action-btn" style="font-size:10px;padding:2px 10px;" onclick="exportAll('eval')">&#8659; CSV</button>
-        </div>
-      </div>
+  <!-- Finetune History — /api/finetune/ -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">Finetune History</div>
+    <div class="rpt-section-body">
       <div style="overflow-x:auto">
         <table class="rpt-table">
-          <thead>
-            <tr><th>RUN ID</th><th>DATE</th><th>MODEL</th><th>BACKEND</th><th>JUDGE</th><th>SUITE</th><th>SCORE</th><th>PASS RATE</th><th>TIME</th><th>STATUS</th></tr>
-          </thead>
-          <tbody id="eval-tbody">
-            <tr><td colspan="10" class="empty">NO EVAL RUNS YET</td></tr>
-          </tbody>
+          <thead><tr><th>Run ID</th><th>Model</th><th>Dataset</th><th>Rank</th><th>Epochs</th><th>LR</th><th>Final Loss</th><th>Duration</th><th>Status</th></tr></thead>
+          <tbody id="ft-tbody"><tr><td colspan="9" style="text-align:center;color:var(--muted);padding:16px">—</td></tr></tbody>
         </table>
       </div>
     </div>
+  </div>
 
-    <!-- TRAINING RUNS -->
-    <div class="info-card">
-      <div class="info-card-hdr" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Training Run History</span>
-        <button class="action-btn" style="font-size:10px;padding:2px 10px;" onclick="exportAll('train')">&#8659; CSV</button>
-      </div>
+  <!-- Model Leaderboard — /api/reports/model-leaderboard -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">
+      Model Leaderboard
+      <span class="sort-btn" onclick="sortLB('rank')">▼ SORT</span>
+    </div>
+    <div class="rpt-section-body">
       <div style="overflow-x:auto">
         <table class="rpt-table">
-          <thead>
-            <tr><th>RUN ID</th><th>MODEL</th><th>DATASET</th><th>RANK</th><th>EPOCHS</th><th>LR</th><th>NODE</th><th>DURATION</th><th>FINAL LOSS</th><th>STATUS</th></tr>
-          </thead>
-          <tbody id="train-tbody">
-            <tr><td colspan="10" class="empty">NO TRAINING RUNS YET</td></tr>
-          </tbody>
+          <thead><tr>
+            <th onclick="sortLB('rank')">#</th>
+            <th onclick="sortLB('model')">Model</th>
+            <th onclick="sortLB('avg_score')">Avg Score</th>
+            <th onclick="sortLB('best_score')">Best</th>
+            <th onclick="sortLB('eval_count')">Evals</th>
+            <th onclick="sortLB('pass_rate')">Pass Rate</th>
+            <th>Status</th>
+          </tr></thead>
+          <tbody id="lb-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:16px">—</td></tr></tbody>
         </table>
       </div>
     </div>
+  </div>
 
-    <!-- PIPELINE RUNS -->
-    <div class="info-card">
-      <div class="info-card-hdr" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Pipeline Run History</span>
-        <button class="action-btn" style="font-size:10px;padding:2px 10px;" onclick="exportAll('pipeline')">&#8659; CSV</button>
+  <!-- Eval Comparison — /api/reports/eval-comparison -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">Eval Comparison</div>
+    <div class="rpt-section-body">
+      <div class="flt-row">
+        <input id="ec-search" type="text" placeholder="Filter model…" oninput="renderEvalComp()">
+        <select id="ec-suite" onchange="renderEvalComp()"><option value="">All Suites</option></select>
       </div>
       <div style="overflow-x:auto">
         <table class="rpt-table">
-          <thead>
-            <tr><th>RUN ID</th><th>MODEL</th><th>BACKEND</th><th>SUITE</th><th>TARGET</th><th>ITERS</th><th>FINAL SCORE</th><th>NODE</th><th>DURATION</th><th>STATUS</th></tr>
-          </thead>
-          <tbody id="pipeline-tbody">
-            <tr><td colspan="10" class="empty">NO PIPELINE RUNS YET</td></tr>
-          </tbody>
+          <thead><tr><th>Model</th><th>Suite</th><th>Score</th><th>Pass Rate</th><th>Evals</th><th>Trend</th><th>Status</th></tr></thead>
+          <tbody id="ec-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:16px">—</td></tr></tbody>
         </table>
       </div>
     </div>
-
   </div>
 
-  <div class="log-panel" id="log">
-    <div class="log-line"><span class="log-time">--:--:--</span><span class="log-msg info">REPORTS module ready. Historical data populates as runs complete.</span></div>
-  </div>
-</div>
-
-<div class="footer">
-  <span>BOB-AI // BCOM-C v0.1</span>
-  <span id="footer-date"></span>
-  <span>SESSION ACTIVE</span>
-</div>
-
-<!-- TERMINAL DOCK -->
-<div class="terminal-dock" id="terminal-dock">
-  <div class="terminal-bar">
-    <div class="terminal-tabs">
-      <div class="terminal-tab active" data-term="spark" onclick="switchTerm('spark')">SPARK-BOB</div>
-      <div class="terminal-tab" data-term="linux" onclick="switchTerm('linux')">LINUX-DSKTP</div>
-    </div>
-      <div class="terminal-tab" data-term="shell">SHELL</div>
-    <div class="terminal-controls">
-      <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
+  <!-- Test Heatmap — /api/reports/test-heatmap -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">Test Heatmap</div>
+    <div class="rpt-section-body">
+      <div class="heatmap-wrap" id="heatmap-wrap"><div style="color:var(--muted);font-size:11px">—</div></div>
     </div>
   </div>
-  <div class="terminal-body" id="terminal-body">
-    <div class="terminal-output" id="term-out-spark"><div class="term-line sys">[bcom-c] reports terminal ready</div></div>
-    <div class="terminal-output" id="term-out-linux" style="display:none"><div class="term-line sys">[bcom-c] reports terminal ready</div></div>
-    <div id="xterm-container" style="display:none;flex:1;min-height:0;width:100%;background:#080808;"></div>
-    <div class="terminal-input-row">
-      <span class="term-prompt" id="term-prompt">$</span>
-      <input class="terminal-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type command..." />
+
+  <!-- Pipeline Timeline — /api/reports/pipeline-timeline -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">Pipeline Timeline</div>
+    <div class="rpt-section-body">
+      <div id="timeline-wrap"><div style="color:var(--muted);font-size:11px">—</div></div>
     </div>
   </div>
-</div>
+
+  <!-- Model × Suite Matrix — /api/reports/model-suite-matrix -->
+  <div class="rpt-section">
+    <div class="rpt-section-title">Model × Suite Matrix</div>
+    <div class="rpt-section-body">
+      <div class="heatmap-wrap" id="matrix-wrap"><div style="color:var(--muted);font-size:11px">—</div></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
 
 <script src="../assets/js/bcom.js?v=5"></script>
 <script>
-  BCOM.apiBase      = '';   // '' = same-origin (Caddy proxies /api/* → Spark)
-  BCOM.pollInterval = 5000;
-  startPolling();
+window.BCOM = window.BCOM || {};
+BCOM.apiBase = '';
 
-  // ── Live data arrays (populated by API) ─────────────────────────────
-  let _evals     = [];
-  let _trains    = [];
-  let _pipelines = [];
+var _lb = [], _lbSort = 'rank', _lbAsc = true;
+var _ec = [], _ecSuites = [];
+var ORANGE     = 'rgba(180,90,20,1)';
+var ORANGE_DIM = 'rgba(180,90,20,0.15)';
 
-  function sc(n) { return n >= 80 ? 'score-hi' : n >= 65 ? 'score-mid' : 'score-lo'; }
+Chart.defaults.color = '#555';
+Chart.defaults.font.family = 'inherit';
 
-  function renderEvals() {
-    const fm  = document.getElementById('flt-model').value.toLowerCase();
-    const fs  = document.getElementById('flt-suite').value.toLowerCase();
-    const fst = document.getElementById('flt-status').value;
-    let d = _evals;
-    if (fm)          d = d.filter(r => r.model.toLowerCase().includes(fm));
-    if (fs)          d = d.filter(r => r.suite.toLowerCase().includes(fs));
-    if (fst !== 'all') d = d.filter(r => r.status === fst);
-    const tb = document.getElementById('eval-tbody');
-    if (!d.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">NO EVAL RUNS YET</td></tr>'; return; }
-    tb.innerHTML = d.map(r => `<tr>
-      <td style="color:var(--orange-dark)">${r.id}</td>
-      <td style="color:#999">${r.date}</td><td>${r.model}</td><td>${r.backend}</td>
-      <td>${r.judge}</td><td>${r.suite}</td>
-      <td class="${sc(r.score)}">${r.score}%</td>
-      <td>${r.passrate}</td><td style="color:#999">${r.time}</td>
-      <td><span class="rpt-pill ${r.status}">${r.status.toUpperCase()}</span></td>
-    </tr>`).join('');
-  }
+function apiFetch(url) {
+  return fetch(BCOM.apiBase + url, { cache: 'no-store' }).then(function(r) {
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  });
+}
 
-  function renderTrains() {
-    const tb = document.getElementById('train-tbody');
-    if (!_trains.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">NO TRAINING RUNS YET</td></tr>'; return; }
-    tb.innerHTML = _trains.map(r => `<tr>
-      <td style="color:var(--orange-dark)">${r.id}</td>
-      <td>${r.model}</td><td style="font-size:10px;color:#999">${r.dataset}</td>
-      <td>${r.rank}</td><td>${r.epochs}</td><td>${r.lr}</td><td>${r.node}</td>
-      <td>${r.dur}</td><td class="${sc(parseFloat(r.loss)<0.09?85:parseFloat(r.loss)<0.12?70:55)}">${r.loss}</td>
-      <td><span class="rpt-pill ${r.status}">${r.status.toUpperCase()}</span></td>
-    </tr>`).join('');
-  }
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-  function renderPipelines() {
-    const tb = document.getElementById('pipeline-tbody');
-    if (!_pipelines.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">NO PIPELINE RUNS YET</td></tr>'; return; }
-    tb.innerHTML = _pipelines.map(r => `<tr>
-      <td style="color:var(--orange-dark)">${r.id}</td>
-      <td>${r.model}</td><td>${r.backend}</td><td>${r.suite}</td><td>${r.target}</td>
-      <td>${r.iters}</td><td class="${sc(parseInt(r.score))}">${r.score}</td>
-      <td>${r.node}</td><td>${r.dur}</td>
-      <td><span class="rpt-pill ${r.status}">${r.status.toUpperCase()}</span></td>
-    </tr>`).join('');
-  }
+function sc(n)   { return n >= 0.80 ? 'score-hi' : n >= 0.60 ? 'score-mid' : 'score-lo'; }
+function pct(v)  { return typeof v === 'number' ? (v > 1 ? v.toFixed(1) + '%' : (v * 100).toFixed(1) + '%') : '—'; }
 
-  // ── Live summary from API ────────────────────────────────────────────
-  async function pollReportsSummary() {
-    try {
-      const res = await fetch('/api/reports/summary', { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const d = await res.json();
-      setText('sum-evals',     d.eval_runs     ?? '--');
-      setText('sum-pipelines', d.pipelines     ?? '--');
-      setText('sum-datajobs',  d.datagen_jobs  ?? '--');
-      setText('sum-ft',        d.finetune_jobs ?? '--');
-      if (!d.eval_runs) {
-        setText('sum-bestscore', '--');
-        setText('sum-avgscore',  '--');
-      }
-    } catch (err) {
-      logLine('Reports summary error: ' + err.message, 'warn');
+function noData(elOrId, msg) {
+  var el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
+  if (el) el.innerHTML = '<div style="color:var(--muted);font-size:11px">' + (msg || 'No data') + '</div>';
+}
+
+function emptyRow(cols, msg) {
+  return '<tr><td colspan="' + cols + '" style="text-align:center;color:var(--muted);padding:16px;font-size:11px">' + (msg || 'No data') + '</td></tr>';
+}
+
+/* ── Summary ─────────────────────────────────────────────── */
+function pollSummary() {
+  apiFetch('/api/reports/summary').then(function(d) {
+    document.getElementById('chip-evals').textContent     = d.eval_runs     ?? d.evals     ?? 0;
+    document.getElementById('chip-pipelines').textContent = d.pipelines     ?? d.pipeline_runs ?? 0;
+    document.getElementById('chip-ft').textContent        = d.finetune_jobs ?? d.finetunes  ?? 0;
+    document.getElementById('chip-dg').textContent        = d.datagen_jobs  ?? d.datagen   ?? 0;
+    document.getElementById('chip-best').textContent = d.best_score !== undefined ? pct(d.best_score) : '—';
+    document.getElementById('chip-avg').textContent  = d.avg_score  !== undefined ? pct(d.avg_score)  : '—';
+    document.getElementById('rpt-refresh').textContent = 'updated ' + new Date().toLocaleTimeString();
+  }).catch(function(){});
+}
+
+/* ── Leaderboard ─────────────────────────────────────────── */
+function pollLeaderboard() {
+  apiFetch('/api/reports/model-leaderboard').then(function(data) {
+    _lb = Array.isArray(data) ? data : (data.models || data.leaderboard || data.items || []);
+    renderLB();
+  }).catch(function() {
+    document.getElementById('lb-tbody').innerHTML = emptyRow(7, 'No data');
+  });
+}
+
+function sortLB(field) {
+  if (_lbSort === field) _lbAsc = !_lbAsc;
+  else { _lbSort = field; _lbAsc = field === 'rank'; }
+  renderLB();
+}
+
+function renderLB() {
+  var sorted = _lb.slice().sort(function(a, b) {
+    var va = a[_lbSort] !== undefined ? a[_lbSort] : (a.metrics && a.metrics[_lbSort]);
+    var vb = b[_lbSort] !== undefined ? b[_lbSort] : (b.metrics && b.metrics[_lbSort]);
+    va = va ?? 0; vb = vb ?? 0;
+    return _lbAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+  var tbody = document.getElementById('lb-tbody');
+  if (!sorted.length) { tbody.innerHTML = emptyRow(7, 'No data'); return; }
+  tbody.innerHTML = sorted.map(function(m, i) {
+    var rank  = m.rank ?? (i + 1);
+    var model = m.model_id || m.model || m.name || '—';
+    var avg   = m.avg_score  ?? (m.metrics && m.metrics.avg_score);
+    var best  = m.best_score ?? (m.metrics && m.metrics.best_score);
+    var cnt   = m.eval_count || m.evals || '—';
+    var pass  = m.pass_rate  ?? (m.metrics && m.metrics.pass_rate);
+    var rankCls = rank === 1 ? 'color:#ffd700' : rank === 2 ? 'color:#c0c0c0' : rank === 3 ? 'color:#cd7f32' : 'color:var(--muted)';
+    return '<tr>' +
+      '<td style="font-weight:700;' + rankCls + '">' + rank + '</td>' +
+      '<td style="font-weight:600">' + esc(model) + '</td>' +
+      '<td class="' + sc(avg || 0) + '">' + pct(avg) + '</td>' +
+      '<td class="' + sc(best || 0) + '">' + pct(best) + '</td>' +
+      '<td>' + esc(String(cnt)) + '</td>' +
+      '<td>' + pct(pass) + '</td>' +
+      '<td><span class="pill ' + ((avg || 0) >= 0.7 ? 'pill-pass' : 'pill-fail') + '">' + ((avg || 0) >= 0.7 ? 'Strong' : 'Weak') + '</span></td>' +
+      '</tr>';
+  }).join('');
+}
+
+/* ── Eval Comparison ─────────────────────────────────────── */
+function pollEvalComparison() {
+  apiFetch('/api/reports/eval-comparison').then(function(data) {
+    _ec = Array.isArray(data) ? data : (data.comparisons || data.evals || data.items || []);
+    var suites = _ec.map(function(e){ return e.suite || e.suite_id || ''; }).filter(Boolean);
+    suites = suites.filter(function(v, i, a){ return a.indexOf(v) === i; });
+    var sel = document.getElementById('ec-suite');
+    sel.innerHTML = '<option value="">All Suites</option>' + suites.map(function(s){ return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join('');
+    renderEvalComp();
+  }).catch(function() {
+    document.getElementById('ec-tbody').innerHTML = emptyRow(7, 'No data');
+  });
+}
+
+window.renderEvalComp = function() {
+  var search = (document.getElementById('ec-search').value || '').toLowerCase();
+  var suite  = document.getElementById('ec-suite').value;
+  var filtered = _ec.filter(function(e) {
+    var model = (e.model_id || e.model || '').toLowerCase();
+    if (search && model.indexOf(search) < 0) return false;
+    if (suite && (e.suite || e.suite_id) !== suite) return false;
+    return true;
+  });
+  var tbody = document.getElementById('ec-tbody');
+  if (!filtered.length) { tbody.innerHTML = emptyRow(7, 'No data'); return; }
+  tbody.innerHTML = filtered.map(function(e) {
+    var model  = e.model_id || e.model || '—';
+    var suite  = e.suite || e.suite_id || '—';
+    var score  = e.score ?? e.avg_score;
+    var pass   = e.pass_rate ?? e.passrate;
+    var cnt    = e.eval_count || e.count || '—';
+    var trend  = e.trend || e.score_trend;
+    var trendHtml = trend > 0 ? '<span style="color:#6f6">▲ +' + trend.toFixed(2) + '</span>' :
+                    trend < 0 ? '<span style="color:#f88">▼ '  + trend.toFixed(2) + '</span>' : '—';
+    var st = e.status || 'unknown';
+    return '<tr>' +
+      '<td style="font-weight:600">' + esc(model) + '</td>' +
+      '<td style="color:var(--muted)">' + esc(suite) + '</td>' +
+      '<td class="' + sc(score || 0) + '">' + pct(score) + '</td>' +
+      '<td>' + pct(pass) + '</td>' +
+      '<td>' + esc(String(cnt)) + '</td>' +
+      '<td>' + trendHtml + '</td>' +
+      '<td><span class="pill ' + ((score || 0) >= 0.7 ? 'pill-pass' : 'pill-fail') + '">' + esc(st) + '</span></td>' +
+      '</tr>';
+  }).join('');
+};
+
+/* ── Test Heatmap ────────────────────────────────────────── */
+function pollTestHeatmap() {
+  apiFetch('/api/reports/test-heatmap').then(function(data) {
+    renderHeatmap(data, 'heatmap-wrap');
+  }).catch(function() { noData('heatmap-wrap'); });
+}
+
+function renderHeatmap(data, containerId) {
+  var el     = document.getElementById(containerId);
+  var models = data.models || data.rows || [];
+  var tests  = data.tests  || data.cols || data.columns || [];
+  var matrix = data.matrix || data.values || [];
+  if (!models.length || !tests.length) { noData(el); return; }
+  var html = '<table class="heatmap-table"><thead><tr><th></th>' +
+    tests.slice(0,12).map(function(t){ return '<th>' + esc(String(t).slice(0,10)) + '</th>'; }).join('') +
+    '</tr></thead><tbody>' +
+    models.map(function(model, i) {
+      var row = matrix[i] || [];
+      return '<tr><td class="hm-row-label">' + esc(String(model).slice(0,20)) + '</td>' +
+        tests.slice(0,12).map(function(_, j) {
+          var v   = row[j];
+          var num = typeof v === 'number' ? v : null;
+          var bg  = num !== null ? heatColor(num) : 'rgba(255,255,255,.03)';
+          var txt = num !== null ? (num > 1 ? num.toFixed(0) + '%' : (num*100).toFixed(0) + '%') : '—';
+          return '<td><div class="hm-cell" style="background:' + bg + ';color:' + (num !== null && num >= 0.7 ? '#fff' : '#888') + '">' + txt + '</div></td>';
+        }).join('') + '</tr>';
+    }).join('') + '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function heatColor(v) {
+  if (v > 1) v = v / 100;
+  var r, g;
+  if (v >= 0.5) { r = Math.round(255 * (1 - v) * 2); g = 140; }
+  else           { r = 160; g = Math.round(255 * v * 2 * 0.55); }
+  return 'rgba(' + r + ',' + g + ',20,0.35)';
+}
+
+/* ── Finetune History — /api/finetune/ ───────────────────── */
+function pollFinetuneHistory() {
+  apiFetch('/api/finetune/').then(function(data) {
+    var runs = Array.isArray(data) ? data : (data.runs || data.history || data.items || []);
+    renderFTTable(runs);
+    renderFTChart(runs);
+  }).catch(function() {
+    document.getElementById('ft-tbody').innerHTML = emptyRow(9, 'No data');
+  });
+}
+
+function renderFTTable(runs) {
+  var tbody = document.getElementById('ft-tbody');
+  if (!runs.length) { tbody.innerHTML = emptyRow(9, 'No finetune runs'); return; }
+  tbody.innerHTML = runs.slice(0,30).map(function(r) {
+    var id     = r.id || r.finetune_id || r.run_id || '?';
+    var model  = r.base_model || r.model_id || r.model || '—';
+    var ds     = r.dataset_path || r.dataset || '—';
+    var rank   = r.lora_rank != null ? r.lora_rank : (r.rank != null ? r.rank : '—');
+    var epochs = r.epochs || '—';
+    var lr     = r.learning_rate || r.lr || '—';
+    var loss   = typeof r.final_loss === 'number' ? r.final_loss.toFixed(4) : '—';
+    /* derive duration from timestamps */
+    var dur = r.duration_s ? r.duration_s.toFixed(0) + 's' : (r.duration || null);
+    if (!dur && r.started_at && r.completed_at) {
+      var ms = new Date(r.completed_at) - new Date(r.started_at);
+      if (!isNaN(ms) && ms > 0) dur = ms >= 60000 ? Math.round(ms/60000) + 'm' : Math.round(ms/1000) + 's';
     }
-  }
+    dur = dur || '—';
+    var dsShort  = ds !== '—' ? ds.split('/').pop() : '—';
+    var status   = (r.status || 'unknown').toLowerCase();
+    var statusCls = status === 'completed' || status === 'done' ? 'pill-pass' : status === 'failed' ? 'pill-fail' : status === 'running' ? 'pill-run' : '';
+    return '<tr>' +
+      '<td style="font-family:monospace;font-size:10px;color:var(--orange-dark)">' + esc(String(id).slice(0,12)) + '</td>' +
+      '<td style="font-weight:600;font-size:11px">' + esc(model) + '</td>' +
+      '<td style="color:var(--muted);font-size:11px" title="' + esc(ds) + '">' + esc(dsShort) + '</td>' +
+      '<td>' + esc(String(rank)) + '</td>' +
+      '<td>' + esc(String(epochs)) + '</td>' +
+      '<td style="font-family:monospace">' + esc(String(lr)) + '</td>' +
+      '<td style="font-weight:700">' + loss + '</td>' +
+      '<td style="color:var(--muted)">' + dur + '</td>' +
+      '<td><span class="pill ' + statusCls + '">' + status + '</span></td>' +
+      '</tr>';
+  }).join('');
+}
 
-  // ── Live table data from API ─────────────────────────────────────────
-  async function pollReportsTables() {
-    const [evalsRes, trainsRes, plRes] = await Promise.allSettled([
-      fetch('/api/evals/',          { cache: 'no-store' }),
-      fetch('/api/training/runs/',  { cache: 'no-store' }),
-      fetch('/api/pipelines/runs/', { cache: 'no-store' }),
-    ]);
-    if (evalsRes.status === 'fulfilled' && evalsRes.value.ok)
-      try { _evals = await evalsRes.value.json(); } catch(_) {}
-    if (trainsRes.status === 'fulfilled' && trainsRes.value.ok)
-      try { _trains = await trainsRes.value.json(); } catch(_) {}
-    if (plRes.status === 'fulfilled' && plRes.value.ok)
-      try { _pipelines = await plRes.value.json(); } catch(_) {}
-    renderEvals(); renderTrains(); renderPipelines();
+var _ftChart = null;
+function renderFTChart(runs) {
+  var completed = runs.filter(function(r){ return typeof r.final_loss === 'number'; });
+  var wrap = document.getElementById('ft-chart-wrap');
+  if (!completed.length) {
+    wrap.innerHTML = '<div class="no-data-msg">No loss data yet</div>';
+    return;
   }
-
-  function renderSummary() { pollReportsSummary(); }
-
-  function exportAll(type) {
-    logLine(`CMD: EXPORT ${type.toUpperCase()} — CSV`, 'info');
-    if (BCOM.apiBase === null) logLine('No API — export unavailable', 'warn');
+  if (!document.getElementById('chart-ft')) {
+    wrap.innerHTML = '<canvas id="chart-ft"></canvas>';
   }
+  var labels = completed.map(function(r, i){ return (r.base_model || r.model_id || r.model || ('run '+(i+1))).split('/').pop(); });
+  var losses  = completed.map(function(r){ return r.final_loss; });
+  var ctx = document.getElementById('chart-ft').getContext('2d');
+  if (_ftChart) _ftChart.destroy();
+  _ftChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: labels, datasets: [{ label: 'Final Loss', data: losses, borderColor: ORANGE,
+      backgroundColor: ORANGE_DIM, borderWidth: 1.5, pointRadius: 3, tension: 0.3 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#ccc', bodyColor: '#ccc' } },
+      scales: {
+        x: { ticks: { color: '#555', font: { size: 10 }, maxRotation: 30 }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { ticks: { color: '#555', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } }
+      }
+    }
+  });
+}
 
-  renderSummary();
-  pollReportsTables();
-  setInterval(pollReportsTables, 30000);
+/* ── Pipeline Timeline — /api/reports/pipeline-timeline ──── */
+function pollPipelineTimeline() {
+  apiFetch('/api/reports/pipeline-timeline').then(function(data) {
+    renderTimeline(data);
+  }).catch(function() { noData('timeline-wrap'); });
+}
 
-  // Terminal
-  let _termNode = 'spark';
-  function switchTerm(node) {
-    _termNode = node;
-    document.querySelectorAll('.terminal-tab').forEach(t => t.classList.toggle('active', t.dataset.term === node));
-    ['spark','linux'].forEach(n => { const el = document.getElementById('term-out-'+n); if (el) el.style.display = n===node?'block':'none'; });
-    document.getElementById('term-prompt').textContent = (node==='spark'?'spark-bob':'linux-dsktp')+' $';
-    document.getElementById('terminal-input').focus();
+function renderTimeline(data) {
+  var el   = document.getElementById('timeline-wrap');
+  var runs = Array.isArray(data) ? data : (data.runs || data.pipelines || data.timeline || data.items || []);
+  if (!runs.length) { noData(el); return; }
+  var maxDur = Math.max.apply(null, runs.map(function(r){ return r.duration_s || r.duration || 0; })) || 1;
+  var colors = ['rgba(180,90,20,.7)','rgba(80,140,220,.7)','rgba(60,180,100,.7)','rgba(220,80,80,.7)'];
+  el.innerHTML = runs.slice(0,20).map(function(r, i) {
+    var label = (r.model_id || r.model || r.pipeline_id || r.id || 'run').slice(0,22);
+    var dur   = r.duration_s || r.duration || 0;
+    var p     = Math.max(1, Math.round(dur / maxDur * 100));
+    var score = r.final_score !== undefined ? (r.final_score > 1 ? r.final_score.toFixed(0) : (r.final_score*100).toFixed(0)) + '%' : '';
+    return '<div class="timeline-row">' +
+      '<div class="timeline-label">' + esc(label) + '</div>' +
+      '<div class="timeline-track">' +
+        '<div class="timeline-bar" style="width:' + p + '%;background:' + colors[i%colors.length] + '">' +
+          (dur ? (dur > 60 ? Math.round(dur/60) + 'm' : dur + 's') : '') + (score ? ' ' + score : '') +
+        '</div>' +
+      '</div></div>';
+  }).join('');
+}
+
+/* ── Datagen Stats — /api/reports/datagen-stats ──────────── */
+var _dgChart = null;
+function pollDatagenStats() {
+  apiFetch('/api/reports/datagen-stats').then(function(data) {
+    renderDGChart(data);
+  }).catch(function() {
+    document.getElementById('dg-chart-wrap').innerHTML = '<div class="no-data-msg">No data</div>';
+  });
+}
+
+function renderDGChart(data) {
+  var labels = [], vals = [];
+  if (data.by_model) {
+    Object.keys(data.by_model).forEach(function(k){ labels.push(k); vals.push(data.by_model[k]); });
+  } else if (Array.isArray(data) && data.length) {
+    data.forEach(function(d){ labels.push(d.model || d.name || '?'); vals.push(d.count || d.tokens || d.value || 0); });
+  } else if (data.models && data.models.length) {
+    data.models.forEach(function(m){ labels.push(m.name || m.model_id || '?'); vals.push(m.count || m.tokens || 0); });
   }
-  function termLine(text, cls) {
-    const out = document.getElementById('term-out-'+_termNode); if (!out) return;
-    const div = document.createElement('div'); div.className = 'term-line'+(cls?' '+cls:''); div.textContent = text;
-    out.appendChild(div); out.scrollTop = out.scrollHeight;
+  var wrap = document.getElementById('dg-chart-wrap');
+  if (!labels.length) {
+    wrap.innerHTML = '<div class="no-data-msg">No data</div>';
+    return;
   }
-  // terminal input wired by bcom-terminal.js
-  // minimize wired by bcom-terminal.js
-  switchTerm('spark');
+  if (!document.getElementById('chart-dg')) wrap.innerHTML = '<canvas id="chart-dg"></canvas>';
+  var ctx = document.getElementById('chart-dg').getContext('2d');
+  if (_dgChart) _dgChart.destroy();
+  _dgChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: labels, datasets: [{ label: 'Datagen Jobs', data: vals, backgroundColor: ORANGE_DIM, borderColor: ORANGE, borderWidth: 1 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#ccc', bodyColor: '#ccc' } },
+      scales: {
+        x: { ticks: { color: '#555', font: { size: 10 }, maxRotation: 30 }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { ticks: { color: '#555', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } }
+      }
+    }
+  });
+}
+
+/* ── Model-Suite Matrix ──────────────────────────────────── */
+function pollModelSuiteMatrix() {
+  apiFetch('/api/reports/model-suite-matrix').then(function(data) {
+    renderHeatmap(data, 'matrix-wrap');
+  }).catch(function() { noData('matrix-wrap'); });
+}
+
+/* ── Init ────────────────────────────────────────────────── */
+function startPolling() {
+  pollSummary();
+  pollFinetuneHistory();
+  pollLeaderboard();
+  pollEvalComparison();
+  pollTestHeatmap();
+  pollPipelineTimeline();
+  pollDatagenStats();
+  pollModelSuiteMatrix();
+
+  setInterval(pollSummary,         60000);
+  setInterval(pollFinetuneHistory, 30000);
+  setInterval(pollLeaderboard,     30000);
+  setInterval(pollEvalComparison,  30000);
+  setInterval(pollPipelineTimeline,30000);
+  setInterval(pollDatagenStats,    60000);
+}
+
+document.addEventListener('DOMContentLoaded', startPolling);
 </script>
-  <script src="../assets/js/bcom-terminal.js?v=3"></script>
 </body>
 </html>
