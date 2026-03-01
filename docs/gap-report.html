@@ -76,7 +76,7 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
 <body>
 
 <h1>BCOM-C ← → SPARK MISSION CONTROL</h1>
-<div class="subtitle">FEATURE GAP ANALYSIS &nbsp;·&nbsp; Generated 2026-03-01 &nbsp;·&nbsp; <span style="color:var(--green)">Updated 2026-03-01</span></div>
+<div class="subtitle">FEATURE GAP ANALYSIS &nbsp;·&nbsp; Generated 2026-03-01 &nbsp;·&nbsp; <span style="color:var(--green)">Updated 2026-03-01 (session 2 — pages audit + progress bar)</span></div>
 <div class="ts">Ross's dashboard @ 192.168.3.30:9010 &nbsp;|&nbsp; BCOM-C @ 10.0.0.223 (Mac Mini)</div>
 
 <h2>Executive Summary</h2>
@@ -88,23 +88,23 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
   </div>
   <div class="sum-card">
     <div class="label">Pages in BCOM-C</div>
-    <div class="val" style="color:var(--blue)">7</div>
-    <div class="sub">index, pipeline, data-gen, reports, resources, settings, orchestrator</div>
+    <div class="val" style="color:var(--blue)">11</div>
+    <div class="sub">index, pipeline, data-gen, datagen-run, datasets, models, coordinator, reports, resources, settings, orchestrator</div>
   </div>
   <div class="sum-card">
     <div class="label">Pages Missing Entirely</div>
-    <div class="val" style="color:var(--red)">3</div>
-    <div class="sub">datagen run detail, datasets, models/leaderboard</div>
+    <div class="val" style="color:var(--green)">0</div>
+    <div class="sub">All Ross pages now exist in BCOM-C — feature gaps remain within pages</div>
   </div>
   <div class="sum-card">
     <div class="label">Missing API Endpoints</div>
-    <div class="val" style="color:var(--amber)">24+</div>
-    <div class="sub">coordinator, datagen monitor, model-registry, finetune, reports endpoints</div>
+    <div class="val" style="color:var(--amber)">20+</div>
+    <div class="sub">datagen monitor, coordinator add-node/pause/resume, reports charts, compare/bedrock model tabs</div>
   </div>
   <div class="sum-card" style="border-color:rgba(0,204,102,.25);background:rgba(0,204,102,.04)">
-    <div class="label" style="color:var(--green)">Gaps Closed This Session</div>
-    <div class="val" style="color:var(--green)">2</div>
-    <div class="sub">Live Stream worker cards (P1 #1) · Pipeline finetune visibility (fake sim removed)</div>
+    <div class="label" style="color:var(--green)">Gaps Closed</div>
+    <div class="val" style="color:var(--green)">6</div>
+    <div class="sub">Live Stream (P1 #1) · Pipeline finetune banner · Datagen Run Detail page · Datasets page · Models page · Progress bar gradient + %</div>
   </div>
 </div>
 
@@ -146,7 +146,7 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
       <td><strong>Datagen Run Detail Page</strong> — dedicated URL per datagen job with full live monitoring</td>
       <td>/datagen-run?id=…</td>
       <td>✓ Full page with SSE, analytics, job controls</td>
-      <td><span class="badge page-miss">PAGE MISSING</span></td>
+      <td><span class="badge ok">DONE</span> datagen-run.html — hero stats, live agent worker cards, SSE stream, event chain viewer</td>
       <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
     </tr>
     <tr>
@@ -155,7 +155,7 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
       <td><strong>Coordinator Job System</strong> — multi-node job dispatch, add/remove/pause/resume nodes on running jobs</td>
       <td>datagen run detail</td>
       <td>✓ /api/coordinator/jobs/active/add-node, /pause, /resume</td>
-      <td><span class="badge missing">MISSING</span> BCOM uses single /api/jobs/ (no coordinator)</td>
+      <td><span class="badge partial">PARTIAL</span> coordinator.html page exists with node health cards and queue display — add-node/pause/resume API endpoints not yet wired</td>
       <td><span class="tag api">API</span><span class="tag fe">FE</span></td>
     </tr>
     <tr>
@@ -164,7 +164,7 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
       <td><strong>Datasets Page</strong> — list + hero stats + grounding distribution bars + detail slide-out + provenance chain</td>
       <td>/datasets</td>
       <td>✓ Full datasets page with Chart.js, slide-out panel, provenance</td>
-      <td><span class="badge page-miss">PAGE MISSING</span></td>
+      <td><span class="badge ok">DONE</span> datasets.html — hero stats, filterable table, grounding bars, detail slide-out, provenance chain, examples viewer</td>
       <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
     </tr>
     <tr>
@@ -191,7 +191,7 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
       <td><strong>Models / Leaderboard Page</strong> — full model registry with leaderboard, lineage, compare, Bedrock library tabs</td>
       <td>/models</td>
       <td>✓ 5-tab model page with filter dropdowns</td>
-      <td><span class="badge partial">PARTIAL</span> resources.html shows model list but no leaderboard/lineage/compare/Bedrock tabs</td>
+      <td><span class="badge partial">PARTIAL</span> models.html has Leaderboard + Registry + Lineage chain — Compare tab and Bedrock Library tab still missing</td>
       <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
     </tr>
     <tr>
@@ -336,17 +336,17 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
 <div class="page-section">
   <div class="page-header">
     <div class="name">/datasets page</div>
-    <div class="sizes">Ross: 156 KB &nbsp;|&nbsp; BCOM equivalent: <em>does not exist</em></div>
+    <div class="sizes">Ross: 156 KB &nbsp;|&nbsp; BCOM: datasets.html 46 KB</div>
   </div>
   <div class="page-body">
-    <p style="font-size:12px;color:var(--fg-dim);margin-bottom:16px">Entire page missing from BCOM-C. Ross's datasets page provides a permanent catalog of all generated training data with rich drill-down capability.</p>
-    <div class="feat-row"><div class="feat-name">Hero stats bar (total datasets, examples, high/medium/low confidence)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note"></div></div>
-    <div class="feat-row"><div class="feat-name">Filterable datasets table (status + type dropdowns)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Columns: dataset name/type, status badge, example count, services, grounding bar, node pills, created date</div></div>
-    <div class="feat-row"><div class="feat-name">Stacked grounding distribution bar per row (high/medium/low)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">4px inline bar in each table row showing confidence breakdown proportionally</div></div>
-    <div class="feat-row"><div class="feat-name">Per-dataset node pills (color-coded by node name hash)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Each worker node that contributed examples shown as a colored pill</div></div>
-    <div class="feat-row"><div class="feat-name">Dataset detail slide-out panel</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Click row → slide-in panel showing full stats: examples, services, grounding breakdown, by-service/node/model distribution bars</div></div>
-    <div class="feat-row"><div class="feat-name">Provenance chain display (docs → nodes → dataset → finetune → models)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/datasets/{id}/provenance endpoint shows full lineage chain</div></div>
-    <div class="feat-row"><div class="feat-name">Sample examples viewer (first 20 Q&A pairs from dataset)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/datasets/{id}/examples?limit=20 with question/difficulty/grounding display</div></div>
+    <p style="font-size:12px;color:var(--fg-dim);margin-bottom:16px">Page exists. Core features are implemented — see individual items below for remaining gaps.</p>
+    <div class="feat-row"><div class="feat-name">Hero stats bar (total datasets, examples, high/medium/low confidence)</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">Hero stat chips present in datasets.html</div></div>
+    <div class="feat-row"><div class="feat-name">Filterable datasets table (status + type dropdowns)</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">Search, tag, and source filters implemented</div></div>
+    <div class="feat-row"><div class="feat-name">Stacked grounding distribution bar per row (high/medium/low)</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">Inline grounding bars present per row</div></div>
+    <div class="feat-row"><div class="feat-name">Per-dataset node pills (color-coded by node name hash)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Each worker node that contributed examples shown as a colored pill — not confirmed in current implementation</div></div>
+    <div class="feat-row"><div class="feat-name">Dataset detail slide-out panel</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">Click row → slide-in panel with stats, grounding breakdown, distribution bars via /api/data/datasets/{id}/stats</div></div>
+    <div class="feat-row"><div class="feat-name">Provenance chain display (docs → nodes → dataset → finetune → models)</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">/api/datasets/{id}/provenance wired in slide-out panel</div></div>
+    <div class="feat-row"><div class="feat-name">Sample examples viewer (first 20 Q&A pairs from dataset)</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">/api/datasets/{id}/examples?limit=20 with question/difficulty/grounding display</div></div>
     <div class="feat-row"><div class="feat-name">Service distribution bar chart (Chart.js)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Top 20 services by example count, horizontal bar</div></div>
     <div class="feat-row"><div class="feat-name">Grounding confidence doughnut chart</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Aggregate high/medium/low breakdown across all datasets</div></div>
   </div>
@@ -356,17 +356,17 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
 <div class="page-section">
   <div class="page-header">
     <div class="name">/models page (leaderboard)</div>
-    <div class="sizes">Ross: 95 KB &nbsp;|&nbsp; BCOM equivalent: resources.html 20 KB (model registry only)</div>
+    <div class="sizes">Ross: 95 KB &nbsp;|&nbsp; BCOM: models.html</div>
   </div>
   <div class="page-body">
-    <p style="font-size:12px;color:var(--fg-dim);margin-bottom:16px">BCOM has a model list in resources.html but it only shows running models. Ross has a full model intelligence center with 5 tabs.</p>
-    <div class="feat-row"><div class="feat-name">Model Registry tab (with type/judge/suite/backend filter dropdowns)</div><div class="feat-status"><span class="badge partial">PARTIAL</span></div><div class="feat-note">BCOM shows model list but no filter tabs or per-model pass rate history</div></div>
-    <div class="feat-row"><div class="feat-name">Leaderboard tab — ranked by avg score across all evals</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Sortable table of all evaluated models with pass rate, suite, judge, backend columns</div></div>
-    <div class="feat-row"><div class="feat-name">Lineage tab — shows base→finetune→deploy chain for each model</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/model-registry provides full lineage data per model</div></div>
+    <p style="font-size:12px;color:var(--fg-dim);margin-bottom:16px">models.html now exists as a dedicated page with Leaderboard, Registry, and Lineage. Compare and Bedrock Library tabs still missing.</p>
+    <div class="feat-row"><div class="feat-name">Model Registry tab (with type/judge/suite/backend filter dropdowns)</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">Registry table with filter dropdowns in models.html</div></div>
+    <div class="feat-row"><div class="feat-name">Leaderboard tab — ranked by avg score across all evals</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">Leaderboard table polling /api/models/registry/leaderboard — sortable, ranked by pass rate</div></div>
+    <div class="feat-row"><div class="feat-name">Lineage chain — shows base→finetune→deploy chain for each model</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">LINEAGE button per row, slide-out panel fetches /api/models/{id}/lineage and renders chain</div></div>
     <div class="feat-row"><div class="feat-name">Compare tab — side-by-side model performance comparison</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Select 2 models, compare eval scores, pass rates, generation times</div></div>
     <div class="feat-row"><div class="feat-name">Bedrock Library tab — Anthropic deployed models</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Separate tab for Claude/Bedrock models used as judges or vlad-bedrock workers</div></div>
-    <div class="feat-row"><div class="feat-name">Model detail slide-out panel (click row)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Detailed view: full eval history, training data source, LoRA config, deployment status</div></div>
-    <div class="feat-row"><div class="feat-name">Hero stats: Total Models, Best Pass Rate, Bedrock Deployed, Fine-Tune Jobs, Total Evals</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">BCOM has no aggregate model stats bar</div></div>
+    <div class="feat-row"><div class="feat-name">Model detail slide-out panel (click row)</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">Click row → slide-out panel with eval history, LoRA config, lineage chain</div></div>
+    <div class="feat-row"><div class="feat-name">Hero stats: Total Models, Best Pass Rate, Bedrock Deployed, Fine-Tune Jobs, Total Evals</div><div class="feat-status"><span class="badge partial">PARTIAL</span></div><div class="feat-note">Hero chips present but may not include all 5 stat categories Ross shows</div></div>
   </div>
 </div>
 
@@ -382,7 +382,7 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
     <div class="feat-row"><div class="feat-name">Pass Rate by Iteration chart</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Line chart showing eval pass rate improving across pipeline iterations</div></div>
     <div class="feat-row"><div class="feat-name">Iteration History table (iteration N → score → pass rate → dataset examples → status)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Full per-iteration breakdown, each row shows what happened in that loop</div></div>
     <div class="feat-row"><div class="feat-name">Live output / step log panel</div><div class="feat-status"><span class="badge partial">PARTIAL</span></div><div class="feat-note">BCOM orchestrator.html has a STEP LOG section via SSE — pipeline.html itself does not</div></div>
-    <div class="feat-row" style="background:rgba(0,204,102,.03)"><div class="feat-name" style="color:var(--green)">&#10003; Active Finetune Banner (fake sim removed)</div><div class="feat-status"><span class="badge ok">FIXED</span></div><div class="feat-note">pipeline.html was 100% fake animation. Now polls <code style="font-size:10px">/api/finetune/</code> + <code style="font-size:10px">/api/jobs/</code> every 8s — shows real run ID, model, epoch progress, elapsed. Deploy poll guarded to prevent banner-flip conflict. Zombie DB records (5×) cleaned.</div></div>
+    <div class="feat-row" style="background:rgba(0,204,102,.03)"><div class="feat-name" style="color:var(--green)">&#10003; Active Finetune Banner + Progress Bar</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">pipeline.html was 100% fake animation. Now polls <code style="font-size:10px">/api/finetune/</code> + <code style="font-size:10px">/api/jobs/</code> every 8s — shows real run ID, model, epoch progress, elapsed. Deploy poll guarded to prevent banner-flip conflict. Zombie DB records (5×) cleaned. Progress bar now shows live % label + orange→green gradient fill via <code style="font-size:10px">setProgress()</code> helper; label color transitions at 33%/66% thresholds.</div></div>
     <div class="feat-row"><div class="feat-name">Pipeline config display (model, backend, node, suite, target score, max iter, LoRA, LR)</div><div class="feat-status"><span class="badge partial">PARTIAL</span></div><div class="feat-note">BCOM pipeline.html has form fields for these — Ross shows them as a read-only config card at top of detail view</div></div>
     <div class="feat-row"><div class="feat-name">Multi-node cluster status panel on pipeline detail</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Shows which nodes are participating in this pipeline run with health status</div></div>
     <div class="feat-row"><div class="feat-name">Eval run trigger button (inline in pipeline detail)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">/api/evals/run — BCOM has no inline re-eval capability from pipeline detail view</div></div>
