@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BCOM-C — Deploy</title>
+<script>
+  (function(){
+    var t=localStorage.getItem("bcom-theme")||"dark";
+    document.documentElement.setAttribute("data-theme",t);
+    try { var raw=localStorage.getItem("bcom-theme-vars"); if(raw){ var vars=JSON.parse(raw); Object.keys(vars).forEach(function(k){ document.documentElement.style.setProperty(k,vars[k]); }); } } catch(_) {}
+  })();
+</script>
+<link rel="stylesheet" href="../assets/css/bcom.css?v=3" />
+<style>
+  /* ── Hero ─────────────────────────────────────────────────────────── */
+  .hero-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .hero-chip { flex:1; min-width:110px; padding:10px 14px; border:1px solid #1a0e05; background:#090603; }
+  .hero-chip-label { font-size:9px; letter-spacing:2px; color:#666; margin-bottom:4px; }
+  .hero-chip-val { font-size:20px; font-weight:700; color:var(--orange); letter-spacing:1px; }
+  .hero-chip-sub { font-size:9px; color:#555; margin-top:2px; letter-spacing:1px; }
+
+  /* ── Tables ───────────────────────────────────────────────────────── */
+  .dep-table { width:100%; border-collapse:collapse; font-size:12px; letter-spacing:.5px; }
+  .dep-table th { background:#0e0a06; color:#ccc; font-weight:600; letter-spacing:1.5px; padding:7px 10px; text-align:left; border-bottom:1px solid #1e1008; }
+  .dep-table td { padding:7px 10px; border-bottom:1px solid #120b04; vertical-align:middle; color:#ccc; }
+  .dep-table tr:hover td { background:#0e0905; cursor:pointer; }
+  .dep-table .empty { text-align:center; color:#2a2a2a; padding:24px; letter-spacing:2px; cursor:default; }
+
+  /* ── Status pills ─────────────────────────────────────────────────── */
+  .dpill { display:inline-block; font-size:9px; letter-spacing:1.5px; padding:2px 7px; border:1px solid; }
+  .dpill.active    { color:#27ae60; border-color:#27ae60; }
+  .dpill.running   { color:#27ae60; border-color:#27ae60; }
+  .dpill.deploying { color:var(--orange); border-color:var(--orange-dark); animation:pulse-txt 1.2s infinite; }
+  .dpill.success   { color:#27ae60; border-color:#1a6b35; background:rgba(39,174,96,.08); }
+  .dpill.failed    { color:#e74c3c; border-color:#7b1e1e; background:rgba(231,76,60,.08); }
+  .dpill.cancelled { color:#666; border-color:#333; }
+  .dpill.pending   { color:#f39c12; border-color:#7a4f0a; }
+  .dpill.stopped   { color:#666; border-color:#333; }
+  @keyframes pulse-txt { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+  /* ── Action buttons ───────────────────────────────────────────────── */
+  .dbtn { font-size:9px; letter-spacing:1.5px; padding:2px 8px; background:#0e0905; border:1px solid #2a1508; color:#aaa; cursor:pointer; }
+  .dbtn:hover { border-color:var(--orange-dark); color:var(--orange); }
+  .dbtn.danger { border-color:#3a1010; color:#e74c3c; }
+  .dbtn.danger:hover { border-color:#e74c3c; }
+  .btn-row { display:flex; gap:4px; }
+
+  /* ── Active deploy progress bar ───────────────────────────────────── */
+  .adep-card { padding:12px; border:1px solid #1a0e05; background:#090603; margin-bottom:8px; }
+  .adep-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .adep-name { font-size:12px; letter-spacing:1.5px; color:var(--orange-dark); font-weight:700; }
+  .adep-meta { font-size:10px; color:#666; letter-spacing:1px; }
+  .adep-bar-track { background:#0e0905; height:4px; margin:6px 0; }
+  .adep-bar-fill  { height:4px; background:var(--orange-dark); transition:width .6s; }
+  .adep-steps { display:flex; gap:6px; flex-wrap:wrap; }
+  .adep-step { font-size:9px; letter-spacing:1px; padding:2px 8px; border:1px solid #1a0e05; color:#555; }
+  .adep-step.done { color:#27ae60; border-color:#1a6b35; }
+  .adep-step.active { color:var(--orange); border-color:var(--orange-dark); }
+  .adep-empty { text-align:center; color:#2a2a2a; padding:24px; letter-spacing:2px; font-size:11px; }
+
+  /* ── Deploy form ──────────────────────────────────────────────────── */
+  .form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
+  .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .form-grp label { display:block; font-size:9px; letter-spacing:1.5px; color:#777; margin-bottom:4px; }
+  .form-grp input, .form-grp select, .form-grp textarea { width:100%; box-sizing:border-box; }
+  .form-grp textarea { height:60px; resize:vertical; }
+  .deploy-out { font-size:11px; letter-spacing:1px; color:#555; margin-top:6px; min-height:18px; }
+
+  /* ── Slide-out panel ──────────────────────────────────────────────── */
+  .slide-panel { position:fixed; top:0; right:-480px; width:480px; height:100vh; background:#09060300; border-left:1px solid #1a0e05; z-index:200; transition:right .25s ease,background .25s; overflow-y:auto; padding:20px; box-sizing:border-box; }
+  .slide-panel.open { right:0; background:#09060399; backdrop-filter:blur(8px); }
+  .slide-close { position:absolute; top:14px; right:16px; background:none; border:none; color:#666; font-size:18px; cursor:pointer; }
+  .slide-close:hover { color:var(--orange); }
+  .slide-title { font-size:13px; letter-spacing:2px; color:var(--orange-dark); font-weight:700; margin-bottom:14px; padding-right:30px; }
+  .slide-section { margin-bottom:16px; }
+  .slide-section-hdr { font-size:9px; letter-spacing:2px; color:#555; margin-bottom:6px; border-bottom:1px solid #1a0e05; padding-bottom:4px; }
+  .slide-kv { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #0e0905; font-size:11px; }
+  .slide-kv .k { color:#666; letter-spacing:1px; }
+  .slide-kv .v { color:#ccc; max-width:280px; word-break:break-all; text-align:right; }
+  .slide-log { font-size:10px; color:#888; font-family:monospace; background:#050302; padding:8px; max-height:200px; overflow-y:auto; }
+  .slide-log-line { margin-bottom:3px; }
+  .slide-log-line span { color:var(--orange-dark); margin-right:8px; }
+
+  /* ── Card header row ──────────────────────────────────────────────── */
+  .card-hdr-row { display:flex; align-items:center; justify-content:space-between; }
+  .card-hdr-row .filters { display:flex; gap:6px; align-items:center; }
+  .card-hdr-row select, .card-hdr-row input { font-size:10px; padding:2px 8px; width:auto; }
+
+  /* ── Log ──────────────────────────────────────────────────────────── */
+  .log-panel { margin-top:16px; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-title">BCOM-C</div>
+  <div class="topbar-right">
+    <a class="nav-btn" href="../index.html">DASHBOARD</a>
+    <a class="nav-btn" href="data-gen.html">DATA GEN</a>
+    <a class="nav-btn" href="pipeline.html">PIPELINE</a>
+    <a class="nav-btn" href="resources.html">RESOURCES</a>
+    <a class="nav-btn" href="reports.html">REPORTS</a>
+    <a class="nav-btn" href="orchestrator.html">ORCHESTRATOR</a>
+    <a class="cog-btn" href="settings.html" title="Settings">⚙</a>
+    <div class="timestamp"><span id="clock">--:--:--</span>&nbsp;&nbsp;<span id="datestamp">----/--/--</span></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ── Hero chips ──────────────────────────────────────────────────── -->
+  <div class="hero-row">
+    <div class="hero-chip">
+      <div class="hero-chip-label">ACTIVE</div>
+      <div class="hero-chip-val" id="h-active">--</div>
+      <div class="hero-chip-sub">DEPLOYMENTS</div>
+    </div>
+    <div class="hero-chip">
+      <div class="hero-chip-label">TOTAL DEPLOYS</div>
+      <div class="hero-chip-val" id="h-total">--</div>
+      <div class="hero-chip-sub">ALL TIME</div>
+    </div>
+    <div class="hero-chip">
+      <div class="hero-chip-label">SUCCESS RATE</div>
+      <div class="hero-chip-val" id="h-success">--</div>
+      <div class="hero-chip-sub">COMPLETED</div>
+    </div>
+    <div class="hero-chip">
+      <div class="hero-chip-label">LAST DEPLOY</div>
+      <div class="hero-chip-val" id="h-last" style="font-size:13px;letter-spacing:1px">--</div>
+      <div class="hero-chip-sub">MODEL</div>
+    </div>
+    <div class="hero-chip">
+      <div class="hero-chip-label">AVG DURATION</div>
+      <div class="hero-chip-val" id="h-duration">--</div>
+      <div class="hero-chip-sub">SECONDS</div>
+    </div>
+  </div>
+
+  <div class="info-grid">
+
+    <!-- ── ACTIVE DEPLOYMENTS ─────────────────────────────────────────── -->
+    <div class="info-card">
+      <div class="info-card-hdr card-hdr-row">
+        <span>Active Deployments</span>
+        <div class="filters">
+          <button class="dbtn" onclick="refreshActive()">⟳ REFRESH</button>
+        </div>
+      </div>
+      <div id="active-list">
+        <div class="adep-empty">LOADING…</div>
+      </div>
+    </div>
+
+    <!-- ── NEW DEPLOYMENT FORM ────────────────────────────────────────── -->
+    <div class="info-card">
+      <div class="info-card-hdr">New Deployment</div>
+      <div class="form-body">
+        <div class="form-grid-3">
+          <div class="form-grp">
+            <label>Model</label>
+            <select class="form-select" id="dep-model">
+              <option value="">-- SELECT MODEL --</option>
+            </select>
+          </div>
+          <div class="form-grp">
+            <label>Environment</label>
+            <select class="form-select" id="dep-env">
+              <option value="production">PRODUCTION</option>
+              <option value="staging">STAGING</option>
+              <option value="dev">DEV</option>
+            </select>
+          </div>
+          <div class="form-grp">
+            <label>Strategy</label>
+            <select class="form-select" id="dep-strategy">
+              <option value="rolling">ROLLING</option>
+              <option value="blue_green">BLUE / GREEN</option>
+              <option value="canary">CANARY</option>
+              <option value="immediate">IMMEDIATE</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-3">
+          <div class="form-grp">
+            <label>Node</label>
+            <select class="form-select" id="dep-node">
+              <option value="spark">SPARK-BOB</option>
+              <option value="linux">LINUX-DSKTP</option>
+              <option value="both">BOTH</option>
+            </select>
+          </div>
+          <div class="form-grp">
+            <label>Backend</label>
+            <select class="form-select" id="dep-backend">
+              <option value="ollama">Ollama</option>
+              <option value="vllm">vLLM</option>
+            </select>
+          </div>
+          <div class="form-grp">
+            <label>Replicas</label>
+            <input class="form-input" id="dep-replicas" type="number" value="1" min="1" max="8" />
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-grp">
+            <label>Config JSON (optional)</label>
+            <textarea class="form-input" id="dep-config" placeholder='{"max_model_len": 4096}'></textarea>
+          </div>
+          <div class="form-grp">
+            <label>Notes</label>
+            <textarea class="form-input" id="dep-notes" placeholder="Deployment notes…"></textarea>
+          </div>
+        </div>
+        <button class="form-submit" onclick="submitDeploy()">▶ DEPLOY</button>
+        <div class="deploy-out" id="dep-output">—</div>
+      </div>
+    </div>
+
+    <!-- ── DEPLOYMENT HISTORY ─────────────────────────────────────────── -->
+    <div class="info-card">
+      <div class="info-card-hdr card-hdr-row">
+        <span>Deployment History</span>
+        <div class="filters">
+          <select class="form-select" id="hist-filter" onchange="renderHistory()">
+            <option value="all">ALL</option>
+            <option value="success">SUCCESS</option>
+            <option value="failed">FAILED</option>
+            <option value="cancelled">CANCELLED</option>
+          </select>
+          <button class="dbtn" onclick="refreshHistory()">⟳ REFRESH</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="dep-table" id="hist-table">
+          <thead>
+            <tr><th>#</th><th>MODEL</th><th>ENV</th><th>STRATEGY</th><th>NODE</th><th>DURATION</th><th>STATUS</th><th>STARTED</th></tr>
+          </thead>
+          <tbody id="hist-body">
+            <tr><td colspan="8" class="empty">LOADING…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /info-grid -->
+
+  <div class="log-panel" id="log">
+    <div class="log-line"><span class="log-time">--:--:--</span><span class="log-msg info">DEPLOY center ready — polling active deployments.</span></div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ── Slide-out detail panel ──────────────────────────────────────────── -->
+<div class="slide-panel" id="slide-panel">
+  <button class="slide-close" onclick="closeSlide()">✕</button>
+  <div class="slide-title" id="slide-title">DEPLOYMENT DETAIL</div>
+  <div id="slide-content">—</div>
+</div>
+
+<script src="../assets/js/bcom.js?v=5"></script>
+<script>
+window.BCOM = window.BCOM || {};
+BCOM.apiBase = '';
+
+// ── State ──────────────────────────────────────────────────────────────
+var _active  = [];
+var _history = [];
+
+// ── Helpers ────────────────────────────────────────────────────────────
+function setText(id, v) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = v;
+}
+
+function logLine(msg, cls) {
+  var panel = document.getElementById('log');
+  if (!panel) return;
+  var ts  = new Date().toTimeString().split(' ')[0];
+  var div = document.createElement('div');
+  div.className = 'log-line';
+  div.innerHTML = '<span class="log-time">' + ts + '</span>'
+                + '<span class="log-msg ' + (cls||'info') + '">' + msg + '</span>';
+  panel.appendChild(div);
+  panel.scrollTop = panel.scrollHeight;
+  while (panel.children.length > 120) panel.removeChild(panel.firstChild);
+}
+
+function statusPill(s) {
+  var sl = (s||'unknown').toLowerCase();
+  return '<span class="dpill ' + sl + '">' + sl.toUpperCase() + '</span>';
+}
+
+function fmtTs(ts) {
+  if (!ts) return '--';
+  try { return new Date(ts).toLocaleString(); } catch(_) { return ts; }
+}
+
+function fmtDur(s) {
+  if (s == null) return '--';
+  if (s < 60)  return s + 's';
+  return Math.floor(s/60) + 'm ' + (s%60) + 's';
+}
+
+// ── Active deployments ─────────────────────────────────────────────────
+function renderActive() {
+  var el = document.getElementById('active-list');
+  if (!_active.length) {
+    el.innerHTML = '<div class="adep-empty">NO ACTIVE DEPLOYMENTS</div>';
+    return;
+  }
+  el.innerHTML = _active.map(function(d) {
+    var steps  = d.steps  || ['INIT', 'PULL', 'LOAD', 'VERIFY', 'ROUTE', 'DONE'];
+    var cur    = d.current_step || d.step || 0;
+    var pct    = d.progress != null ? d.progress : Math.min(100, Math.round((cur / steps.length) * 100));
+    var id     = d.id || d.deploy_id || '';
+    return '<div class="adep-card">'
+      + '<div class="adep-hdr">'
+      + '<span class="adep-name">' + (d.model || d.model_id || '--') + '</span>'
+      + '<div style="display:flex;align-items:center;gap:8px;">'
+      + statusPill(d.status || 'deploying')
+      + '<button class="dbtn danger" onclick="cancelDeploy(\'' + id + '\')">✕ CANCEL</button>'
+      + '</div>'
+      + '</div>'
+      + '<div class="adep-meta">'
+      + (d.environment || d.env || '--').toUpperCase() + ' · '
+      + (d.strategy    || '--').toUpperCase() + ' · '
+      + (d.node        || '--').toUpperCase()
+      + '</div>'
+      + '<div class="adep-bar-track"><div class="adep-bar-fill" style="width:' + pct + '%"></div></div>'
+      + '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
+      + '<span style="font-size:9px;color:#555;letter-spacing:1px">PROGRESS</span>'
+      + '<span style="font-size:9px;color:var(--orange-dark)">' + pct + '%</span>'
+      + '</div>'
+      + '<div class="adep-steps">'
+      + steps.map(function(s, i) {
+          var cls = i < cur ? 'done' : i === cur ? 'active' : '';
+          return '<span class="adep-step ' + cls + '">' + s + '</span>';
+        }).join('')
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+async function refreshActive() {
+  try {
+    var res = await fetch('/api/deploy/active', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var d   = await res.json();
+    _active = d.deployments || d.active || (Array.isArray(d) ? d : []);
+    setText('h-active', _active.length);
+    renderActive();
+  } catch (err) {
+    logLine('Active deploys error: ' + err.message, 'warn');
+    document.getElementById('active-list').innerHTML = '<div class="adep-empty">API UNAVAILABLE</div>';
+  }
+}
+
+async function cancelDeploy(id) {
+  if (!id) return;
+  try {
+    logLine('Cancelling deployment: ' + id, 'warn');
+    var res = await fetch('/api/deploy/' + id + '/cancel', { method: 'POST' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    logLine('Deployment cancelled: ' + id, 'warn');
+    setTimeout(function(){ refreshActive(); refreshHistory(); }, 1200);
+  } catch (err) {
+    logLine('Cancel failed: ' + err.message, 'warn');
+  }
+}
+
+// ── History ────────────────────────────────────────────────────────────
+function renderHistory() {
+  var filter = document.getElementById('hist-filter').value;
+  var list   = _history;
+  if (filter !== 'all') list = list.filter(function(d){ return (d.status||'').toLowerCase() === filter; });
+  var tb = document.getElementById('hist-body');
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="8" class="empty">NO DEPLOYMENTS</td></tr>';
+    return;
+  }
+  // hero stats
+  var done = _history.filter(function(d){ return d.status === 'success'; });
+  setText('h-total', _history.length);
+  setText('h-success', _history.length ? Math.round(done.length / _history.length * 100) + '%' : '--');
+  var last = _history[0];
+  if (last) setText('h-last', (last.model || last.model_id || '--').split(':')[0].split('/').pop());
+  var durs = _history.filter(function(d){ return d.duration_s; }).map(function(d){ return d.duration_s; });
+  if (durs.length) setText('h-duration', Math.round(durs.reduce(function(a,b){return a+b;},0)/durs.length));
+
+  tb.innerHTML = list.map(function(d, i) {
+    var id = d.id || d.deploy_id || '';
+    return '<tr onclick="openSlide(\'' + id + '\')">'
+      + '<td style="color:#555;font-size:10px">' + (d.id || i+1) + '</td>'
+      + '<td style="color:var(--orange-dark);font-weight:600">' + (d.model || d.model_id || '--') + '</td>'
+      + '<td style="color:#777;font-size:10px">' + (d.environment || d.env || '--').toUpperCase() + '</td>'
+      + '<td style="color:#777;font-size:10px">' + (d.strategy || '--') + '</td>'
+      + '<td style="color:#666;font-size:10px">' + (d.node || '--').toUpperCase() + '</td>'
+      + '<td style="color:#888;font-size:10px">' + fmtDur(d.duration_s) + '</td>'
+      + '<td>' + statusPill(d.status) + '</td>'
+      + '<td style="color:#555;font-size:10px">' + fmtTs(d.started_at || d.created_at) + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+async function refreshHistory() {
+  try {
+    var res = await fetch('/api/deploy/', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var d    = await res.json();
+    _history = d.deployments || (Array.isArray(d) ? d : []);
+    renderHistory();
+  } catch (err) {
+    logLine('History error: ' + err.message, 'warn');
+    document.getElementById('hist-body').innerHTML = '<tr><td colspan="8" class="empty">API UNAVAILABLE</td></tr>';
+  }
+}
+
+// ── Submit deployment ──────────────────────────────────────────────────
+async function submitDeploy() {
+  var model    = document.getElementById('dep-model').value;
+  var env      = document.getElementById('dep-env').value;
+  var strategy = document.getElementById('dep-strategy').value;
+  var node     = document.getElementById('dep-node').value;
+  var backend  = document.getElementById('dep-backend').value;
+  var replicas = parseInt(document.getElementById('dep-replicas').value) || 1;
+  var notes    = document.getElementById('dep-notes').value;
+  var out      = document.getElementById('dep-output');
+  var cfgRaw   = document.getElementById('dep-config').value;
+  var config   = {};
+  if (!model) { out.textContent = 'ERROR: Select a model.'; out.style.color = '#e74c3c'; return; }
+  if (cfgRaw.trim()) {
+    try { config = JSON.parse(cfgRaw); }
+    catch(_) { out.textContent = 'ERROR: Invalid config JSON.'; out.style.color = '#e74c3c'; return; }
+  }
+  out.textContent = 'Submitting deployment…';
+  out.style.color = 'var(--orange-dark)';
+  try {
+    var res = await fetch('/api/deploy/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: model, environment: env, strategy: strategy, node: node, backend: backend, replicas: replicas, config: config, notes: notes }),
+    });
+    var d = await res.json();
+    if (res.ok) {
+      out.textContent = 'Deployment started: ' + (d.deploy_id || d.id || 'OK');
+      out.style.color = '#27ae60';
+      logLine('Deploy started: ' + model + ' → ' + env, 'info');
+      setTimeout(function(){ refreshActive(); refreshHistory(); }, 1500);
+    } else {
+      out.textContent = 'ERROR: ' + (d.detail || d.error || 'Unknown');
+      out.style.color = '#e74c3c';
+    }
+  } catch (err) {
+    out.textContent = 'ERROR: ' + err.message;
+    out.style.color = '#e74c3c';
+  }
+}
+
+// ── Slide-out detail ───────────────────────────────────────────────────
+async function openSlide(id) {
+  if (!id) return;
+  var panel = document.getElementById('slide-panel');
+  var cont  = document.getElementById('slide-content');
+  panel.classList.add('open');
+  cont.innerHTML = '<div style="color:#555;padding:20px;text-align:center;letter-spacing:2px;font-size:11px">LOADING…</div>';
+  try {
+    var res = await fetch('/api/deploy/' + id, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var d = await res.json();
+    var dep = d.deployment || d;
+    setText('slide-title', 'DEPLOY #' + (dep.id || id));
+    var kv = [
+      ['Model',       dep.model || dep.model_id || '--'],
+      ['Environment', (dep.environment || '--').toUpperCase()],
+      ['Strategy',    dep.strategy || '--'],
+      ['Node',        (dep.node || '--').toUpperCase()],
+      ['Backend',     dep.backend || '--'],
+      ['Replicas',    dep.replicas || '--'],
+      ['Status',      dep.status || '--'],
+      ['Duration',    fmtDur(dep.duration_s)],
+      ['Started',     fmtTs(dep.started_at || dep.created_at)],
+      ['Completed',   fmtTs(dep.completed_at)],
+      ['Deploy ID',   dep.id || dep.deploy_id || '--'],
+    ];
+    var html = '<div class="slide-section">'
+      + '<div class="slide-section-hdr">DETAILS</div>'
+      + kv.map(function(r){ return '<div class="slide-kv"><span class="k">' + r[0] + '</span><span class="v">' + r[1] + '</span></div>'; }).join('')
+      + '</div>';
+    if (dep.notes) {
+      html += '<div class="slide-section"><div class="slide-section-hdr">NOTES</div>'
+        + '<div style="font-size:11px;color:#888;padding:6px 0">' + dep.notes + '</div></div>';
+    }
+    if (dep.log || dep.logs) {
+      var lines = (dep.log || dep.logs || []);
+      if (typeof lines === 'string') lines = lines.split('\n');
+      html += '<div class="slide-section"><div class="slide-section-hdr">LOG</div>'
+        + '<div class="slide-log">'
+        + lines.map(function(l){ return '<div class="slide-log-line">' + l + '</div>'; }).join('')
+        + '</div></div>';
+    }
+    if (dep.steps_detail || dep.steps) {
+      var steps = dep.steps_detail || dep.steps || [];
+      html += '<div class="slide-section"><div class="slide-section-hdr">STEPS</div>'
+        + steps.map(function(s){ return '<div class="slide-kv"><span class="k">' + (s.name||s) + '</span><span class="v">' + (s.status||'--') + '</span></div>'; }).join('')
+        + '</div>';
+    }
+    cont.innerHTML = html;
+  } catch (err) {
+    cont.innerHTML = '<div style="color:#e74c3c;padding:20px;font-size:11px;letter-spacing:1px">ERROR: ' + err.message + '</div>';
+  }
+}
+
+function closeSlide() {
+  document.getElementById('slide-panel').classList.remove('open');
+}
+
+// ── Populate model dropdown from /api/models ───────────────────────────
+async function populateModelSelect() {
+  try {
+    var res = await fetch('/api/models/', { cache: 'no-store' });
+    if (!res.ok) return;
+    var d   = await res.json();
+    var models = d.models || (Array.isArray(d) ? d : []);
+    var sel = document.getElementById('dep-model');
+    models.forEach(function(m) {
+      var name = m.name || m.model || m.id || '';
+      var opt  = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  } catch (_) {}
+}
+
+// ── Poll loop ──────────────────────────────────────────────────────────
+function pollAll() {
+  refreshActive();
+  refreshHistory();
+}
+
+populateModelSelect();
+pollAll();
+setInterval(refreshActive,  8000);
+setInterval(refreshHistory, 20000);
+</script>
+</body>
+</html>

@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BCOM-C — Run Detail</title>
+<script>
+  (function(){
+    var t=localStorage.getItem("bcom-theme")||"dark";
+    document.documentElement.setAttribute("data-theme",t);
+    try { var raw=localStorage.getItem("bcom-theme-vars"); if(raw){ var vars=JSON.parse(raw); Object.keys(vars).forEach(function(k){ document.documentElement.style.setProperty(k,vars[k]); }); } } catch(_) {}
+  })();
+</script>
+<link rel="stylesheet" href="../assets/css/bcom.css?v=3" />
+<style>
+  /* ── Hero ─────────────────────────────────────────────── */
+  .run-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 16px 20px 14px;
+    background: #0a0704;
+    border: 1px solid #1a0e06;
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+  .run-hero-left { flex: 1 1 320px; }
+  .run-id-line {
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--orange-dark);
+    letter-spacing: .5px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .run-task-text {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.5;
+    letter-spacing: .3px;
+    max-width: 700px;
+  }
+  .run-status-badge {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    padding: 3px 10px;
+    border: 1px solid;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .run-status-badge.running   { color:#27ae60; border-color:#27ae60; }
+  .run-status-badge.completed { color:#444;    border-color:#333; }
+  .run-status-badge.failed    { color:#e74c3c; border-color:#e74c3c; }
+  .run-status-badge.cancelled { color:#555;    border-color:#444; }
+  .run-status-badge.queued    { color:#f39c12; border-color:#f39c12; }
+
+  /* ── Stat cards row ──────────────────────────────────── */
+  .stat-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    background: #1a0e06;
+    border: 1px solid #1a0e06;
+    border-top: none;
+    margin-bottom: 12px;
+  }
+  .stat-card {
+    flex: 1 1 110px;
+    background: #080604;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: #444;
+    text-transform: uppercase;
+  }
+  .stat-val {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--orange-dark);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .5px;
+  }
+  .stat-sub {
+    font-size: 9px;
+    color: #555;
+    letter-spacing: .5px;
+  }
+
+  /* ── Live stream panel ───────────────────────────────── */
+  #live-panel { display:none; }
+  .live-inner {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .live-agent-card {
+    flex: 1 1 200px;
+    background: #0c0804;
+    border: 1px solid var(--orange-dark);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .lac-label { font-size: 9px; letter-spacing: 1.5px; color: #555; }
+  .lac-agent {
+    font-size: 13px;
+    color: var(--orange-dark);
+    letter-spacing: .5px;
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .lac-iter { font-size: 10px; color: #555; letter-spacing: 1px; }
+
+  .live-tok-card {
+    flex: 0 0 140px;
+    background: #0c0804;
+    border: 1px solid #1e1008;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tok-big {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--orange-dark);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .5px;
+  }
+
+  .live-snippet-card {
+    flex: 1 1 320px;
+    background: #0c0804;
+    border: 1px solid #1e1008;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .live-snippet-text {
+    font-size: 11px;
+    color: #88a0a0;
+    font-family: monospace;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 80px;
+    overflow: hidden;
+  }
+
+  @keyframes pulse-glow {
+    0%   { border-color: #c84000; box-shadow: 0 0 4px rgba(200,64,0,0.2); }
+    50%  { border-color: #ff7700; box-shadow: 0 0 14px rgba(255,100,0,0.55); }
+    100% { border-color: #c84000; box-shadow: 0 0 4px rgba(200,64,0,0.2); }
+  }
+  .live-agent-card.pulse { animation: pulse-glow 1.6s ease-in-out infinite; }
+
+  /* ── Event chain ─────────────────────────────────────── */
+  .event-chain-wrap {
+    max-height: 520px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .event-chain-wrap::-webkit-scrollbar { width: 4px; }
+  .event-chain-wrap::-webkit-scrollbar-track { background: #080604; }
+  .event-chain-wrap::-webkit-scrollbar-thumb { background: #2a1a0a; }
+
+  .ec-row {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #0e0a06;
+    padding: 9px 14px;
+    align-items: flex-start;
+    transition: background .1s;
+  }
+  .ec-row:hover { background: #090604; }
+  .ec-row.status-row { opacity: .6; }
+  .ec-row.error-row  { border-left: 2px solid #e74c3c; }
+
+  .ec-idx {
+    font-size: 9px;
+    color: #333;
+    letter-spacing: 1px;
+    font-family: monospace;
+    min-width: 32px;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+  .ec-agent {
+    font-size: 10px;
+    color: var(--orange-dark);
+    font-family: monospace;
+    letter-spacing: .5px;
+    min-width: 120px;
+    flex-shrink: 0;
+    padding-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
+  }
+  .ec-iter {
+    font-size: 9px;
+    color: #444;
+    letter-spacing: 1px;
+    min-width: 48px;
+    flex-shrink: 0;
+    padding-top: 3px;
+    font-family: monospace;
+  }
+  .ec-node {
+    font-size: 9px;
+    color: #3a3a3a;
+    letter-spacing: 1px;
+    min-width: 80px;
+    flex-shrink: 0;
+    padding-top: 3px;
+    font-family: monospace;
+  }
+  .ec-text {
+    font-size: 10px;
+    color: #88a0a0;
+    font-family: monospace;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    flex: 1;
+  }
+  .ec-text.status-text { color: #666; font-style: italic; }
+  .ec-text.error-text  { color: #e74c3c; }
+  .ec-empty {
+    text-align: center;
+    color: #2a2a2a;
+    padding: 28px;
+    letter-spacing: 2px;
+    font-size: 11px;
+  }
+  .ec-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ec-meta {
+    font-size: 10px;
+    color: #555;
+    letter-spacing: 1px;
+    display: flex;
+    gap: 14px;
+  }
+  .ec-meta span { color: #888; }
+
+  /* ── Loading / error state ───────────────────────────── */
+  .page-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #444;
+    letter-spacing: 2px;
+    font-size: 12px;
+  }
+  .page-state .ps-id { color: var(--orange-dark); font-family: monospace; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">BCOM-C</div>
+  <div class="topbar-right">
+    <a class="nav-btn" href="../index.html">DASHBOARD</a>
+    <a class="nav-btn active" href="data-gen.html">DATA GEN</a>
+    <a class="nav-btn" href="pipeline.html">PIPELINE</a>
+    <a class="nav-btn" href="resources.html">RESOURCES</a>
+    <a class="nav-btn" href="reports.html">REPORTS</a>
+    <a class="nav-btn" href="orchestrator.html">ORCHESTRATOR</a>
+    <a class="cog-btn" href="settings.html" title="Settings">⚙</a>
+    <div class="timestamp"><span id="clock">--:--:--</span>&nbsp;&nbsp;<span id="datestamp">----/--/--</span></div>
+  </div>
+  </div>
+</div>
+
+<div class="actionbar">
+  <button class="action-btn" onclick="goBack()"><span class="nav-arrow">&#8592;</span> DATA GEN</button>
+  <button class="action-btn danger" id="btn-cancel" style="display:none" onclick="cancelThisRun()">&#10007; CANCEL RUN</button>
+  <button class="action-btn" id="btn-refresh" onclick="loadRun(true)">&#8635; REFRESH</button>
+  <span id="run-id-bar" style="font-size:10px;letter-spacing:1px;color:#555;margin-left:8px;font-family:monospace">—</span>
+</div>
+
+<div class="main">
+
+  <!-- loading / error state -->
+  <div id="page-state" class="page-state">
+    <div class="ps-id" id="ps-run-id">LOADING…</div>
+    <div style="margin-top:8px" id="ps-msg">Fetching run details</div>
+  </div>
+
+  <!-- ── Hero ──────────────────────────────────────────── -->
+  <div class="run-hero" id="run-hero" style="display:none">
+    <div class="run-hero-left">
+      <div class="run-id-line">
+        <span id="hero-run-id">—</span>
+        <span class="run-status-badge" id="hero-status-badge">—</span>
+      </div>
+      <div class="run-task-text" id="hero-task">—</div>
+    </div>
+  </div>
+
+  <!-- ── Stat row ──────────────────────────────────────── -->
+  <div class="stat-row" id="stat-row" style="display:none">
+    <div class="stat-card">
+      <div class="stat-label">Model</div>
+      <div class="stat-val" id="s-model" style="font-size:12px;letter-spacing:.3px">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Status</div>
+      <div class="stat-val" id="s-status">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Duration</div>
+      <div class="stat-val" id="s-duration">—</div>
+      <div class="stat-sub" id="s-duration-sub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Tokens Out</div>
+      <div class="stat-val" id="s-tokout">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Tokens In</div>
+      <div class="stat-val" id="s-tokin">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Iterations</div>
+      <div class="stat-val" id="s-iters">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Created</div>
+      <div class="stat-val" id="s-created" style="font-size:11px">—</div>
+    </div>
+  </div>
+
+  <div class="info-grid" id="content-area" style="display:none">
+
+    <!-- ── Live Stream (visible only when running) ───── -->
+    <div class="info-card" id="live-panel">
+      <div class="info-card-hdr" style="display:flex;align-items:center;gap:10px;">
+        <span>Live Stream</span>
+        <span style="font-size:9px;letter-spacing:1.5px;color:#27ae60;animation:pulse-glow 1.6s ease-in-out infinite;border:1px solid #27ae60;padding:1px 8px;">● LIVE</span>
+      </div>
+      <div class="live-inner">
+        <div class="live-agent-card pulse" id="lac">
+          <div class="lac-label">ACTIVE AGENT</div>
+          <div class="lac-agent" id="live-agent">—</div>
+          <div class="lac-iter" id="live-iter">iter 0</div>
+        </div>
+        <div class="live-tok-card">
+          <div class="stat-label">TOK/S</div>
+          <div class="tok-big" id="live-tokrate">—</div>
+          <div class="stat-sub" id="live-toktotal">0 total</div>
+        </div>
+        <div class="live-snippet-card">
+          <div class="stat-label">CURRENT OUTPUT</div>
+          <div class="live-snippet-text" id="live-snippet">Waiting for stream…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Event Chain ─────────────────────────────────── -->
+    <div class="info-card">
+      <div class="info-card-hdr">
+        <div class="ec-hdr">
+          <span>Event Chain</span>
+          <div class="ec-meta">
+            <span>EVENTS&nbsp;<span id="ec-count">0</span></span>
+            <span>NODE_UPDATES&nbsp;<span id="ec-nu-count">0</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="event-chain-wrap" id="event-chain">
+        <div class="ec-empty" id="ec-empty">NO EVENTS</div>
+      </div>
+    </div>
+
+  </div><!-- /info-grid -->
+
+  <div class="log-panel" id="log">
+    <div class="log-line"><span class="log-time">--:--:--</span><span class="log-msg info">Run detail — loading…</span></div>
+  </div>
+
+</div><!-- /main -->
+
+<div class="footer">
+  <span>BOB-AI // BCOM-C v0.1</span>
+  <span id="footer-date"></span>
+  <span id="footer-status">RUN DETAIL</span>
+</div>
+
+<!-- TERMINAL DOCK -->
+<div class="terminal-dock" id="terminal-dock">
+  <div class="terminal-bar">
+    <div class="terminal-tabs">
+      <div class="terminal-tab active" data-term="spark" onclick="switchTerm('spark')">SPARK-BOB</div>
+    </div>
+    <div class="terminal-controls">
+      <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
+    </div>
+  </div>
+  <div class="terminal-body" id="terminal-body">
+    <div class="terminal-output" id="term-out-spark">
+      <div class="term-line sys">[bcom-c] run-detail terminal ready</div>
+    </div>
+    <div class="terminal-input-row">
+      <span class="term-prompt" id="term-prompt">spark-bob $</span>
+      <input class="terminal-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type command..." />
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/bcom.js?v=5"></script>
+<script>
+  BCOM.apiBase = '';
+  startPolling();
+
+  // ── State ──────────────────────────────────────────────
+  var _runId   = null;
+  var _run     = null;
+  var _events  = [];
+  var _es      = null;          // EventSource
+  var _live    = { lastTok: 0, lastTime: Date.now(), ema: 0 };
+  var _pollTimer = null;
+
+  // ── Init ───────────────────────────────────────────────
+  (function init() {
+    var params = new URLSearchParams(window.location.search);
+    _runId = params.get('id') || params.get('run_id');
+    if (!_runId) {
+      showState('NO RUN ID', 'Provide ?id=<run_id> in the URL');
+      return;
+    }
+    document.getElementById('run-id-bar').textContent = _runId;
+    document.getElementById('ps-run-id').textContent  = _runId;
+    loadRun(false);
+  })();
+
+  // ── Load run detail ────────────────────────────────────
+  async function loadRun(forceRefresh) {
+    if (!_runId) return;
+    try {
+      var res = await fetch('/api/runs/' + _runId + (forceRefresh ? '?t=' + Date.now() : ''), { cache: 'no-store' });
+      if (!res.ok) {
+        showState(_runId, 'API error ' + res.status + ' — run not found');
+        logLine('Run ' + _runId.slice(0,8) + ': fetch error ' + res.status, 'error');
+        return;
+      }
+      var data = await res.json();
+      _run    = data.run    || {};
+      _events = data.events || [];
+
+      renderHero();
+      renderStats();
+      renderEventChain();
+      showContent();
+
+      if (_run.status === 'running') {
+        openLivePanel();
+        startSSE();
+        startPollTimer();
+      } else {
+        closeLivePanel();
+        stopSSE();
+        stopPollTimer();
+      }
+
+      document.getElementById('btn-cancel').style.display = _run.status === 'running' ? 'inline-block' : 'none';
+      logLine('RUN ' + _runId.slice(0,8) + ': loaded — ' + (_events.length) + ' events — status: ' + _run.status, 'info');
+
+    } catch(e) {
+      showState(_runId, 'Fetch failed: ' + e.message);
+      logLine('Run detail fetch error: ' + e.message, 'error');
+    }
+  }
+
+  // ── Hero ───────────────────────────────────────────────
+  function renderHero() {
+    document.getElementById('hero-run-id').textContent  = _runId;
+    document.getElementById('hero-task').textContent    = _run.task || '—';
+
+    var badge = document.getElementById('hero-status-badge');
+    var st    = _run.status || 'unknown';
+    badge.textContent  = st.toUpperCase();
+    badge.className    = 'run-status-badge ' + st;
+
+    document.title = 'BCOM-C — ' + _runId.slice(0,10);
+    document.getElementById('footer-status').textContent = st.toUpperCase();
+  }
+
+  // ── Stats ──────────────────────────────────────────────
+  function renderStats() {
+    var r = _run;
+    document.getElementById('s-model').textContent   = r.model   || '—';
+    document.getElementById('s-status').textContent  = r.status  || '—';
+    document.getElementById('s-tokout').textContent  = r.tokens_out != null ? Number(r.tokens_out).toLocaleString() : '—';
+    document.getElementById('s-tokin').textContent   = r.tokens_in  != null ? Number(r.tokens_in).toLocaleString()  : '—';
+
+    var maxIter = 0;
+    for (var i = 0; i < _events.length; i++) {
+      var ev = _events[i];
+      if (ev.event_type === 'node_update' && ev.data && ev.data.iteration != null) {
+        if (ev.data.iteration > maxIter) maxIter = ev.data.iteration;
+      }
+    }
+    document.getElementById('s-iters').textContent = maxIter;
+
+    if (r.duration_s != null) {
+      document.getElementById('s-duration').textContent    = r.duration_s.toFixed(1) + 's';
+      document.getElementById('s-duration-sub').textContent = (r.duration_s / 60).toFixed(1) + ' min';
+    } else if (r.status === 'running') {
+      document.getElementById('s-duration').textContent    = '…';
+    } else {
+      document.getElementById('s-duration').textContent    = '—';
+    }
+
+    if (r.created_at) {
+      var d = new Date(r.created_at);
+      document.getElementById('s-created').textContent = d.toLocaleTimeString('en-US',{hour12:false}) + ' ' + d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    }
+  }
+
+  // ── Event Chain ────────────────────────────────────────
+  function renderEventChain() {
+    var chain  = document.getElementById('event-chain');
+    var empty  = document.getElementById('ec-empty');
+    var nuCount = 0;
+
+    if (!_events.length) {
+      empty.style.display = 'block';
+      document.getElementById('ec-count').textContent    = '0';
+      document.getElementById('ec-nu-count').textContent = '0';
+      return;
+    }
+
+    empty.style.display = 'none';
+    var html = '';
+    for (var i = 0; i < _events.length; i++) {
+      var ev  = _events[i];
+      var et  = ev.event_type || '';
+      var d   = ev.data || {};
+
+      if (et === 'node_update') {
+        nuCount++;
+        var agent   = escHtml(d.active_agent || ev.node || '?');
+        var nodeStr = escHtml(ev.node || '');
+        var iter    = d.iteration != null ? 'i' + d.iteration : '';
+        var snippet = d.snippet   ? escHtml(d.snippet) : '<span style="color:#2a2a2a;font-style:italic">— no snippet —</span>';
+        html +=
+          '<div class="ec-row">' +
+            '<span class="ec-idx">' + (i+1) + '</span>' +
+            '<span class="ec-agent">' + agent + '</span>' +
+            '<span class="ec-iter">'  + iter  + '</span>' +
+            '<span class="ec-node">'  + nodeStr + '</span>' +
+            '<span class="ec-text">'  + snippet + '</span>' +
+          '</div>';
+      } else if (et === 'status') {
+        var msg = escHtml(d.message || d.task || et);
+        html +=
+          '<div class="ec-row status-row">' +
+            '<span class="ec-idx">' + (i+1) + '</span>' +
+            '<span class="ec-agent" style="color:#555">STATUS</span>' +
+            '<span class="ec-iter"></span>' +
+            '<span class="ec-node"></span>' +
+            '<span class="ec-text status-text">' + msg + '</span>' +
+          '</div>';
+      } else if (et === 'error') {
+        var errmsg = escHtml(d.message || 'error');
+        html +=
+          '<div class="ec-row error-row">' +
+            '<span class="ec-idx">' + (i+1) + '</span>' +
+            '<span class="ec-agent" style="color:#e74c3c">ERROR</span>' +
+            '<span class="ec-iter"></span>' +
+            '<span class="ec-node"></span>' +
+            '<span class="ec-text error-text">' + errmsg + '</span>' +
+          '</div>';
+      }
+    }
+
+    // Replace content but keep scroll if already has rows (live update)
+    var existing = chain.querySelectorAll('.ec-row');
+    if (existing.length === 0) {
+      chain.innerHTML = html + '<div class="ec-empty" id="ec-empty" style="display:none">NO EVENTS</div>';
+    } else {
+      // Insert new rows at bottom (only new ones)
+      var frag = document.createElement('div');
+      frag.innerHTML = html;
+      var newRows = frag.querySelectorAll('.ec-row');
+      for (var j = existing.length; j < newRows.length; j++) {
+        chain.insertBefore(newRows[j].cloneNode(true), chain.querySelector('.ec-empty'));
+      }
+    }
+
+    document.getElementById('ec-count').textContent    = _events.length;
+    document.getElementById('ec-nu-count').textContent = nuCount;
+  }
+
+  // ── Live Panel ─────────────────────────────────────────
+  function openLivePanel()  { document.getElementById('live-panel').style.display = 'block'; }
+  function closeLivePanel() { document.getElementById('live-panel').style.display = 'none';  }
+
+  function updateLive(agent, iter, snippet, tokOut) {
+    document.getElementById('live-agent').textContent  = agent   || '—';
+    document.getElementById('live-iter').textContent   = iter != null ? 'iter ' + iter : '';
+    document.getElementById('live-snippet').textContent = snippet || '…';
+
+    // tok/s EMA
+    var now    = Date.now();
+    var dt     = (now - _live.lastTime) / 1000;
+    var dTok   = (tokOut || 0) - _live.lastTok;
+    if (dt > 0.1 && dTok > 0) {
+      var instant = dTok / dt;
+      _live.ema   = _live.ema === 0 ? instant : (0.3 * instant + 0.7 * _live.ema);
+    }
+    _live.lastTok  = tokOut || _live.lastTok;
+    _live.lastTime = now;
+
+    document.getElementById('live-tokrate').textContent  = _live.ema > 0 ? _live.ema.toFixed(1) + ' tok/s' : '—';
+    document.getElementById('live-toktotal').textContent = (_live.lastTok).toLocaleString() + ' total';
+
+    // also update stat cards
+    document.getElementById('s-tokout').textContent = (_live.lastTok).toLocaleString();
+    document.getElementById('s-iters').textContent  = iter != null ? iter : document.getElementById('s-iters').textContent;
+  }
+
+  // ── SSE ────────────────────────────────────────────────
+  function startSSE() {
+    if (_es) { _es.close(); _es = null; }
+    _es = new EventSource('/api/runs/' + _runId + '/stream');
+
+    _es.addEventListener('node_update', function(e) {
+      try {
+        var d = JSON.parse(e.data);
+        updateLive(d.active_agent || d.node, d.iteration, d.snippet, d.tokens_out);
+        // Append new event to chain incrementally
+        _events.push({ event_type: 'node_update', node: d.node || '', data: d, id: Date.now() });
+        renderEventChain();
+        // Scroll chain to bottom on live
+        var chain = document.getElementById('event-chain');
+        chain.scrollTop = chain.scrollHeight;
+      } catch(_) {}
+    });
+
+    _es.addEventListener('status', function(e) {
+      try {
+        var d = JSON.parse(e.data);
+        document.getElementById('live-snippet').textContent = d.message || d.task || '…';
+        _events.push({ event_type: 'status', node: '', data: d, id: Date.now() });
+        renderEventChain();
+      } catch(_) {}
+    });
+
+    _es.addEventListener('stream_end', function(e) {
+      try {
+        var d = {};
+        try { d = JSON.parse(e.data); } catch(_) {}
+        logLine('RUN ' + _runId.slice(0,8) + ': stream ended — ' + (d.status || 'done'), 'info');
+      } catch(_) {}
+      _es.close(); _es = null;
+      closeLivePanel();
+      stopPollTimer();
+      // Reload full run state
+      setTimeout(function(){ loadRun(true); }, 800);
+    });
+
+    _es.addEventListener('error', function(e) {
+      if (e.data) {
+        try { var d = JSON.parse(e.data); logLine('Stream error: ' + (d.message || '?'), 'error'); } catch(_) {}
+      }
+    });
+
+    _es.onerror = function() {
+      logLine('RUN ' + _runId.slice(0,8) + ': SSE connection lost', 'warn');
+      _es.close(); _es = null;
+      closeLivePanel();
+    };
+
+    logLine('RUN ' + _runId.slice(0,8) + ': SSE stream open', 'info');
+  }
+
+  function stopSSE() {
+    if (_es) { _es.close(); _es = null; }
+  }
+
+  // ── Periodic poll (fallback for long-running) ──────────
+  function startPollTimer() {
+    stopPollTimer();
+    _pollTimer = setInterval(function(){
+      if (_run && _run.status === 'running') loadRun(false);
+    }, 10000);
+  }
+  function stopPollTimer() {
+    if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+  }
+
+  // ── Cancel ─────────────────────────────────────────────
+  async function cancelThisRun() {
+    if (!_runId) return;
+    if (!confirm('Cancel run ' + _runId.slice(0,12) + '?')) return;
+    try {
+      await fetch('/api/runs/' + _runId, { method: 'DELETE' });
+      logLine('CMD: CANCEL RUN ' + _runId.slice(0,8), 'warn');
+      stopSSE();
+      stopPollTimer();
+      document.getElementById('btn-cancel').style.display = 'none';
+      setTimeout(function(){ loadRun(true); }, 600);
+    } catch(e) {
+      logLine('Cancel error: ' + e.message, 'error');
+    }
+  }
+
+  // ── UI helpers ─────────────────────────────────────────
+  function showState(id, msg) {
+    document.getElementById('page-state').style.display  = 'block';
+    document.getElementById('content-area').style.display = 'none';
+    document.getElementById('run-hero').style.display     = 'none';
+    document.getElementById('stat-row').style.display     = 'none';
+    document.getElementById('ps-run-id').textContent = id;
+    document.getElementById('ps-msg').textContent    = msg;
+  }
+
+  function showContent() {
+    document.getElementById('page-state').style.display   = 'none';
+    document.getElementById('run-hero').style.display      = 'flex';
+    document.getElementById('stat-row').style.display      = 'flex';
+    document.getElementById('content-area').style.display  = 'block';
+  }
+
+  function goBack() {
+    if (document.referrer && document.referrer.includes('data-gen')) {
+      history.back();
+    } else {
+      window.location.href = 'data-gen.html';
+    }
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Terminal ───────────────────────────────────────────
+  var _termNode = 'spark';
+  function switchTerm(node) {
+    _termNode = node;
+    document.querySelectorAll('.terminal-tab').forEach(function(t){ t.classList.toggle('active', t.dataset.term===node); });
+    document.getElementById('term-prompt').textContent = 'spark-bob $';
+    document.getElementById('terminal-input').focus();
+  }
+</script>
+<script src="../assets/js/bcom-terminal.js?v=3"></script>
+</body>
+</html>

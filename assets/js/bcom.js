@@ -253,7 +253,7 @@ async function ctrlContainer(id, action) {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     logLine(`CTR: ${action.toUpperCase()} ${id.slice(0, 12)} — OK`, 'info');
-    pollDashboard();                              // refresh state immediately
+    pollGauges();                              // refresh state immediately
   } catch (err) {
     logLine(`CTR error: ${err.message}`, 'warn');
   }
@@ -265,7 +265,7 @@ async function ctrlContainer(id, action) {
    - Containers/models failures are soft (card stays as-is).
    - Logs connection/error transitions only once (no spam).
    ─────────────────────────────────────────────────────────────────────── */
-async function pollDashboard() {
+async function pollGauges() {
   try {
     const base = BCOM.apiBase || '';
     const [metricsRes, containersRes, modelsRes, deployRes] = await Promise.allSettled([
@@ -324,8 +324,8 @@ async function pollDashboard() {
 function startPolling(intervalMs) {
   if (BCOM._timer) clearInterval(BCOM._timer);
   BCOM.pollInterval = intervalMs ?? BCOM.pollInterval;
-  pollDashboard();                                        // immediate first call
-  BCOM._timer = setInterval(pollDashboard, BCOM.pollInterval);
+  pollGauges();                                        // immediate first call
+  BCOM._timer = setInterval(pollGauges, BCOM.pollInterval);
 }
 
 function stopPolling() {
