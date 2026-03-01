@@ -103,8 +103,8 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
   </div>
   <div class="sum-card" style="border-color:rgba(0,204,102,.25);background:rgba(0,204,102,.04)">
     <div class="label" style="color:var(--green)">Gaps Closed</div>
-    <div class="val" style="color:var(--green)">7</div>
-    <div class="sub">Live Stream (P1 #1) · Q&amp;A History Feed (P1 #2) · Datagen Run Detail page · Datasets page · Models page · Pipeline finetune banner · Progress bar gradient + %</div>
+    <div class="val" style="color:var(--green)">8</div>
+    <div class="sub">Live Stream (P1 #1) · Q&amp;A History Feed (P1 #2) · Coordinator job system (P1 #4) · Datagen Run Detail page · Datasets page · Models page · Pipeline finetune banner · Progress bar gradient + %</div>
   </div>
 </div>
 
@@ -155,7 +155,7 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
       <td><strong>Coordinator Job System</strong> — multi-node job dispatch, add/remove/pause/resume nodes on running jobs</td>
       <td>datagen run detail</td>
       <td>✓ /api/coordinator/jobs/active/add-node, /pause, /resume</td>
-      <td><span class="badge partial">PARTIAL</span> coordinator.html page exists with node health cards and queue display — add-node/pause/resume API endpoints not yet wired</td>
+      <td><span class="badge ok">DONE</span> Active Coordinator Job panel polls <code style="font-size:10px">/api/coordinator/jobs/active</code> — shows live node list with per-node PAUSE/RESUME buttons. ADD NODE control posts to <code style="font-size:10px">/api/coordinator/jobs/active/add-node</code>. Pause/resume hit <code style="font-size:10px">/api/coordinator/jobs/{id}/nodes/{name}/pause|resume</code>.</td>
       <td><span class="tag api">API</span><span class="tag fe">FE</span></td>
     </tr>
     <tr>
@@ -426,9 +426,9 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
 
 <h3>Coordinator System (multi-node job dispatch)</h3>
 <div class="api-block">
-<span class="m">MISSING</span>  POST /api/coordinator/jobs/active/add-node
-<span class="m">MISSING</span>  PUT  /api/coordinator/jobs/{id}/nodes/{name}/pause
-<span class="m">MISSING</span>  PUT  /api/coordinator/jobs/{id}/nodes/{name}/resume
+<span class="ok">IN USE</span>   POST /api/coordinator/jobs/active/add-node
+<span class="ok">IN USE</span>   PUT  /api/coordinator/jobs/{id}/nodes/{name}/pause
+<span class="ok">IN USE</span>   PUT  /api/coordinator/jobs/{id}/nodes/{name}/resume
 <span class="ok">EXISTS</span>   GET  /api/jobs/            <span style="color:var(--fg-dim)"># BCOM's version — single-node job list only</span>
 </div>
 

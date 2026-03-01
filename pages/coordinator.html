@@ -210,6 +210,117 @@
     display:flex; gap:14px; align-items:center;
   }
   .coord-hdr-meta span { color:#999; }
+
+  /* ── Active coordinator job panel ───────────────────────── */
+  .acj-banner {
+    border: 1px solid var(--orange-dark);
+    background: #0a0603;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    display: none;
+  }
+  .acj-banner.visible { display: block; }
+
+  .acj-hdr {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .acj-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--orange);
+    font-weight: 600;
+  }
+  .acj-id {
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--orange-dark);
+    letter-spacing: .5px;
+  }
+  .acj-live {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: #27ae60;
+    border: 1px solid #27ae60;
+    padding: 1px 8px;
+    animation: acj-pulse 2s ease-in-out infinite;
+  }
+  @keyframes acj-pulse {
+    0%,100% { opacity: 1; }
+    50%      { opacity: .5; }
+  }
+
+  .acj-nodes {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .acj-node-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #080503;
+    border: 1px solid #1a0e06;
+    flex-wrap: wrap;
+  }
+  .acj-node-name {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--orange-dark);
+    font-family: monospace;
+    min-width: 120px;
+  }
+  .acj-node-status {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    padding: 2px 8px;
+    border: 1px solid;
+    text-transform: uppercase;
+  }
+  .acj-node-status.running { color: #27ae60; border-color: #27ae60; }
+  .acj-node-status.paused  { color: #f39c12; border-color: #f39c12; }
+  .acj-node-status.offline { color: #e74c3c; border-color: #e74c3c; }
+
+  .acj-node-meta {
+    font-size: 9px;
+    color: #555;
+    letter-spacing: .5px;
+    font-family: monospace;
+    flex: 1;
+  }
+  .acj-node-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .acj-add-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-top: 1px solid #1a0e06;
+    padding-top: 12px;
+  }
+  .acj-add-label {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: #555;
+  }
+
+  .acj-empty {
+    font-size: 11px;
+    color: #333;
+    letter-spacing: 2px;
+    padding: 8px 0;
+    text-align: center;
+  }
 </style>
 </head>
 <body>
@@ -308,6 +419,30 @@
         </div>
       </div>
       <div style="font-size:9px;color:#444;letter-spacing:.5px;" id="nm-linux-model">model: —</div>
+    </div>
+  </div>
+
+  <!-- ── Active Coordinator Job ───────────────────────────── -->
+  <div class="acj-banner" id="acj-banner">
+    <div class="acj-hdr">
+      <span class="acj-title">ACTIVE COORDINATOR JOB</span>
+      <span class="acj-id" id="acj-id">—</span>
+      <span class="acj-live">● RUNNING</span>
+      <span style="font-size:9px;color:#555;letter-spacing:1px;margin-left:auto" id="acj-meta">—</span>
+    </div>
+
+    <div class="acj-nodes" id="acj-nodes">
+      <div class="acj-empty" id="acj-nodes-empty">NO NODE DATA</div>
+    </div>
+
+    <div class="acj-add-row">
+      <span class="acj-add-label">ADD NODE</span>
+      <select class="form-select" id="acj-add-node-select" style="width:180px;padding:4px 8px;font-size:10px">
+        <option value="spark">SPARK-BOB</option>
+        <option value="linux">LINUX-DSKTP</option>
+      </select>
+      <button class="action-btn" style="font-size:10px;padding:3px 12px" onclick="addNodeToJob()">+ ADD NODE</button>
+      <span id="acj-add-output" style="font-size:10px;color:#555;letter-spacing:.5px"></span>
     </div>
   </div>
 
@@ -474,18 +609,21 @@
   startPolling();
 
   // ── State ───────────────────────────────────────────────
-  var _allRuns  = [];
-  var _queue    = [];
+  var _allRuns    = [];
+  var _queue      = [];
+  var _activeJob  = null;
 
   // ── Boot ────────────────────────────────────────────────
   (function boot() {
     pollNodeStats();
     pollQueue();
     pollRuns();
+    pollActiveJob();
 
-    setInterval(pollNodeStats, 8000);
-    setInterval(pollQueue,     6000);
-    setInterval(pollRuns,      6000);
+    setInterval(pollNodeStats,  8000);
+    setInterval(pollQueue,      6000);
+    setInterval(pollRuns,       6000);
+    setInterval(pollActiveJob,  5000);
   })();
 
   // ── Node stats — /api/system/stats + /api/system/linux/stats ──
@@ -678,6 +816,152 @@
     document.getElementById('cs-done').textContent    = done;
     document.getElementById('cs-failed').textContent  = failed;
     document.getElementById('cs-tokens').textContent  = tokens > 999 ? (tokens/1000).toFixed(1)+'k' : tokens;
+  }
+
+  // ── Active Coordinator Job ──────────────────────────────
+  async function pollActiveJob() {
+    try {
+      var r = await fetch('/api/coordinator/jobs/active', { cache: 'no-store' });
+      var banner = document.getElementById('acj-banner');
+      if (!r.ok) { banner.classList.remove('visible'); _activeJob = null; return; }
+      var d = await r.json();
+      if (!d || !d.id) { banner.classList.remove('visible'); _activeJob = null; return; }
+      _activeJob = d;
+      banner.classList.add('visible');
+      renderActiveJob(d);
+    } catch(_) { /* soft fail — API may not exist yet */ }
+  }
+
+  function renderActiveJob(job) {
+    document.getElementById('acj-id').textContent = (job.id || '').slice(0, 16);
+
+    var taskShort = (job.task || job.description || '—').slice(0, 80);
+    var nodeCount = Array.isArray(job.nodes) ? job.nodes.length : '?';
+    document.getElementById('acj-meta').textContent =
+      nodeCount + ' node' + (nodeCount !== 1 ? 's' : '') +
+      ' · ' + taskShort;
+
+    var container = document.getElementById('acj-nodes');
+    var empty     = document.getElementById('acj-nodes-empty');
+    var nodes     = Array.isArray(job.nodes) ? job.nodes : [];
+
+    // Remove old node rows (keep empty placeholder)
+    Array.from(container.querySelectorAll('.acj-node-row')).forEach(function(el){ el.remove(); });
+
+    if (!nodes.length) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    nodes.forEach(function(node) {
+      var name   = node.name || node.node_name || node.id || '?';
+      var status = (node.status || 'running').toLowerCase();
+      var tokOut = node.tokens_out != null ? Number(node.tokens_out).toLocaleString() + ' tok' : '';
+      var pairs  = node.pairs_done != null ? node.pairs_done + ' pairs' : '';
+      var meta   = [tokOut, pairs].filter(Boolean).join(' · ') || '—';
+
+      var row = document.createElement('div');
+      row.className = 'acj-node-row';
+
+      var nameEl = document.createElement('span');
+      nameEl.className = 'acj-node-name';
+      nameEl.textContent = name.toUpperCase();
+      row.appendChild(nameEl);
+
+      var statusEl = document.createElement('span');
+      statusEl.className = 'acj-node-status ' + status;
+      statusEl.textContent = status.toUpperCase();
+      row.appendChild(statusEl);
+
+      var metaEl = document.createElement('span');
+      metaEl.className = 'acj-node-meta';
+      metaEl.textContent = meta;
+      row.appendChild(metaEl);
+
+      var actions = document.createElement('div');
+      actions.className = 'acj-node-actions';
+
+      if (status === 'running') {
+        var pauseBtn = document.createElement('button');
+        pauseBtn.className = 'ctr-btn';
+        pauseBtn.textContent = 'PAUSE';
+        pauseBtn.addEventListener('click', function() { pauseNode(job.id, name); });
+        actions.appendChild(pauseBtn);
+      } else if (status === 'paused') {
+        var resumeBtn = document.createElement('button');
+        resumeBtn.className = 'ctr-btn';
+        resumeBtn.textContent = 'RESUME';
+        resumeBtn.addEventListener('click', function() { resumeNode(job.id, name); });
+        actions.appendChild(resumeBtn);
+      }
+
+      row.appendChild(actions);
+      container.insertBefore(row, empty);
+    });
+  }
+
+  async function addNodeToJob() {
+    if (!_activeJob) { logLine('No active coordinator job', 'warn'); return; }
+    var node   = document.getElementById('acj-add-node-select').value;
+    var output = document.getElementById('acj-add-output');
+    output.textContent = 'Adding…';
+    output.style.color = 'var(--orange-dark)';
+    try {
+      var res = await fetch('/api/coordinator/jobs/active/add-node', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ node: node, job_id: _activeJob.id })
+      });
+      if (res.ok) {
+        logLine('CMD: ADD NODE ' + node.toUpperCase() + ' → job ' + _activeJob.id.slice(0,8), 'info');
+        output.textContent = node.toUpperCase() + ' added';
+        output.style.color = '#27ae60';
+        setTimeout(pollActiveJob, 600);
+      } else {
+        var err = await res.json().catch(function(){ return {}; });
+        logLine('Add node error ' + res.status + ': ' + (err.detail || err.error || '?'), 'error');
+        output.textContent = 'Error ' + res.status;
+        output.style.color = '#e74c3c';
+      }
+    } catch(e) {
+      logLine('Add node error: ' + e.message, 'error');
+      output.textContent = 'Request failed';
+      output.style.color = '#e74c3c';
+    }
+    setTimeout(function(){ output.textContent = ''; }, 4000);
+  }
+
+  async function pauseNode(jobId, nodeName) {
+    try {
+      var res = await fetch(
+        '/api/coordinator/jobs/' + encodeURIComponent(jobId) +
+        '/nodes/' + encodeURIComponent(nodeName) + '/pause',
+        { method: 'PUT' }
+      );
+      if (res.ok) {
+        logLine('CMD: PAUSE NODE ' + nodeName.toUpperCase(), 'warn');
+        setTimeout(pollActiveJob, 400);
+      } else {
+        logLine('Pause failed ' + res.status, 'error');
+      }
+    } catch(e) { logLine('Pause error: ' + e.message, 'error'); }
+  }
+
+  async function resumeNode(jobId, nodeName) {
+    try {
+      var res = await fetch(
+        '/api/coordinator/jobs/' + encodeURIComponent(jobId) +
+        '/nodes/' + encodeURIComponent(nodeName) + '/resume',
+        { method: 'PUT' }
+      );
+      if (res.ok) {
+        logLine('CMD: RESUME NODE ' + nodeName.toUpperCase(), 'info');
+        setTimeout(pollActiveJob, 400);
+      } else {
+        logLine('Resume failed ' + res.status, 'error');
+      }
+    } catch(e) { logLine('Resume error: ' + e.message, 'error'); }
   }
 
   // ── Dispatch ────────────────────────────────────────────
