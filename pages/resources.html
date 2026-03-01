@@ -11,19 +11,43 @@
     try { var raw=localStorage.getItem("bcom-theme-vars"); if(raw){ var vars=JSON.parse(raw); Object.keys(vars).forEach(function(k){ document.documentElement.style.setProperty(k,vars[k]); }); } } catch(_) {}
   })();
 </script>
-<link rel="stylesheet" href="../assets/css/bcom.css?v=3" />
+<link rel="stylesheet" href="../bcom.css?v=3" />
 <style>
-  .reg-table { width:100%; border-collapse:collapse; font-size:12px; letter-spacing:.5px; }
-  .reg-table th { background:#0e0a06; color:#ccc; font-weight:600; letter-spacing:1.5px; padding:7px 10px; text-align:left; border-bottom:1px solid #1e1008; }
-  .reg-table td { padding:7px 10px; border-bottom:1px solid #120b04; vertical-align:middle; color:#ccc; }
-  .reg-table tr:hover td { background:#0e0905; }
-  .reg-table .empty { text-align:center; color:#2a2a2a; padding:24px; letter-spacing:2px; }
-  .mdl-pill { display:inline-block; font-size:9px; letter-spacing:1.5px; padding:2px 7px; border:1px solid; }
-  .mdl-pill.loaded  { color:#27ae60; border-color:#27ae60; }
-  .mdl-pill.cached  { color:var(--orange); border-color:var(--orange-dark); }
-  .mdl-pill.avail   { color:#444; border-color:#333; }
-  .mdl-pill.pulling { color:#f39c12; border-color:#f39c12; }
-  .stor-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  /* ── Hero chips ───────────────────────────────────────────────────── */
+  .hero-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .hero-chip { flex:1; min-width:110px; padding:10px 14px; border:1px solid #1a0e05; background:#090603; }
+  .hero-chip-label { font-size:9px; letter-spacing:2px; color:#666; margin-bottom:4px; }
+  .hero-chip-val { font-size:20px; font-weight:700; color:var(--orange); letter-spacing:1px; }
+  .hero-chip-sub { font-size:9px; color:#555; margin-top:2px; letter-spacing:1px; }
+
+  /* ── Generic table ────────────────────────────────────────────────── */
+  .res-table { width:100%; border-collapse:collapse; font-size:12px; letter-spacing:.5px; }
+  .res-table th { background:#0e0a06; color:#ccc; font-weight:600; letter-spacing:1.5px; padding:7px 10px; text-align:left; border-bottom:1px solid #1e1008; }
+  .res-table td { padding:7px 10px; border-bottom:1px solid #120b04; vertical-align:middle; color:#ccc; }
+  .res-table tr:hover td { background:#0e0905; }
+  .res-table .empty { text-align:center; color:#2a2a2a; padding:24px; letter-spacing:2px; }
+
+  /* ── Status pills ─────────────────────────────────────────────────── */
+  .spill { display:inline-block; font-size:9px; letter-spacing:1.5px; padding:2px 7px; border:1px solid; }
+  .spill.up      { color:#27ae60; border-color:#27ae60; }
+  .spill.running { color:#27ae60; border-color:#27ae60; }
+  .spill.down    { color:#e74c3c; border-color:#e74c3c; }
+  .spill.stopped { color:#e74c3c; border-color:#e74c3c; }
+  .spill.paused  { color:#f39c12; border-color:#f39c12; }
+  .spill.restarting { color:var(--orange); border-color:var(--orange-dark); }
+  .spill.loaded  { color:#27ae60; border-color:#27ae60; }
+  .spill.cached  { color:var(--orange); border-color:var(--orange-dark); }
+  .spill.avail   { color:#444; border-color:#333; }
+
+  /* ── Action buttons in tables ─────────────────────────────────────── */
+  .ctr-btn { font-size:9px; letter-spacing:1.5px; padding:2px 8px; background:#0e0905; border:1px solid #2a1508; color:#aaa; cursor:pointer; }
+  .ctr-btn:hover { border-color:var(--orange-dark); color:var(--orange); }
+  .ctr-btn.danger { border-color:#3a1010; color:#e74c3c; }
+  .ctr-btn.danger:hover { border-color:#e74c3c; }
+  .btn-row { display:flex; gap:4px; }
+
+  /* ── Storage bars ─────────────────────────────────────────────────── */
+  .stor-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
   .stor-node { padding:12px; border:1px solid #1a0e05; background:#090603; }
   .stor-hdr  { font-size:11px; letter-spacing:2px; color:var(--orange-dark); margin-bottom:10px; font-weight:700; }
   .stor-row  { margin-bottom:8px; }
@@ -32,48 +56,139 @@
   .stor-fill { height:6px; background:var(--orange-dark); transition:width .6s; }
   .stor-fill.warn   { background:#f39c12; }
   .stor-fill.danger { background:#e74c3c; }
-  .compute-chip { font-size:11px; letter-spacing:1px; color:#ccc; border:1px solid #1a0e05; padding:6px 12px; background:#090603; min-width:120px; }
-  .compute-chip span { color:var(--orange); display:block; font-weight:700; font-size:13px; margin-top:2px; }
-  .compute-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+
+  /* ── Pull model form ──────────────────────────────────────────────── */
+  .form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
+  .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .form-grp label { display:block; font-size:9px; letter-spacing:1.5px; color:#777; margin-bottom:4px; }
+  .form-grp input, .form-grp select { width:100%; box-sizing:border-box; }
+  .pull-out { font-size:11px; letter-spacing:1px; color:#555; margin-top:6px; min-height:18px; }
+
+  /* ── Section header with actions ──────────────────────────────────── */
+  .card-hdr-row { display:flex; align-items:center; justify-content:space-between; }
+  .card-hdr-row .filters { display:flex; gap:6px; align-items:center; }
+  .card-hdr-row select { font-size:10px; padding:2px 8px; width:auto; }
+  .card-hdr-row input[type=text] { font-size:10px; padding:2px 8px; width:140px; }
+
+  /* ── Log panel override ───────────────────────────────────────────── */
+  .log-panel { margin-top:16px; }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-title">BCOM-C</div>
-  <div class="topbar-right">
-    <a class="nav-btn" href="../index.html"><span class="nav-arrow">&#8592;</span> DASHBOARD</a>
-    <a class="nav-btn" href="data-gen.html">DATA GEN</a>
-    <a class="nav-btn" href="pipeline.html">PIPELINE</a>
-    <a class="nav-btn active" href="resources.html">RESOURCES</a>
-    <a class="nav-btn" href="reports.html">REPORTS</a>
-    <a class="nav-btn" href="orchestrator.html">ORCHESTRATOR</a>
-    <a class="cog-btn" href="settings.html" title="Settings">⚙</a>
-    <div class="timestamp"><span id="clock">--:--:--</span>&nbsp;&nbsp;<span id="datestamp">----/--/--</span></div>
+<nav class="bcom-nav">
+  <span class="bcom-nav-brand">BCOM-C</span>
+  <div class="bcom-nav-links">
+    <a href="pipeline.html">PIPELINE</a>
+    <a href="data-gen.html">DATAGEN</a>
+    <a href="analytics.html">ANALYTICS</a>
+    <a href="coordinator.html">COORDINATOR</a>
+    <a href="datasets.html">DATASETS</a>
+    <a href="evals.html">EVALS</a>
+    <a href="models.html">MODELS</a>
+    <a href="monitor.html">MONITOR</a>
+    <a href="deploy.html">DEPLOY</a>
+    <a href="resources.html" class="active">RESOURCES</a>
+    <a href="reports.html">REPORTS</a>
+    <a href="settings.html">⚙</a>
   </div>
-</div>
-
-<div class="actionbar">
-  <button class="action-btn danger" onclick="triggerAction('RESTART VLLM')">RESTART VLLM</button>
-  <button class="action-btn danger" onclick="triggerAction('RESTART LLM')">RESTART LLM</button>
-  <button class="action-btn" onclick="pullModel()">&#8659; PULL MODEL</button>
-  <button class="action-btn" onclick="refreshAll()">&#8635; REFRESH</button>
-</div>
+</nav>
 
 <div class="main">
+
+  <!-- ── Hero chips ──────────────────────────────────────────────────── -->
+  <div class="hero-row">
+    <div class="hero-chip">
+      <div class="hero-chip-label">CONTAINERS</div>
+      <div class="hero-chip-val" id="h-containers">--</div>
+      <div class="hero-chip-sub">TOTAL</div>
+    </div>
+    <div class="hero-chip">
+      <div class="hero-chip-label">RUNNING</div>
+      <div class="hero-chip-val" id="h-running">--</div>
+      <div class="hero-chip-sub">CONTAINERS</div>
+    </div>
+    <div class="hero-chip">
+      <div class="hero-chip-label">SERVICES</div>
+      <div class="hero-chip-val" id="h-services">--</div>
+      <div class="hero-chip-sub">ACTIVE</div>
+    </div>
+    <div class="hero-chip">
+      <div class="hero-chip-label">MODELS LOADED</div>
+      <div class="hero-chip-val" id="h-models">--</div>
+      <div class="hero-chip-sub">IN MEMORY</div>
+    </div>
+    <div class="hero-chip">
+      <div class="hero-chip-label">STORAGE USED</div>
+      <div class="hero-chip-val" id="h-storage">--</div>
+      <div class="hero-chip-sub">SPARK-BOB ROOT</div>
+    </div>
+    <div class="hero-chip">
+      <div class="hero-chip-label">API STATUS</div>
+      <div class="hero-chip-val" id="h-api" style="font-size:13px;letter-spacing:1px">--</div>
+      <div class="hero-chip-sub">BOBSPARK-APIS</div>
+    </div>
+  </div>
+
   <div class="info-grid">
 
-    <!-- MODEL REGISTRY -->
+    <!-- ── CONTAINERS ─────────────────────────────────────────────────── -->
     <div class="info-card">
-      <div class="info-card-hdr" style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="info-card-hdr card-hdr-row">
+        <span>Containers</span>
+        <div class="filters">
+          <select class="form-select" id="ctr-filter" onchange="renderContainers()">
+            <option value="all">ALL</option>
+            <option value="running">RUNNING</option>
+            <option value="stopped">STOPPED</option>
+          </select>
+          <button class="ctr-btn" onclick="refreshContainers()">⟳ REFRESH</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="res-table">
+          <thead>
+            <tr><th>NAME</th><th>IMAGE</th><th>STATUS</th><th>PORTS</th><th>NODE</th><th>UPTIME</th><th>ACTIONS</th></tr>
+          </thead>
+          <tbody id="ctr-body">
+            <tr><td colspan="7" class="empty">LOADING…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── SERVICES ───────────────────────────────────────────────────── -->
+    <div class="info-card">
+      <div class="info-card-hdr card-hdr-row">
+        <span>Services</span>
+        <div class="filters">
+          <button class="ctr-btn" onclick="refreshServices()">⟳ REFRESH</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="res-table">
+          <thead>
+            <tr><th>SERVICE</th><th>STATUS</th><th>PORT</th><th>NODE</th><th>PID</th><th>UPTIME</th><th>ACTIONS</th></tr>
+          </thead>
+          <tbody id="svc-body">
+            <tr><td colspan="7" class="empty">LOADING…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── MODEL REGISTRY ─────────────────────────────────────────────── -->
+    <div class="info-card">
+      <div class="info-card-hdr card-hdr-row">
         <span>Model Registry</span>
-        <div style="display:flex;gap:8px;">
-          <select class="form-select" id="reg-filter-node" style="font-size:10px;padding:2px 8px;width:auto;" onchange="renderRegistry()">
+        <div class="filters">
+          <input type="text" class="form-input" id="reg-search" placeholder="SEARCH…" oninput="renderRegistry()" style="font-size:10px;padding:2px 8px;width:130px;" />
+          <select class="form-select" id="reg-filter-node" onchange="renderRegistry()">
             <option value="all">ALL NODES</option>
             <option value="spark">SPARK-BOB</option>
             <option value="linux">LINUX-DSKTP</option>
           </select>
-          <select class="form-select" id="reg-filter-status" style="font-size:10px;padding:2px 8px;width:auto;" onchange="renderRegistry()">
+          <select class="form-select" id="reg-filter-status" onchange="renderRegistry()">
             <option value="all">ALL STATUS</option>
             <option value="loaded">LOADED</option>
             <option value="cached">CACHED</option>
@@ -82,62 +197,67 @@
         </div>
       </div>
       <div style="overflow-x:auto">
-        <table class="reg-table">
+        <table class="res-table">
           <thead>
-            <tr><th>MODEL</th><th>TYPE</th><th>SIZE</th><th>BACKEND</th><th>NODE</th><th>VRAM REQ</th><th>QUANT</th><th>STATUS</th><th>ACTIONS</th></tr>
+            <tr><th>MODEL</th><th>TYPE</th><th>SIZE</th><th>BACKEND</th><th>NODE</th><th>QUANT</th><th>STATUS</th><th>ACTIONS</th></tr>
           </thead>
           <tbody id="reg-body">
-            <tr><td colspan="9" class="empty">AWAITING CONNECTION</td></tr>
+            <tr><td colspan="8" class="empty">LOADING…</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- PULL MODEL -->
+    <!-- ── PULL MODEL ─────────────────────────────────────────────────── -->
     <div class="info-card">
       <div class="info-card-hdr">Pull / Register Model</div>
       <div class="form-body">
-        <div class="form-row-3">
-          <div class="form-group">
-            <label class="form-label">Model ID or Path</label>
+        <div class="form-grid-3">
+          <div class="form-grp">
+            <label>Model ID or Path</label>
             <input class="form-input" id="pull-id" type="text" placeholder="e.g. mistral:7b-q4" />
           </div>
-          <div class="form-group">
-            <label class="form-label">Backend</label>
+          <div class="form-grp">
+            <label>Backend</label>
             <select class="form-select" id="pull-backend">
               <option>Ollama</option><option>vLLM</option><option>HuggingFace</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Node</label>
+          <div class="form-grp">
+            <label>Node</label>
             <select class="form-select" id="pull-node">
               <option value="spark">SPARK-BOB</option>
               <option value="linux">LINUX-DSKTP</option>
             </select>
           </div>
         </div>
-        <div class="form-row-3">
-          <div class="form-group">
-            <label class="form-label">Quantization</label>
+        <div class="form-grid-3">
+          <div class="form-grp">
+            <label>Quantization</label>
             <select class="form-select" id="pull-quant">
               <option>Q4_K_M</option><option>Q5_K_M</option><option>Q8_0</option><option>FP16</option><option>FP32</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Tag / Version</label>
+          <div class="form-grp">
+            <label>Tag / Version</label>
             <input class="form-input" id="pull-tag" type="text" placeholder="latest" />
           </div>
-          <div class="form-group" style="display:flex;align-items:flex-end;">
-            <button class="form-submit" style="margin-top:0;width:100%" onclick="pullModel()">&#8659; Pull</button>
+          <div class="form-grp" style="display:flex;align-items:flex-end;">
+            <button class="form-submit" style="margin-top:0;width:100%" onclick="submitPull()">↓ PULL</button>
           </div>
         </div>
-        <div class="form-output" id="pull-output">--</div>
+        <div class="pull-out" id="pull-output">—</div>
       </div>
     </div>
 
-    <!-- STORAGE -->
+    <!-- ── STORAGE ─────────────────────────────────────────────────────── -->
     <div class="info-card">
-      <div class="info-card-hdr">Storage Overview</div>
+      <div class="info-card-hdr card-hdr-row">
+        <span>Storage</span>
+        <div class="filters">
+          <button class="ctr-btn" onclick="refreshStorage()">⟳ REFRESH</button>
+        </div>
+      </div>
       <div class="stor-grid">
         <div class="stor-node">
           <div class="stor-hdr">SPARK-BOB</div>
@@ -161,8 +281,8 @@
         <div class="stor-node">
           <div class="stor-hdr">LINUX-DSKTP</div>
           <div class="stor-row">
-            <div class="stor-label"><span>MODELS</span><span id="stor-linux-models">-- / --</span></div>
-            <div class="stor-track"><div class="stor-fill" id="sf-linux-models" style="width:0%"></div></div>
+            <div class="stor-label"><span>UBDRIVE</span><span id="stor-linux-ubdrive">-- / --</span></div>
+            <div class="stor-track"><div class="stor-fill" id="sf-linux-ubdrive" style="width:0%"></div></div>
           </div>
           <div class="stor-row">
             <div class="stor-label"><span>DATASETS</span><span id="stor-linux-data">-- / --</span></div>
@@ -180,245 +300,351 @@
       </div>
     </div>
 
-    <!-- COMPUTE ALLOCATION -->
-    <div class="info-card">
-      <div class="info-card-hdr">Compute Allocation</div>
-      <div class="node-cols">
-        <div class="node-col">
-          <div class="node-col-hdr"><div class="status-dot"></div>SPARK-BOB</div>
-          <div class="compute-row">
-            <div class="compute-chip">GPU ALLOC<span id="ca-spark-gpu">--</span></div>
-            <div class="compute-chip">VRAM USED<span id="ca-spark-vram">--</span></div>
-            <div class="compute-chip">CPU CORES<span id="ca-spark-cpu">--</span></div>
-            <div class="compute-chip">PROCESSES<span id="ca-spark-procs">--</span></div>
-          </div>
-        </div>
-        <div class="node-col">
-          <div class="node-col-hdr"><div class="status-dot"></div>LINUX-DSKTP</div>
-          <div class="compute-row">
-            <div class="compute-chip">GPU ALLOC<span id="ca-linux-gpu">--</span></div>
-            <div class="compute-chip">RAM USED<span id="ca-linux-ram">--</span></div>
-            <div class="compute-chip">CPU CORES<span id="ca-linux-cpu">--</span></div>
-            <div class="compute-chip">PROCESSES<span id="ca-linux-procs">--</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+  </div><!-- /info-grid -->
 
   <div class="log-panel" id="log">
-    <div class="log-line"><span class="log-time">--:--:--</span><span class="log-msg info">RESOURCES module ready. Connect API to populate live data.</span></div>
+    <div class="log-line"><span class="log-time">--:--:--</span><span class="log-msg info">RESOURCES ready — polling containers, services, models, storage.</span></div>
   </div>
-</div>
 
-<div class="footer">
-  <span>BOB-AI // BCOM-C v0.1</span>
-  <span id="footer-date"></span>
-  <span>SESSION ACTIVE</span>
-</div>
+</div><!-- /main -->
 
-<!-- TERMINAL DOCK -->
-<div class="terminal-dock" id="terminal-dock">
-  <div class="terminal-bar">
-    <div class="terminal-tabs">
-      <div class="terminal-tab active" data-term="spark" onclick="switchTerm('spark')">SPARK-BOB</div>
-      <div class="terminal-tab" data-term="linux" onclick="switchTerm('linux')">LINUX-DSKTP</div>
-    </div>
-      <div class="terminal-tab" data-term="shell">SHELL</div>
-    <div class="terminal-controls">
-      <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
-    </div>
-  </div>
-  <div class="terminal-body" id="terminal-body">
-    <div class="terminal-output" id="term-out-spark"><div class="term-line sys">[bcom-c] resources terminal ready</div></div>
-    <div class="terminal-output" id="term-out-linux" style="display:none"><div class="term-line sys">[bcom-c] resources terminal ready</div></div>
-    <div id="xterm-container" style="display:none;flex:1;min-height:0;width:100%;background:#080808;"></div>
-    <div class="terminal-input-row">
-      <span class="term-prompt" id="term-prompt">$</span>
-      <input class="terminal-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type command..." />
-    </div>
-  </div>
-</div>
-
-<script src="../assets/js/bcom.js?v=5"></script>
+<script src="../bcom.js?v=5"></script>
 <script>
-  BCOM.apiBase      = '';   // '' = same-origin (Caddy proxies /api/* → Spark)
-  BCOM.pollInterval = 5000;
-  startPolling();
+window.BCOM = window.BCOM || {};
+BCOM.apiBase = '';
 
-  // ── Live model list ────────────────────────────────────────────────
-  let _sparkModels = [];
-  let _linuxModels = [];
+// ── State ──────────────────────────────────────────────────────────────
+var _containers = [];
+var _services   = [];
+var _models     = [];
 
-  function _liveToRegistry(models, node) {
-    return models.map(m => ({
-      id:      m.name ?? m.model ?? '--',
-      type:    (m.details?.family ?? 'llm').toUpperCase(),
-      size:    m.size ? (m.size / 1e9).toFixed(1) + ' GB' : '--',
-      backend: 'Ollama',
-      node:    node,
-      vram:    '--',
-      quant:   m.details?.quantization_level ?? '--',
-      status:  'loaded',
-    }));
+// ── Helpers ────────────────────────────────────────────────────────────
+function setText(id, v) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = v;
+}
+
+function logLine(msg, cls) {
+  var panel = document.getElementById('log');
+  if (!panel) return;
+  var now = new Date();
+  var ts  = now.toTimeString().split(' ')[0];
+  var div = document.createElement('div');
+  div.className = 'log-line';
+  div.innerHTML = '<span class="log-time">' + ts + '</span>'
+                + '<span class="log-msg ' + (cls||'info') + '">' + msg + '</span>';
+  panel.appendChild(div);
+  panel.scrollTop = panel.scrollHeight;
+  while (panel.children.length > 120) panel.removeChild(panel.firstChild);
+}
+
+function pillHtml(status) {
+  var s = (status || 'unknown').toLowerCase();
+  var cls = s;
+  if (s === 'active' || s === 'online') cls = 'up';
+  return '<span class="spill ' + cls + '">' + s.toUpperCase() + '</span>';
+}
+
+function setStorBar(fillId, labelId, usedGb, totalGb) {
+  if (!totalGb) return;
+  var pct = Math.min(100, Math.round(usedGb / totalGb * 100));
+  var fill = document.getElementById(fillId);
+  if (fill) {
+    fill.style.width = pct + '%';
+    fill.className   = 'stor-fill' + (pct >= 90 ? ' danger' : pct >= 75 ? ' warn' : '');
   }
+  var lbl = document.getElementById(labelId);
+  if (lbl) lbl.textContent = usedGb.toFixed(1) + ' / ' + totalGb.toFixed(1) + ' GB';
+}
 
-  function renderRegistry() {
-    const fn = document.getElementById('reg-filter-node').value;
-    const fs = document.getElementById('reg-filter-status').value;
-    let m = [
-      ..._liveToRegistry(_sparkModels, 'spark'),
-      ..._liveToRegistry(_linuxModels, 'linux'),
-    ];
-    if (fn !== 'all') m = m.filter(x => x.node === fn);
-    if (fs !== 'all') m = m.filter(x => x.status === fs);
-    const tb = document.getElementById('reg-body');
-    if (!m.length) {
-      tb.innerHTML = '<tr><td colspan="9" class="empty">NO MODELS LOADED</td></tr>';
-      return;
+// ── Containers ─────────────────────────────────────────────────────────
+function renderContainers() {
+  var filter = document.getElementById('ctr-filter').value;
+  var list   = _containers;
+  if (filter !== 'all') list = list.filter(function(c) {
+    var s = (c.status || c.state || '').toLowerCase();
+    return filter === 'running' ? s === 'running' : s !== 'running';
+  });
+  var tb = document.getElementById('ctr-body');
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="7" class="empty">NO CONTAINERS</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(function(c) {
+    var name   = c.name   || c.Names   || c.id || '--';
+    var image  = c.image  || c.Image   || '--';
+    var status = c.status || c.State   || 'unknown';
+    var ports  = c.ports  || c.Ports   || '';
+    var node   = c.node   || 'SPARK-BOB';
+    var uptime = c.uptime || c.Started || '--';
+    if (Array.isArray(name))  name  = name.join(', ').replace(/^\//, '');
+    if (Array.isArray(ports)) ports = ports.map(function(p){ return p.PublicPort || ''; }).filter(Boolean).join(', ');
+    var id = c.id || c.Id || '';
+    return '<tr>'
+      + '<td style="color:var(--orange-dark);font-weight:600">' + name + '</td>'
+      + '<td style="color:#888;font-size:10px">' + image + '</td>'
+      + '<td>' + pillHtml(status) + '</td>'
+      + '<td style="color:#777;font-size:10px">' + (ports || '—') + '</td>'
+      + '<td style="color:#666;font-size:10px">' + node + '</td>'
+      + '<td style="color:#666;font-size:10px">' + uptime + '</td>'
+      + '<td><div class="btn-row">'
+      + '<button class="ctr-btn" onclick="containerAction(\'' + id + '\',\'start\')">START</button>'
+      + '<button class="ctr-btn" onclick="containerAction(\'' + id + '\',\'stop\')">STOP</button>'
+      + '<button class="ctr-btn" onclick="containerAction(\'' + id + '\',\'restart\')">RESTART</button>'
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+async function refreshContainers() {
+  try {
+    var res = await fetch('/api/system/containers', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var d = await res.json();
+    _containers = d.containers || d || [];
+    var running = _containers.filter(function(c){ return (c.status||c.state||'').toLowerCase()==='running'; }).length;
+    setText('h-containers', _containers.length);
+    setText('h-running', running);
+    renderContainers();
+  } catch (err) {
+    logLine('Containers error: ' + err.message, 'warn');
+    document.getElementById('ctr-body').innerHTML = '<tr><td colspan="7" class="empty">API UNAVAILABLE</td></tr>';
+  }
+}
+
+async function containerAction(id, action) {
+  if (!id) return;
+  try {
+    logLine('Container ' + action + ': ' + id, 'info');
+    var res = await fetch('/api/system/containers/' + id + '/' + action, { method: 'POST' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    logLine('Container ' + action + ' OK', 'info');
+    setTimeout(refreshContainers, 1200);
+  } catch (err) {
+    logLine('Container action failed: ' + err.message, 'warn');
+  }
+}
+
+// ── Services ───────────────────────────────────────────────────────────
+function renderServices() {
+  var tb = document.getElementById('svc-body');
+  if (!_services.length) {
+    tb.innerHTML = '<tr><td colspan="7" class="empty">NO SERVICES</td></tr>';
+    return;
+  }
+  tb.innerHTML = _services.map(function(s) {
+    var name   = s.name    || s.service  || '--';
+    var status = s.status  || s.state    || 'unknown';
+    var port   = s.port    || s.Port     || '--';
+    var node   = s.node    || 'SPARK-BOB';
+    var pid    = s.pid     || '--';
+    var uptime = s.uptime  || '--';
+    return '<tr>'
+      + '<td style="color:var(--orange-dark);font-weight:600">' + name + '</td>'
+      + '<td>' + pillHtml(status) + '</td>'
+      + '<td style="color:#777;font-size:10px">' + port + '</td>'
+      + '<td style="color:#666;font-size:10px">' + node + '</td>'
+      + '<td style="color:#666;font-size:10px">' + pid + '</td>'
+      + '<td style="color:#666;font-size:10px">' + uptime + '</td>'
+      + '<td><div class="btn-row">'
+      + '<button class="ctr-btn" onclick="serviceAction(\'' + name + '\',\'start\')">START</button>'
+      + '<button class="ctr-btn" onclick="serviceAction(\'' + name + '\',\'stop\')">STOP</button>'
+      + '<button class="ctr-btn" onclick="serviceAction(\'' + name + '\',\'restart\')">RESTART</button>'
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+async function refreshServices() {
+  try {
+    var res = await fetch('/api/system/services', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var d = await res.json();
+    _services = d.services || d || [];
+    var active = _services.filter(function(s){ var st=(s.status||s.state||'').toLowerCase(); return st==='up'||st==='running'||st==='active'; }).length;
+    setText('h-services', active);
+    renderServices();
+  } catch (err) {
+    logLine('Services error: ' + err.message, 'warn');
+    document.getElementById('svc-body').innerHTML = '<tr><td colspan="7" class="empty">API UNAVAILABLE</td></tr>';
+  }
+}
+
+async function serviceAction(name, action) {
+  if (!name) return;
+  try {
+    logLine('Service ' + action + ': ' + name, 'info');
+    var res = await fetch('/api/system/services/' + encodeURIComponent(name) + '/' + action, { method: 'POST' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    logLine('Service ' + action + ' OK: ' + name, 'info');
+    setTimeout(refreshServices, 1200);
+  } catch (err) {
+    logLine('Service action failed: ' + err.message, 'warn');
+  }
+}
+
+// ── Model Registry ─────────────────────────────────────────────────────
+function renderRegistry() {
+  var fn  = document.getElementById('reg-filter-node').value;
+  var fs  = document.getElementById('reg-filter-status').value;
+  var srch = (document.getElementById('reg-search').value || '').toLowerCase();
+  var m   = _models.slice();
+  if (fn !== 'all')  m = m.filter(function(x){ return x.node === fn; });
+  if (fs !== 'all')  m = m.filter(function(x){ return x.status === fs; });
+  if (srch) m = m.filter(function(x){ return x.id.toLowerCase().indexOf(srch) >= 0; });
+  var tb = document.getElementById('reg-body');
+  if (!m.length) {
+    tb.innerHTML = '<tr><td colspan="8" class="empty">NO MODELS</td></tr>';
+    return;
+  }
+  tb.innerHTML = m.map(function(x) {
+    return '<tr>'
+      + '<td style="color:var(--orange-dark);font-weight:600">' + x.id + '</td>'
+      + '<td>' + x.type + '</td>'
+      + '<td>' + x.size + '</td>'
+      + '<td>' + x.backend + '</td>'
+      + '<td style="color:#777;font-size:10px">' + (x.node==='spark'?'SPARK-BOB':'LINUX-DSKTP') + '</td>'
+      + '<td style="color:#999;font-size:10px">' + x.quant + '</td>'
+      + '<td>' + pillHtml(x.status) + '</td>'
+      + '<td><div class="btn-row">'
+      + '<button class="ctr-btn" onclick="modelAction(\'' + x.id + '\',\'load\')">LOAD</button>'
+      + '<button class="ctr-btn danger" onclick="modelAction(\'' + x.id + '\',\'remove\')">RM</button>'
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+async function refreshModels() {
+  try {
+    var res = await fetch('/api/models/', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var d   = await res.json();
+    var raw = d.models || (Array.isArray(d) ? d : []);
+    _models = raw.map(function(m) {
+      return {
+        id:      m.name || m.model || m.id || '--',
+        type:    ((m.details && m.details.family) || 'LLM').toUpperCase(),
+        size:    m.size ? (m.size / 1e9).toFixed(1) + ' GB' : '--',
+        backend: 'Ollama',
+        node:    'spark',
+        quant:   (m.details && m.details.quantization_level) || '--',
+        status:  'loaded',
+      };
+    });
+    var loaded = _models.filter(function(m){ return m.status === 'loaded'; }).length;
+    setText('h-models', loaded);
+    renderRegistry();
+  } catch (err) {
+    logLine('Models error: ' + err.message, 'warn');
+    document.getElementById('reg-body').innerHTML = '<tr><td colspan="8" class="empty">API UNAVAILABLE</td></tr>';
+  }
+}
+
+function modelAction(id, action) {
+  logLine('Model ' + action + ': ' + id, 'info');
+}
+
+// ── Pull model ─────────────────────────────────────────────────────────
+async function submitPull() {
+  var id  = (document.getElementById('pull-id').value || '').trim();
+  var bk  = document.getElementById('pull-backend').value;
+  var nd  = document.getElementById('pull-node').value;
+  var qt  = document.getElementById('pull-quant').value;
+  var tag = (document.getElementById('pull-tag').value || 'latest').trim();
+  var out = document.getElementById('pull-output');
+  if (!id) { out.textContent = 'ERROR: Model ID required.'; out.style.color = '#e74c3c'; return; }
+  out.textContent = 'Pulling ' + id + ':' + tag + ' via ' + bk + ' on ' + (nd==='spark'?'SPARK-BOB':'LINUX-DSKTP') + '…';
+  out.style.color = 'var(--orange-dark)';
+  try {
+    var res = await fetch('/api/models/pull', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: id, tag: tag, backend: bk, node: nd, quantization: qt }),
+    });
+    var d = await res.json();
+    if (res.ok) {
+      out.textContent = 'Pull started: ' + (d.message || d.status || 'OK');
+      out.style.color = '#27ae60';
+      logLine('Pull queued: ' + id, 'info');
+      setTimeout(refreshModels, 3000);
+    } else {
+      out.textContent = 'ERROR: ' + (d.detail || d.error || 'Unknown error');
+      out.style.color = '#e74c3c';
     }
-    tb.innerHTML = m.map(x => `<tr>
-      <td style="color:var(--orange-dark);font-weight:600">${x.id}</td>
-      <td>${x.type}</td><td>${x.size}</td><td>${x.backend}</td>
-      <td>${x.node==='spark'?'SPARK-BOB':'LINUX-DSKTP'}</td>
-      <td>${x.vram}</td><td style="color:#999">${x.quant}</td>
-      <td><span class="mdl-pill ${x.status}">${x.status.toUpperCase()}</span></td>
-      <td style="display:flex;gap:4px;">
-        <button class="ctr-btn" onclick="loadModel('${x.id}')">LOAD</button>
-        <button class="ctr-btn" onclick="removeModel('${x.id}')">RM</button>
-      </td>
-    </tr>`).join('');
+  } catch (err) {
+    out.textContent = 'ERROR: ' + err.message;
+    out.style.color = '#e74c3c';
   }
+}
 
-  function loadModel(id)   { logLine(`CMD: LOAD — ${id}`, 'info'); }
-  function removeModel(id) { logLine(`CMD: REMOVE — ${id}`, 'warn'); }
+// ── Storage ────────────────────────────────────────────────────────────
+async function refreshStorage() {
+  try {
+    var [storRes, linuxRes] = await Promise.all([
+      fetch('/api/system/storage',      { cache: 'no-store' }),
+      fetch('/api/system/linux/stats',  { cache: 'no-store' }),
+    ]);
 
-  function pullModel() {
-    const id = document.getElementById('pull-id').value.trim();
-    const bk = document.getElementById('pull-backend').value;
-    const nd = document.getElementById('pull-node').value;
-    if (!id) { logLine('Form error: Model ID required', 'warn'); return; }
-    const t = new Date().toTimeString().split(' ')[0];
-    logLine(`CMD: PULL — ${id} via ${bk} on ${nd==='spark'?'SPARK-BOB':'LINUX-DSKTP'}`, 'info');
-    const out = document.getElementById('pull-output');
-    out.textContent = `[${t}] Pull queued: ${id}`;
-    out.style.color = 'var(--orange-dark)';
-  }
-
-  function setStorBar(id, labelId, used, total) {
-    if (!total) return;
-    const pct = Math.min(100, Math.round(used / total * 100));
-    const el  = document.getElementById(id);
-    if (el) {
-      el.style.width = pct + '%';
-      el.className   = 'stor-fill' + (pct >= 90 ? ' danger' : pct >= 75 ? ' warn' : '');
+    if (storRes.ok) {
+      var stor = await storRes.json();
+      var sp   = stor.spark || stor || {};
+      if (sp.models)      setStorBar('sf-spark-models', 'stor-spark-models', sp.models.used_gb,      sp.models.total_gb);
+      if (sp.datasets)    setStorBar('sf-spark-data',   'stor-spark-data',   sp.datasets.used_gb,    sp.datasets.total_gb);
+      if (sp.checkpoints) setStorBar('sf-spark-ckpt',   'stor-spark-ckpt',   sp.checkpoints.used_gb, sp.checkpoints.total_gb);
+      if (sp.root)        setStorBar('sf-spark-root',   'stor-spark-root',   sp.root.used_gb,        sp.root.total_gb);
+      if (sp.root)        setText('h-storage', sp.root.used_gb.toFixed(1) + ' GB');
     }
-    const lbl = document.getElementById(labelId);
-    if (lbl) lbl.textContent = `${used} GB / ${total} GB`;
-  }
 
-  // ── Resource page poll (system stats, storage, models) ─────────────
-  async function pollResourcePage() {
-    try {
-      const [statsRes, infoRes, storageRes, modelsRes, linuxRes, linuxModelsRes] = await Promise.allSettled([
-        fetch('/api/system/stats',        { cache: 'no-store' }),
-        fetch('/api/system/info',         { cache: 'no-store' }),
-        fetch('/api/system/storage',      { cache: 'no-store' }),
-        fetch('/api/models/',             { cache: 'no-store' }),
-        fetch('/api/system/linux/stats',  { cache: 'no-store' }),
-        fetch('/api/models/linux',        { cache: 'no-store' }),
-      ]);
-
-      // Spark stats → compute chips
-      if (statsRes.status === 'fulfilled' && statsRes.value.ok) {
-        const s = await statsRes.value.json();
-        const g = s.gpu ?? {};
-        setText('ca-spark-gpu',   g.name ? `${g.name}` : '--');
-        setText('ca-spark-procs', s.cpu_percent !== undefined
-          ? `${s.cpu_percent.toFixed(1)}% CPU` : '--');
-      }
-
-      // Spark info → cpu_count
-      if (infoRes.status === 'fulfilled' && infoRes.value.ok) {
-        const info = await infoRes.value.json();
-        setText('ca-spark-cpu', info.cpu_count ? `${info.cpu_count} cores` : '--');
-      }
-
-      // Spark storage → bars
-      if (storageRes.status === 'fulfilled' && storageRes.value.ok) {
-        const stor = await storageRes.value.json();
-        const sp   = stor.spark ?? {};
-        if (sp.models)      setStorBar('sf-spark-models','stor-spark-models', sp.models.used_gb,      sp.models.total_gb);
-        if (sp.datasets)    setStorBar('sf-spark-data',  'stor-spark-data',   sp.datasets.used_gb,    sp.datasets.total_gb);
-        if (sp.checkpoints) setStorBar('sf-spark-ckpt',  'stor-spark-ckpt',   sp.checkpoints.used_gb, sp.checkpoints.total_gb);
-        if (sp.root)        setStorBar('sf-spark-root',  'stor-spark-root',   sp.root.used_gb,        sp.root.total_gb);
-      }
-
-      // Spark models → registry table
-      if (modelsRes.status === 'fulfilled' && modelsRes.value.ok) {
-        const mdl = await modelsRes.value.json();
-        _sparkModels = mdl.models ?? (Array.isArray(mdl) ? mdl : []);
-        renderRegistry();
-      }
-
-      // Linux Desktop models → merge into registry table
-      if (linuxModelsRes.status === 'fulfilled' && linuxModelsRes.value.ok) {
-        const lmdl = await linuxModelsRes.value.json();
-        _linuxModels = (!lmdl.error && lmdl.models) ? lmdl.models : [];
-        renderRegistry();
-      }
-
-      // Linux desktop → compute chips + storage bars
-      if (linuxRes.status === 'fulfilled' && linuxRes.value.ok) {
-        const lx = await linuxRes.value.json();
-        if (!lx.error) {
-          setText('ca-linux-gpu',   'NONE');
-          setText('ca-linux-cpu',   lx.cpu_count ? `${lx.cpu_count} cores` : '--');
-          setText('ca-linux-ram',   lx.memory?.used_gb != null
-            ? `${lx.memory.used_gb} / ${lx.memory.total_gb} GB` : '--');
-          setText('ca-linux-procs', lx.procs_running != null
-            ? `${lx.procs_running} running` : '--');
-
-          const d = lx.disk ?? {};
-          if (d.root)    setStorBar('sf-linux-root',   'stor-linux-root',   d.root.used_gb,    d.root.total_gb);
-          if (d.ubdrive) setStorBar('sf-linux-models', 'stor-linux-models', d.ubdrive.used_gb, d.ubdrive.total_gb);
-          if (d.ubdrive) setStorBar('sf-linux-data',   'stor-linux-data',   d.ubdrive.used_gb, d.ubdrive.total_gb);
-        }
-      }
-
-    } catch (err) {
-      logLine('Resource poll error: ' + err.message, 'warn');
+    if (linuxRes.ok) {
+      var lx = await linuxRes.json();
+      var d  = lx.disk || {};
+      if (d.ubdrive) setStorBar('sf-linux-ubdrive', 'stor-linux-ubdrive', d.ubdrive.used_gb, d.ubdrive.total_gb);
+      if (d.ubdrive) setStorBar('sf-linux-data',    'stor-linux-data',    d.ubdrive.used_gb, d.ubdrive.total_gb);
+      if (d.ckpts)   setStorBar('sf-linux-ckpt',    'stor-linux-ckpt',    d.ckpts.used_gb,   d.ckpts.total_gb);
+      if (d.root)    setStorBar('sf-linux-root',    'stor-linux-root',    d.root.used_gb,    d.root.total_gb);
     }
+  } catch (err) {
+    logLine('Storage error: ' + err.message, 'warn');
   }
+}
 
-  function refreshAll() {
-    logLine('Resources refreshed', 'info');
-    pollResourcePage();
+// ── API health chip ────────────────────────────────────────────────────
+async function refreshApiHealth() {
+  try {
+    var res = await fetch('/api/health', { cache: 'no-store' });
+    var el  = document.getElementById('h-api');
+    if (res.ok) {
+      el.textContent = 'ONLINE';
+      el.style.color = '#27ae60';
+    } else {
+      el.textContent = 'ERROR';
+      el.style.color = '#e74c3c';
+    }
+  } catch (_) {
+    var el = document.getElementById('h-api');
+    el.textContent = 'OFFLINE';
+    el.style.color = '#e74c3c';
   }
+}
 
-  // Initial load + recurring poll
-  pollResourcePage();
-  setInterval(pollResourcePage, 10000); // storage is slow (du), 10s is fine
+// ── Poll all ───────────────────────────────────────────────────────────
+function pollAll() {
+  refreshContainers();
+  refreshServices();
+  refreshModels();
+  refreshStorage();
+  refreshApiHealth();
+}
 
-  // Terminal
-  let _termNode = 'spark';
-  function switchTerm(node) {
-    _termNode = node;
-    document.querySelectorAll('.terminal-tab').forEach(t => t.classList.toggle('active', t.dataset.term === node));
-    ['spark','linux'].forEach(n => { const el = document.getElementById('term-out-'+n); if (el) el.style.display = n===node?'block':'none'; });
-    document.getElementById('term-prompt').textContent = (node==='spark'?'spark-bob':'linux-dsktp')+' $';
-    document.getElementById('terminal-input').focus();
-  }
-  function termLine(text, cls) {
-    const out = document.getElementById('term-out-'+_termNode); if (!out) return;
-    const div = document.createElement('div'); div.className = 'term-line'+(cls?' '+cls:''); div.textContent = text;
-    out.appendChild(div); out.scrollTop = out.scrollHeight;
-  }
-  // terminal input wired by bcom-terminal.js
-  // minimize wired by bcom-terminal.js
-  switchTerm('spark');
+// Initial load
+pollAll();
+
+// Staggered intervals
+setInterval(refreshContainers,   12000);
+setInterval(refreshServices,     15000);
+setInterval(refreshModels,       20000);
+setInterval(refreshStorage,      30000);
+setInterval(refreshApiHealth,     8000);
 </script>
-  <script src="../assets/js/bcom-terminal.js?v=3"></script>
 </body>
 </html>
