@@ -5,29 +5,29 @@ on:
     branches: [main]
 
 jobs:
-  sync:
-    name: Sync ${{ matrix.name }}
-    strategy:
-      matrix:
-        include:
-          - name: DGX Spark
-            runner: "[self-hosted, dgx, arm64]"
-            path: /home/nmyers/Projects/BCOM-C
-
-          - name: M4 Pro
-            runner: "[self-hosted, m4pro, arm64]"
-            path: /Users/myro-pro/Projects/BCOM-C
-
-          - name: Linux Desktop
-            runner: "[self-hosted, linux-desktop, x64]"
-            path: /home/myroproductions/Projects/BCOM-C
-
-    runs-on: ${{ fromJSON(matrix.runner) }}
+  sync-dgx:
+    name: Sync DGX Spark
+    runs-on: [self-hosted, dgx, arm64]
     steps:
       - name: Pull latest
-        run: git -C ${{ matrix.path }} pull origin main
-
-      - name: Confirm
         run: |
-          echo "${{ matrix.name }} updated at $(date)"
-          git -C ${{ matrix.path }} log --oneline -2
+          git -C /home/nmyers/Projects/BCOM-C pull origin main
+          git -C /home/nmyers/Projects/BCOM-C log --oneline -2
+
+  sync-m4pro:
+    name: Sync M4 Pro
+    runs-on: [self-hosted, m4pro, arm64]
+    steps:
+      - name: Pull latest
+        run: |
+          git -C /Users/myro-pro/Projects/BCOM-C pull origin main
+          git -C /Users/myro-pro/Projects/BCOM-C log --oneline -2
+
+  sync-linux:
+    name: Sync Linux Desktop
+    runs-on: [self-hosted, linux-desktop, x64]
+    steps:
+      - name: Pull latest
+        run: |
+          git -C /home/myroproductions/Projects/BCOM-C pull origin main
+          git -C /home/myroproductions/Projects/BCOM-C log --oneline -2
