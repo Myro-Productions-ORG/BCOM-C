@@ -253,7 +253,8 @@
   .banner-field { font-size:11px; letter-spacing:1px; color:#ccc; }
   .banner-field span { color:var(--orange); display:block; margin-top:2px; font-weight:700; }
   .prog-track { background:#0e0905; height:6px; margin-top:6px; flex:1; min-width:120px; }
-  .prog-fill  { height:6px; background:var(--orange-dark); transition:width .4s; }
+  .prog-fill  { height:6px; background:linear-gradient(to right, var(--orange-dark), #27ae60); transition:width .4s; }
+  .prog-pct   { font-size:10px; letter-spacing:1px; color:var(--orange); min-width:34px; text-align:right; margin-top:4px; transition:color .4s; }
 
   /* Iteration badge in card header */
   .iter-badge { float: right; font-size: 9px; letter-spacing: 1.5px; color: #252525; transition: color .25s; }
@@ -428,7 +429,10 @@
         <div class="banner-field">SCORE<span id="bp-score">--</span></div>
         <div class="banner-field" style="flex:1">
           PROGRESS
-          <div class="prog-track"><div class="prog-fill" id="bp-prog" style="width:0%"></div></div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="prog-track" style="flex:1"><div class="prog-fill" id="bp-prog" style="width:0%"></div></div>
+            <span class="prog-pct" id="bp-prog-pct">0%</span>
+          </div>
         </div>
       </div>
     </div>
@@ -586,6 +590,14 @@
 
   let _runSeq = 1, _runs = [], _activeRun = null, _simIv = null;
 
+  function setProgress(pct) {
+    const p = Math.round(Math.min(Math.max(pct, 0), 100));
+    document.getElementById('bp-prog').style.width = p + '%';
+    const lbl = document.getElementById('bp-prog-pct');
+    lbl.textContent = p + '%';
+    lbl.style.color = p >= 66 ? '#27ae60' : p >= 33 ? '#e8a040' : 'var(--orange)';
+  }
+
   // Stage live-metric strings for simulation
   const STAGE_LIVE_IDLE = ['—','—','—','—','—'];
   function stageLiveActive(idx, r) {
@@ -651,7 +663,7 @@
         setText('bp-iter',    '—');
         setText('bp-score',   '—');
         setStage(2); // highlight DEPLOY stage
-        document.getElementById('bp-prog').style.width = '60%';
+        setProgress(60);
         // show live metric for deploy stage
         const lv = document.getElementById('live-deploy');
         if (lv) lv.textContent = `${d.backend} → SPARK-BOB`;
@@ -687,7 +699,7 @@
       // Banner fields
       document.getElementById('bp-iter').textContent  = 'EPOCH ' + epoch + ' / ' + totalEpoch;
       document.getElementById('bp-score').textContent = 'LOSS ' + parseFloat(loss).toFixed(4);
-      document.getElementById('bp-prog').style.width  = pct + '%';
+      setProgress(parseFloat(pct));
       // Highlight FINE-TUNE stage and show banner
       if (!_activeRun) {
         document.getElementById('active-banner').style.display = 'flex';
@@ -789,7 +801,7 @@
     _simIv = setInterval(() => {
       prog += Math.floor(Math.random()*14) + 4;
       const totalProg = Math.min(((stage * 100) + Math.min(prog,100)) / STAGES.length, 100);
-      document.getElementById('bp-prog').style.width = totalProg + '%';
+      setProgress(totalProg);
       document.getElementById('bp-iter').textContent = `${r.iter} / ${r.maxiter}`;
 
       if (prog >= 100) {
