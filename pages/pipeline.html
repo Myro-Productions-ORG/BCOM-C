@@ -554,6 +554,7 @@
       <div class="terminal-tab active" data-term="spark" onclick="switchTerm('spark')">SPARK-BOB</div>
       <div class="terminal-tab" data-term="linux" onclick="switchTerm('linux')">LINUX-DSKTP</div>
     </div>
+      <div class="terminal-tab" data-term="shell">SHELL</div>
     <div class="terminal-controls">
       <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
     </div>
@@ -565,6 +566,7 @@
     <div class="terminal-output" id="term-out-linux" style="display:none">
       <div class="term-line sys">[bcom-c] pipeline terminal ready</div>
     </div>
+    <div id="xterm-container" style="display:none;flex:1;min-height:0;width:100%;background:#080808;"></div>
     <div class="terminal-input-row">
       <span class="term-prompt" id="term-prompt">$</span>
       <input class="terminal-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type command..." />
@@ -816,22 +818,10 @@
     const div = document.createElement('div'); div.className = 'term-line'+(cls?' '+cls:''); div.textContent = text;
     out.appendChild(div); out.scrollTop = out.scrollHeight;
   }
-  document.getElementById('terminal-input').addEventListener('keydown', e => {
-    if (e.key !== 'Enter') return;
-    const cmd = e.target.value.trim(); if (!cmd) return;
-    termLine((_termNode==='spark'?'spark-bob':'linux-dsktp')+' $ '+cmd); e.target.value = '';
-    if (BCOM.apiBase === null) termLine('[bcom-c] no API — command not sent', 'dim');
-  });
-  document.getElementById('term-minimize').addEventListener('click', () => {
-    const dock = document.getElementById('terminal-dock');
-    const body = document.getElementById('terminal-body');
-    const btn  = document.getElementById('term-minimize');
-    const isMin = dock.classList.toggle('minimized');
-    body.style.display = isMin ? 'none' : '';
-    btn.textContent = isMin ? '▲' : '_';
-    document.body.style.paddingBottom = isMin ? '34px' : '220px';
-  });
+  // terminal input wired by bcom-terminal.js
+  // minimize wired by bcom-terminal.js
   switchTerm('spark');
 </script>
+  <script src="../assets/js/bcom-terminal.js"></script>
 </body>
 </html>

@@ -814,6 +814,20 @@ body {
   caret-color: var(--orange);
 }
 
+
+/* ── XTERM CONTAINER (real shell terminal) ─────────── */
+#xterm-container {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  background: #080808;
+  overflow: hidden;
+}
+#xterm-container .xterm { height: 100%; }
+#xterm-container .xterm-viewport { overflow-y: scroll; }
+#xterm-container .xterm-viewport::-webkit-scrollbar { width: 4px; }
+#xterm-container .xterm-viewport::-webkit-scrollbar-thumb { background: #2a1a0a; }
+
 /* ── BODY PADDING for terminal dock ───────────────── */
 body { padding-bottom: 220px; }
 

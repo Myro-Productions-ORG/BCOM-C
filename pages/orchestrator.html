@@ -545,6 +545,7 @@
       <div class="terminal-tab active" data-term="orch"    onclick="switchTerm('orch')">ORCHESTRATOR</div>
       <div class="terminal-tab"        data-term="agent"   onclick="switchTerm('agent')">AGENT LOG</div>
       <div class="terminal-tab"        data-term="history" onclick="switchTerm('history')">RUN HISTORY</div>
+      <div class="terminal-tab" data-term="shell">SHELL</div>
     </div>
     <div class="terminal-controls">
       <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
@@ -561,6 +562,7 @@
     <div class="terminal-output" id="term-out-history" style="display:none">
       <div id="run-history-body"><div class="term-line dim">[run-history] loading...</div></div>
     </div>
+    <div id="xterm-container" style="display:none;flex:1;min-height:0;width:100%;background:#080808;"></div>
     <div class="terminal-input-row">
       <span class="term-prompt" id="term-prompt">orch $</span>
       <input class="terminal-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type command..." />
@@ -1294,23 +1296,9 @@ function agentLog(msg, cls) {
   out.appendChild(d); out.scrollTop = out.scrollHeight;
 }
 
-document.getElementById('terminal-input').addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  const cmd = e.target.value.trim(); if (!cmd) return;
-  e.target.value = '';
-  if (_termNode === 'orch') { orchLog('orch $ ' + cmd); orchLog('[bcom-c] command logged', 'dim'); }
-  else { agentLog('agent $ ' + cmd); agentLog('[bcom-c] command logged', 'dim'); }
-});
+// terminal input wired by bcom-terminal.js
 
-document.getElementById('term-minimize').addEventListener('click', () => {
-  const dock = document.getElementById('terminal-dock');
-  const body = document.getElementById('terminal-body');
-  const btn  = document.getElementById('term-minimize');
-  const isMin = dock.classList.toggle('minimized');
-  body.style.display = isMin ? 'none' : '';
-  btn.textContent    = isMin ? '▲' : '_';
-  document.body.style.paddingBottom = isMin ? '34px' : '220px';
-});
+// minimize wired by bcom-terminal.js
 
 // ── Clock ─────────────────────────────────────────────────
 function padZ(n) { return n < 10 ? '0'+n : n; }
@@ -1505,5 +1493,6 @@ orchLog('BOB AI ready — select model, enter prompt, dispatch task', 'sys');
   startQueuePolling();
 
 </script>
+  <script src="../assets/js/bcom-terminal.js"></script>
 </body>
 </html>
