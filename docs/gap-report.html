@@ -103,8 +103,8 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
   </div>
   <div class="sum-card" style="border-color:rgba(0,204,102,.25);background:rgba(0,204,102,.04)">
     <div class="label" style="color:var(--green)">Gaps Closed</div>
-    <div class="val" style="color:var(--green)">6</div>
-    <div class="sub">Live Stream (P1 #1) · Pipeline finetune banner · Datagen Run Detail page · Datasets page · Models page · Progress bar gradient + %</div>
+    <div class="val" style="color:var(--green)">7</div>
+    <div class="sub">Live Stream (P1 #1) · Q&amp;A History Feed (P1 #2) · Datagen Run Detail page · Datasets page · Models page · Pipeline finetune banner · Progress bar gradient + %</div>
   </div>
 </div>
 
@@ -137,7 +137,7 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
       <td><strong>Q&A History Feed</strong> — completed pairs scrolling in with source, difficulty, grounding, full Q+A + citations</td>
       <td>datagen run detail</td>
       <td>✓ /api/datagen/monitor/qa?limit=10 polling, scrollable feed</td>
-      <td><span class="badge missing">MISSING</span></td>
+      <td><span class="badge ok">DONE</span> datagen-run.html — polls <code style="font-size:10px">/api/datagen/monitor/qa?limit=20&run_id=X</code> every 8s. Deduped by ID, prepends new pairs at top with fade-in. Difficulty + grounding badges, service label, timestamps, collapsible answer, citations row.</td>
       <td><span class="tag fe">FE</span><span class="tag api">API</span></td>
     </tr>
     <tr>
@@ -318,7 +318,7 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
   <div class="page-body">
     <p style="font-size:12px;color:var(--fg-dim);margin-bottom:16px">This is the biggest gap. Ross's datagen run detail page is a full live monitoring console. BCOM's data-gen.html is a static job submission form with no realtime output at all.</p>
     <div class="feat-row"><div class="feat-name">Live Generation Stream via SSE (<code style="font-size:10px">/api/runs/{id}/stream</code>)</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">Worker card grid live on data-gen.html — per-card tok/s (EMA delta), partial text (snippet field), iter counter, status badge, CANCEL button. Batch launch 1–18 workers with 300ms stagger. Uses <code style="font-size:10px">node_update / status / stream_end</code> SSE events. Done/error cards persist; CLEAR DONE sweeps them.</div></div>
-    <div class="feat-row"><div class="feat-name">Q&A History Feed (<code style="font-size:10px">/api/datagen/monitor/qa</code>)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Completed Q&A pairs appear with service name, difficulty, grounding level, full question and answer with source citations</div></div>
+    <div class="feat-row"><div class="feat-name">Q&A History Feed (<code style="font-size:10px">/api/datagen/monitor/qa</code>)</div><div class="feat-status"><span class="badge ok">DONE</span></div><div class="feat-note">Polls every 8s, deduped by ID, prepends new pairs at top with fade-in animation. Shows difficulty badge (easy/medium/hard), grounding badge (high/med/low), service name, timestamp, full question, collapsible answer, citations row.</div></div>
     <div class="feat-row"><div class="feat-name">Service Queue Panel (<code style="font-size:10px">/api/datagen/monitor/service-queue</code>)</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Shows services waiting for generation workers, queue depth and priority order</div></div>
     <div class="feat-row"><div class="feat-name">Node Constellation Radar Chart</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Chart.js radar showing per-node throughput, quality, and grounding performance simultaneously</div></div>
     <div class="feat-row"><div class="feat-name">Quality Signal Matrix</div><div class="feat-status"><span class="badge missing">MISSING</span></div><div class="feat-note">Grid heatmap of quality metrics across nodes and service categories</div></div>

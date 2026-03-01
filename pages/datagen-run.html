@@ -261,6 +261,128 @@
   }
   .ec-meta span { color: #888; }
 
+  /* ── Q&A Feed ────────────────────────────────────────── */
+  .qa-feed-wrap {
+    max-height: 560px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .qa-feed-wrap::-webkit-scrollbar { width: 4px; }
+  .qa-feed-wrap::-webkit-scrollbar-track { background: #080604; }
+  .qa-feed-wrap::-webkit-scrollbar-thumb { background: #2a1a0a; }
+
+  .qa-card {
+    background: #070503;
+    border-left: 2px solid #1a0e06;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color .2s;
+  }
+  .qa-card:hover { border-left-color: var(--orange-dark); }
+  .qa-card.qa-new { border-left-color: var(--orange-dark); animation: qa-fade-in .4s ease forwards; }
+  @keyframes qa-fade-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .qa-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .qa-badge {
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border: 1px solid;
+    text-transform: uppercase;
+    font-family: monospace;
+    white-space: nowrap;
+  }
+  .qa-badge.diff-easy   { color: #27ae60; border-color: rgba(39,174,96,.4); }
+  .qa-badge.diff-medium { color: #f39c12; border-color: rgba(243,156,18,.4); }
+  .qa-badge.diff-hard   { color: #e74c3c; border-color: rgba(231,76,60,.4); }
+  .qa-badge.ground-high { color: #3498db; border-color: rgba(52,152,219,.4); }
+  .qa-badge.ground-med  { color: #9b59b6; border-color: rgba(155,89,182,.4); }
+  .qa-badge.ground-low  { color: #555;    border-color: #333; }
+  .qa-service {
+    font-size: 10px;
+    color: var(--orange-dark);
+    font-family: monospace;
+    letter-spacing: .5px;
+  }
+  .qa-ts {
+    font-size: 9px;
+    color: #333;
+    font-family: monospace;
+    margin-left: auto;
+  }
+
+  .qa-question {
+    font-size: 11px;
+    color: #bbb;
+    line-height: 1.55;
+    font-weight: 500;
+  }
+  .qa-answer {
+    font-size: 11px;
+    color: #666;
+    line-height: 1.55;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 72px;
+    overflow: hidden;
+    position: relative;
+  }
+  .qa-answer.expanded { max-height: none; }
+  .qa-expand {
+    font-size: 9px;
+    color: var(--orange-dark);
+    letter-spacing: 1px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-top: 2px;
+    text-transform: uppercase;
+    font-family: monospace;
+  }
+  .qa-citations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+  }
+  .qa-cite {
+    font-size: 9px;
+    color: #444;
+    font-family: monospace;
+    background: #0c0a08;
+    border: 1px solid #1a1208;
+    padding: 1px 6px;
+    letter-spacing: .3px;
+  }
+
+  .qa-empty {
+    text-align: center;
+    color: #2a2a2a;
+    padding: 28px;
+    letter-spacing: 2px;
+    font-size: 11px;
+  }
+  .qa-hdr-meta {
+    font-size: 10px;
+    color: #555;
+    letter-spacing: 1px;
+  }
+  .qa-hdr-meta span { color: #888; }
+
   /* ── Loading / error state ───────────────────────────── */
   .page-state {
     text-align: center;
@@ -390,6 +512,17 @@
       </div>
     </div>
 
+    <!-- ── Q&A History Feed ────────────────────────────── -->
+    <div class="info-card" id="qa-panel">
+      <div class="info-card-hdr" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Q&amp;A History Feed</span>
+        <span class="qa-hdr-meta">PAIRS&nbsp;<span id="qa-count">0</span></span>
+      </div>
+      <div class="qa-feed-wrap" id="qa-feed">
+        <div class="qa-empty" id="qa-empty">NO PAIRS YET</div>
+      </div>
+    </div>
+
   </div><!-- /info-grid -->
 
   <div class="log-panel" id="log">
@@ -474,10 +607,14 @@
         openLivePanel();
         startSSE();
         startPollTimer();
+        startQAPoll();
       } else {
         closeLivePanel();
         stopSSE();
         stopPollTimer();
+        stopQAPoll();
+        // Still poll QA once on completed runs to show historical pairs
+        pollQA();
       }
 
       document.getElementById('btn-cancel').style.display = _run.status === 'running' ? 'inline-block' : 'none';
@@ -674,6 +811,7 @@
       _es.close(); _es = null;
       closeLivePanel();
       stopPollTimer();
+      stopQAPoll();
       // Reload full run state
       setTimeout(function(){ loadRun(true); }, 800);
     });
@@ -708,6 +846,123 @@
     if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
   }
 
+  // ── Q&A History Feed ───────────────────────────────────
+  var _qaSeenIds   = new Set();
+  var _qaPairCount = 0;
+  var _qaTimer     = null;
+
+  async function pollQA() {
+    if (!_runId) return;
+    try {
+      var res = await fetch('/api/datagen/monitor/qa?limit=20&run_id=' + encodeURIComponent(_runId), { cache: 'no-store' });
+      if (!res.ok) return;
+      var pairs = await res.json();
+      if (!Array.isArray(pairs) || pairs.length === 0) return;
+
+      var newPairs = pairs.filter(function(p) {
+        var pid = p.id || p.question_id || ((p.service || '') + ':' + (p.question || '').slice(0, 40));
+        if (_qaSeenIds.has(pid)) return false;
+        _qaSeenIds.add(pid);
+        return true;
+      });
+      if (newPairs.length === 0) return;
+
+      document.getElementById('qa-empty').style.display = 'none';
+      _qaPairCount += newPairs.length;
+      document.getElementById('qa-count').textContent = _qaPairCount;
+
+      var feed = document.getElementById('qa-feed');
+      // Prepend newest at top (iterate reversed so first item ends up on top)
+      for (var j = newPairs.length - 1; j >= 0; j--) {
+        var card = buildQACard(newPairs[j]);
+        feed.insertBefore(card, feed.firstChild);
+        (function(c){ setTimeout(function(){ c.classList.remove('qa-new'); }, 600); })(card);
+      }
+    } catch(e) { /* soft fail */ }
+  }
+
+  function buildQACard(p) {
+    var diff      = (p.difficulty || 'medium').toLowerCase();
+    var ground    = (p.grounding  || p.grounding_level || 'medium').toLowerCase();
+    var citations = Array.isArray(p.citations) ? p.citations : (Array.isArray(p.sources) ? p.sources : []);
+    var ts        = p.created_at ? new Date(p.created_at).toLocaleTimeString('en-US', {hour12: false}) : '';
+
+    var card = document.createElement('div');
+    card.className = 'qa-card qa-new';
+
+    // Meta row
+    var meta = document.createElement('div');
+    meta.className = 'qa-meta';
+
+    var diffBadge = document.createElement('span');
+    diffBadge.className = 'qa-badge ' + (diff === 'easy' ? 'diff-easy' : diff === 'hard' ? 'diff-hard' : 'diff-medium');
+    diffBadge.textContent = diff;
+    meta.appendChild(diffBadge);
+
+    var groundBadge = document.createElement('span');
+    groundBadge.className = 'qa-badge ' + (ground === 'high' ? 'ground-high' : ground === 'low' ? 'ground-low' : 'ground-med');
+    groundBadge.textContent = ground + ' grounding';
+    meta.appendChild(groundBadge);
+
+    var svc = document.createElement('span');
+    svc.className = 'qa-service';
+    svc.textContent = p.service || '—';
+    meta.appendChild(svc);
+
+    if (ts) {
+      var tsEl = document.createElement('span');
+      tsEl.className = 'qa-ts';
+      tsEl.textContent = ts;
+      meta.appendChild(tsEl);
+    }
+    card.appendChild(meta);
+
+    // Question
+    var q = document.createElement('div');
+    q.className = 'qa-question';
+    q.textContent = p.question || '—';
+    card.appendChild(q);
+
+    // Answer (collapsible)
+    var a = document.createElement('div');
+    a.className = 'qa-answer';
+    a.textContent = p.answer || '—';
+    card.appendChild(a);
+
+    var expandBtn = document.createElement('button');
+    expandBtn.className = 'qa-expand';
+    expandBtn.textContent = '▼ EXPAND';
+    expandBtn.addEventListener('click', function() {
+      var expanded = a.classList.toggle('expanded');
+      expandBtn.textContent = expanded ? '▲ COLLAPSE' : '▼ EXPAND';
+    });
+    card.appendChild(expandBtn);
+
+    // Citations
+    if (citations.length > 0) {
+      var citeRow = document.createElement('div');
+      citeRow.className = 'qa-citations';
+      citations.forEach(function(c) {
+        var cite = document.createElement('span');
+        cite.className = 'qa-cite';
+        cite.textContent = String(c);
+        citeRow.appendChild(cite);
+      });
+      card.appendChild(citeRow);
+    }
+
+    return card;
+  }
+
+  function startQAPoll() {
+    stopQAPoll();
+    pollQA();
+    _qaTimer = setInterval(pollQA, 8000);
+  }
+  function stopQAPoll() {
+    if (_qaTimer) { clearInterval(_qaTimer); _qaTimer = null; }
+  }
+
   // ── Cancel ─────────────────────────────────────────────
   async function cancelThisRun() {
     if (!_runId) return;
@@ -717,6 +972,7 @@
       logLine('CMD: CANCEL RUN ' + _runId.slice(0,8), 'warn');
       stopSSE();
       stopPollTimer();
+      stopQAPoll();
       document.getElementById('btn-cancel').style.display = 'none';
       setTimeout(function(){ loadRun(true); }, 600);
     } catch(e) {
