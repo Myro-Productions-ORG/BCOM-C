@@ -21,13 +21,13 @@
     margin-bottom: 12px;
   }
   .node-card {
-    flex: 1 1 260px;
+    flex: 1 1 300px;
     background: #0a0704;
     border: 1px solid #1a0e06;
-    padding: 14px 16px;
+    padding: 20px 22px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
   }
   .node-card-hdr {
     display: flex;
@@ -36,15 +36,15 @@
     gap: 8px;
   }
   .node-name {
-    font-size: 11px;
+    font-size: 14px;
     letter-spacing: 2px;
     color: var(--orange-dark);
     font-weight: 600;
   }
   .node-pill {
-    font-size: 9px;
+    font-size: 11px;
     letter-spacing: 1.5px;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border: 1px solid;
   }
   .node-pill.online  { color: #27ae60; border-color: #27ae60; }
@@ -63,24 +63,24 @@
     min-width: 60px;
   }
   .nm-label {
-    font-size: 8px;
+    font-size: 10px;
     letter-spacing: 1.5px;
-    color: #444;
+    color: #555;
     text-transform: uppercase;
   }
   .nm-val {
-    font-size: 14px;
+    font-size: 22px;
     font-weight: 700;
     color: var(--orange-dark);
     font-variant-numeric: tabular-nums;
   }
   .nm-bar {
-    height: 2px;
+    height: 4px;
     background: #1a0e06;
-    margin-top: 2px;
+    margin-top: 4px;
   }
   .nm-bar-fill {
-    height: 2px;
+    height: 4px;
     background: var(--orange-dark);
     transition: width .5s;
   }
@@ -92,7 +92,7 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    max-height: 280px;
+    max-height: 360px;
     overflow-y: auto;
   }
   .queue-list::-webkit-scrollbar { width: 4px; }
@@ -102,31 +102,31 @@
   .queue-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 14px;
+    gap: 12px;
+    padding: 12px 18px;
     border-bottom: 1px solid #0e0a06;
     transition: background .1s;
     flex-wrap: wrap;
   }
   .queue-item:hover { background: #090604; }
   .qi-pos {
-    font-size: 10px;
-    color: #333;
+    font-size: 12px;
+    color: #444;
     font-family: monospace;
-    min-width: 20px;
+    min-width: 24px;
     letter-spacing: 1px;
   }
   .qi-id {
-    font-size: 10px;
+    font-size: 12px;
     font-family: monospace;
     color: var(--orange-dark);
-    min-width: 110px;
+    min-width: 130px;
     letter-spacing: .5px;
   }
   .qi-status {
-    font-size: 9px;
+    font-size: 11px;
     letter-spacing: 1.5px;
-    padding: 2px 7px;
+    padding: 3px 8px;
     border: 1px solid;
   }
   .qi-status.running  { color: #27ae60; border-color: #27ae60; }
@@ -134,18 +134,18 @@
   .qi-status.done     { color: #444;    border-color: #333; }
   .qi-status.error    { color: #e74c3c; border-color: #e74c3c; }
   .qi-task {
-    font-size: 10px;
-    color: #777;
+    font-size: 12px;
+    color: #888;
     flex: 1;
     letter-spacing: .3px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 320px;
+    max-width: 380px;
   }
   .qi-model {
-    font-size: 9px;
-    color: #444;
+    font-size: 11px;
+    color: #555;
     letter-spacing: .5px;
     white-space: nowrap;
   }
@@ -155,14 +155,6 @@
     margin-left: auto;
     flex-shrink: 0;
   }
-
-  /* ── Dispatch form ───────────────────────────────────── */
-  .dispatch-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-  }
-  @media (max-width: 680px) { .dispatch-grid { grid-template-columns: 1fr 1fr; } }
 
   /* ── Summary stat chips ──────────────────────────────── */
   .coord-stats {
@@ -176,28 +168,28 @@
   .cs-chip {
     flex: 1 1 80px;
     background: #080604;
-    padding: 8px 14px;
+    padding: 14px 18px;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 5px;
   }
-  .cs-label { font-size: 8px; letter-spacing: 1.5px; color: #444; }
-  .cs-val   { font-size: 16px; font-weight: 700; color: var(--orange-dark); font-variant-numeric: tabular-nums; }
+  .cs-label { font-size: 10px; letter-spacing: 1.5px; color: #555; }
+  .cs-val   { font-size: 24px; font-weight: 700; color: var(--orange-dark); font-variant-numeric: tabular-nums; }
 
   /* ── Run table ───────────────────────────────────────── */
-  .run-table { width:100%; border-collapse:collapse; font-size:12px; letter-spacing:.5px; }
+  .run-table { width:100%; border-collapse:collapse; font-size:13px; letter-spacing:.5px; }
   .run-table th { background:#0e0a06; color:#ccc; font-weight:600; letter-spacing:1.5px;
-                  padding:7px 10px; text-align:left; border-bottom:1px solid #1e1008; }
-  .run-table td { padding:7px 10px; border-bottom:1px solid #120b04; vertical-align:middle; color:#ccc; }
+                  padding:10px 14px; text-align:left; border-bottom:1px solid #1e1008; }
+  .run-table td { padding:10px 14px; border-bottom:1px solid #120b04; vertical-align:middle; color:#ccc; }
   .run-table tr:hover td { background:#0e0905; }
-  .run-table .empty { text-align:center; color:#2a2a2a; padding:20px; letter-spacing:2px; }
-  .run-wrap { overflow-x:auto; max-height:320px; overflow-y:auto; }
+  .run-table .empty { text-align:center; color:#2a2a2a; padding:24px; letter-spacing:2px; }
+  .run-wrap { overflow-x:auto; max-height:420px; overflow-y:auto; }
   .run-wrap::-webkit-scrollbar { width:4px; height:4px; }
   .run-wrap::-webkit-scrollbar-track { background:#080604; }
   .run-wrap::-webkit-scrollbar-thumb { background:#2a1a0a; }
 
   .st-badge {
-    display:inline-block; font-size:9px; letter-spacing:1.5px; padding:2px 7px; border:1px solid;
+    display:inline-block; font-size:11px; letter-spacing:1.5px; padding:3px 9px; border:1px solid;
   }
   .st-badge.running   { color:#27ae60; border-color:#27ae60; }
   .st-badge.queued    { color:#f39c12; border-color:#f39c12; }
@@ -206,10 +198,10 @@
   .st-badge.cancelled { color:#555;    border-color:#444; }
 
   .coord-hdr-meta {
-    font-size: 10px; color:#555; letter-spacing:1px;
+    font-size: 12px; color:#666; letter-spacing:1px;
     display:flex; gap:14px; align-items:center;
   }
-  .coord-hdr-meta span { color:#999; }
+  .coord-hdr-meta span { color:#aaa; }
 
   /* ── Active coordinator job panel ───────────────────────── */
   .acj-banner {
@@ -229,23 +221,23 @@
     margin-bottom: 14px;
   }
   .acj-title {
-    font-size: 10px;
+    font-size: 13px;
     letter-spacing: 2px;
     color: var(--orange);
     font-weight: 600;
   }
   .acj-id {
     font-family: monospace;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--orange-dark);
     letter-spacing: .5px;
   }
   .acj-live {
-    font-size: 9px;
+    font-size: 11px;
     letter-spacing: 1.5px;
     color: #27ae60;
     border: 1px solid #27ae60;
-    padding: 1px 8px;
+    padding: 2px 10px;
     animation: acj-pulse 2s ease-in-out infinite;
   }
   @keyframes acj-pulse {
@@ -262,23 +254,23 @@
   .acj-node-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
+    gap: 12px;
+    padding: 12px 16px;
     background: #080503;
     border: 1px solid #1a0e06;
     flex-wrap: wrap;
   }
   .acj-node-name {
-    font-size: 11px;
+    font-size: 13px;
     letter-spacing: 1.5px;
     color: var(--orange-dark);
     font-family: monospace;
-    min-width: 120px;
+    min-width: 140px;
   }
   .acj-node-status {
-    font-size: 9px;
+    font-size: 11px;
     letter-spacing: 1.5px;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border: 1px solid;
     text-transform: uppercase;
   }
@@ -287,8 +279,8 @@
   .acj-node-status.offline { color: #e74c3c; border-color: #e74c3c; }
 
   .acj-node-meta {
-    font-size: 9px;
-    color: #555;
+    font-size: 11px;
+    color: #666;
     letter-spacing: .5px;
     font-family: monospace;
     flex: 1;
@@ -309,16 +301,16 @@
     padding-top: 12px;
   }
   .acj-add-label {
-    font-size: 9px;
+    font-size: 11px;
     letter-spacing: 1.5px;
-    color: #555;
+    color: #666;
   }
 
   .acj-empty {
-    font-size: 11px;
-    color: #333;
+    font-size: 13px;
+    color: #444;
     letter-spacing: 2px;
-    padding: 8px 0;
+    padding: 12px 0;
     text-align: center;
   }
 </style>
@@ -346,8 +338,7 @@
 </div>
 
 <div class="actionbar">
-  <button class="action-btn" onclick="dispatchRun()">&#9654; DISPATCH RUN</button>
-  <button class="action-btn" onclick="refreshAll()">&#8635; REFRESH</button>
+  <button class="action-btn" onclick="refreshAll()">&#8635; REFRESH ALL</button>
   <button class="action-btn danger" onclick="cancelAllQueued()">&#10007; CANCEL QUEUED</button>
 </div>
 
@@ -392,7 +383,7 @@
           <div class="nm-bar"><div class="nm-bar-fill" id="nb-spark-ram" style="width:0%"></div></div>
         </div>
       </div>
-      <div style="font-size:9px;color:#444;letter-spacing:.5px;" id="nm-spark-model">model: —</div>
+      <div style="font-size:11px;color:#555;letter-spacing:.5px;" id="nm-spark-model">model: —</div>
     </div>
 
     <!-- LINUX-DSKTP -->
@@ -423,7 +414,7 @@
           <div class="nm-bar"><div class="nm-bar-fill" id="nb-linux-ram" style="width:0%"></div></div>
         </div>
       </div>
-      <div style="font-size:9px;color:#444;letter-spacing:.5px;" id="nm-linux-model">model: —</div>
+      <div style="font-size:11px;color:#555;letter-spacing:.5px;" id="nm-linux-model">model: —</div>
     </div>
   </div>
 
@@ -433,7 +424,7 @@
       <span class="acj-title">ACTIVE COORDINATOR JOB</span>
       <span class="acj-id" id="acj-id">—</span>
       <span class="acj-live">● RUNNING</span>
-      <span style="font-size:9px;color:#555;letter-spacing:1px;margin-left:auto" id="acj-meta">—</span>
+      <span style="font-size:11px;color:#666;letter-spacing:1px;margin-left:auto" id="acj-meta">—</span>
     </div>
 
     <div class="acj-nodes" id="acj-nodes">
@@ -446,8 +437,8 @@
         <option value="spark">SPARK-BOB</option>
         <option value="linux">LINUX-DSKTP</option>
       </select>
-      <button class="action-btn" style="font-size:10px;padding:3px 12px" onclick="addNodeToJob()">+ ADD NODE</button>
-      <span id="acj-add-output" style="font-size:10px;color:#555;letter-spacing:.5px"></span>
+      <button class="action-btn" style="font-size:12px;padding:5px 14px" onclick="addNodeToJob()">+ ADD NODE</button>
+      <span id="acj-add-output" style="font-size:12px;color:#666;letter-spacing:.5px"></span>
     </div>
   </div>
 
@@ -459,63 +450,11 @@
         <span>Job Queue</span>
         <div class="coord-hdr-meta">
           <span>TOTAL&nbsp;<span id="queue-count">0</span></span>
-          <button class="action-btn" style="font-size:10px;padding:2px 10px;" onclick="pollQueue()">&#8635;</button>
+          <button class="action-btn" style="font-size:12px;padding:4px 12px;" onclick="pollQueue()">&#8635;</button>
         </div>
       </div>
       <div class="queue-list" id="queue-list">
         <div style="text-align:center;color:#2a2a2a;padding:20px;letter-spacing:2px;font-size:11px" id="queue-empty">QUEUE EMPTY</div>
-      </div>
-    </div>
-
-    <!-- ── Dispatch Panel ─────────────────────────────────── -->
-    <div class="info-card">
-      <div class="info-card-hdr">Job Dispatch</div>
-      <div class="form-body">
-        <div class="dispatch-grid">
-          <div class="form-group">
-            <label class="form-label">Target Node</label>
-            <select class="form-select" id="d-node">
-              <option value="spark">SPARK-BOB</option>
-              <option value="linux">LINUX-DSKTP</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Model</label>
-            <select class="form-select" id="d-model">
-              <option value="claude-3-5-sonnet">claude-3-5-sonnet</option>
-              <option value="gpt-4o">gpt-4o</option>
-              <option value="local/spark-model">local/spark-model</option>
-              <option value="local/linux-model">local/linux-model</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Max Iterations</label>
-            <input class="form-input" id="d-maxiter" type="number" value="10" min="1" max="200" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Temperature</label>
-            <input class="form-input" id="d-temp" type="number" value="0.7" min="0" max="2" step="0.05" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Workers</label>
-            <input class="form-input" id="d-workers" type="number" value="1" min="1" max="18" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Queue Mode</label>
-            <select class="form-select" id="d-queued">
-              <option value="false">Immediate</option>
-              <option value="true">Queued</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group" style="margin-top:6px">
-          <label class="form-label">Task</label>
-          <textarea class="form-input" id="d-task" rows="3"
-            style="resize:vertical;font-family:inherit;line-height:1.6;"
-            placeholder="Describe the task for the run…"></textarea>
-        </div>
-        <button class="form-submit" onclick="dispatchRun()">&#9654; Dispatch Job</button>
-        <div class="form-output" id="d-output">--</div>
       </div>
     </div>
 
@@ -526,7 +465,7 @@
         <div class="coord-hdr-meta">
           <span>RUNNING&nbsp;<span id="active-running">0</span></span>
           <span>QUEUED&nbsp;<span id="active-queued">0</span></span>
-          <button class="action-btn" style="font-size:10px;padding:2px 10px;" onclick="pollRuns()">&#8635;</button>
+          <button class="action-btn" style="font-size:12px;padding:4px 12px;" onclick="pollRuns()">&#8635;</button>
         </div>
       </div>
       <div class="run-wrap">
@@ -550,7 +489,7 @@
         <span>Recent Runs</span>
         <div class="coord-hdr-meta">
           <span>SHOWING&nbsp;<span id="history-count">0</span></span>
-          <button class="action-btn" style="font-size:10px;padding:2px 10px;" onclick="pollRuns()">&#8635;</button>
+          <button class="action-btn" style="font-size:12px;padding:4px 12px;" onclick="pollRuns()">&#8635;</button>
         </div>
       </div>
       <div class="run-wrap">
@@ -967,63 +906,6 @@
         logLine('Resume failed ' + res.status, 'error');
       }
     } catch(e) { logLine('Resume error: ' + e.message, 'error'); }
-  }
-
-  // ── Dispatch ────────────────────────────────────────────
-  async function dispatchRun() {
-    var task    = document.getElementById('d-task').value.trim();
-    var model   = document.getElementById('d-model').value;
-    var maxIter = parseInt(document.getElementById('d-maxiter').value) || 10;
-    var temp    = parseFloat(document.getElementById('d-temp').value) || 0.7;
-    var workers = Math.min(18, Math.max(1, parseInt(document.getElementById('d-workers').value) || 1));
-    var queued  = document.getElementById('d-queued').value === 'true';
-
-    if (!task) { logLine('Task is required', 'warn'); return; }
-
-    var out = document.getElementById('d-output');
-    out.textContent = 'Dispatching ' + workers + ' worker' + (workers>1?'s':'') + '…';
-    out.style.color = 'var(--orange-dark)';
-    logLine('CMD: DISPATCH — ' + workers + ' worker' + (workers>1?'s':'') + ' / ' + model, 'info');
-
-    var launched = [];
-    for (var i = 0; i < workers; i++) {
-      var runId = await launchOne(task, model, maxIter, temp, queued);
-      if (runId) launched.push(runId);
-      if (workers > 1) await sleep(300);
-    }
-
-    if (launched.length) {
-      out.textContent = 'Launched: ' + launched.map(function(id){ return id.slice(0,10); }).join(', ');
-      logLine('Dispatched ' + launched.length + ' run(s)', 'info');
-      setTimeout(function(){ pollQueue(); pollRuns(); }, 800);
-    } else {
-      out.textContent = 'Dispatch failed — check log';
-      out.style.color = '#e74c3c';
-    }
-  }
-
-  async function launchOne(task, model, maxIter, temp, queued) {
-    try {
-      var res = await fetch('/api/runs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          task, model,
-          max_iter: maxIter,
-          queued: queued,
-          config: { temperature: temp }
-        })
-      });
-      if (!res.ok) {
-        logLine('Dispatch error ' + res.status, 'error');
-        return null;
-      }
-      var d = await res.json();
-      return d.run_id || d.id || null;
-    } catch(e) {
-      logLine('Dispatch error: ' + e.message, 'error');
-      return null;
-    }
   }
 
   // ── Cancel ──────────────────────────────────────────────

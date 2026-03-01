@@ -198,10 +198,10 @@ body {
   border: 1.5px solid var(--orange);
   color: #e8a080;
   font-family: 'Courier New', monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  padding: 5px 12px;
+  padding: 7px 14px;
   cursor: pointer;
   text-transform: uppercase;
   transition: all 0.15s;
@@ -436,7 +436,7 @@ body {
   background: var(--bg-panel);
   border: 2px solid var(--border-dim);
   padding: 10px 14px;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.8;
   color: #b87060;
   letter-spacing: 0.5px;
@@ -502,8 +502,8 @@ body {
 .info-card-hdr {
   background: #1a0e06;
   border-bottom: 1px solid var(--border-dim);
-  padding: 5px 14px;
-  font-size: 9px;
+  padding: 8px 16px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
   color: var(--orange-dark);
@@ -651,7 +651,7 @@ body {
 }
 
 .form-group { display: flex; flex-direction: column; gap: 3px; }
-.form-label { font-size: 8px; color: #555; letter-spacing: 1.5px; text-transform: uppercase; }
+.form-label { font-size: 10px; color: #555; letter-spacing: 1.5px; text-transform: uppercase; }
 
 .form-input,
 .form-select {
@@ -659,8 +659,8 @@ body {
   border: 1px solid var(--border-dim);
   color: var(--orange);
   font-family: 'Courier New', monospace;
-  font-size: 9px;
-  padding: 4px 8px;
+  font-size: 12px;
+  padding: 6px 10px;
   width: 100%;
 }
 .form-input:focus,
@@ -685,9 +685,9 @@ body {
   border: 1.5px solid var(--orange);
   color: var(--orange);
   font-family: 'Courier New', monospace;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
-  padding: 6px 12px;
+  padding: 9px 14px;
   cursor: pointer;
   width: 100%;
   margin-top: 4px;
@@ -698,10 +698,10 @@ body {
 .form-output {
   background: #0a0a0a;
   border: 1px solid #1a1a1a;
-  padding: 6px 8px;
-  font-size: 8px;
-  color: #333;
-  min-height: 32px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #444;
+  min-height: 38px;
   letter-spacing: 0.5px;
   line-height: 1.8;
 }
