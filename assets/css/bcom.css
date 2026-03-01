@@ -154,6 +154,35 @@ body {
 }
 
 /* ── ACTION BAR ───────────────────────────────────── */
+/* ── Subnav (secondary page tabs under topbar) ─────────── */
+.subnav {
+  background: #050402;
+  border-bottom: 1px solid #1a0e06;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+.subnav-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #3a3a3a;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 8px 14px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: color .2s, border-color .2s;
+  margin-bottom: -1px;
+}
+.subnav-btn:hover  { color: #888; }
+.subnav-btn.active { color: var(--orange); border-bottom-color: var(--orange-dark); }
+
 .actionbar {
   background: var(--bg-bar);
   border-bottom: 2px solid var(--orange-dark);
