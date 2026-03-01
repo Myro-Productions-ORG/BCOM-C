@@ -354,6 +354,8 @@
     <a class="nav-btn" href="../index.html"><span class="nav-arrow">&#8592;</span> DASHBOARD</a>
     <a class="nav-btn active" href="data-gen.html">DATA GEN</a>
     <a class="nav-btn" href="pipeline.html">PIPELINE</a>
+    <a class="nav-btn" href="coordinator.html">COORDINATOR</a>
+    <a class="nav-btn" href="datasets.html">DATASETS</a>
     <a class="nav-btn" href="resources.html">RESOURCES</a>
     <a class="nav-btn" href="reports.html">REPORTS</a>
     <a class="nav-btn" href="orchestrator.html">ORCHESTRATOR</a>
@@ -1049,6 +1051,7 @@
         '<span class="feed-model">model: ' + escHtml(d.model || '--') + '</span>' +
         '<span>' + tokOut + ' tok out</span>' +
         (tokIn !== '0' ? '<span>' + tokIn + ' tok in</span>' : '') +
+        '<a href="datagen-run.html?id=' + encodeURIComponent(runId) + '" class="feed-snippet-toggle" style="margin-left:auto;text-decoration:none">&#8599; VIEW DETAIL</a>' +
       '</div>';
 
     // Prepend — newest first
