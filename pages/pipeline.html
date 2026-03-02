@@ -297,9 +297,50 @@
       <div class="stage-flow-wrap">
         <div class="stage-flow" id="stage-flow">
 
-          <!-- 01 DATA GEN -->
-          <div class="stage-card" id="st-data">
+          <!-- 01 EVALUATE -->
+          <div class="stage-card" id="st-evalinitial">
             <span class="stage-num">01</span>
+            <div class="stage-icon-box">
+              <!-- star for eval/scoring -->
+              <svg viewBox="0 0 22 22">
+                <path class="ico" d="M11 2 L13.2 8 L19.5 8 L14.5 11.8 L16.5 18 L11 14.2 L5.5 18 L7.5 11.8 L2.5 8 L8.8 8 Z"/>
+              </svg>
+            </div>
+            <div class="stage-name">EVALUATE</div>
+            <div class="stage-sub">JUDGE + SUITE</div>
+            <div class="stage-live" id="live-evalinitial">—</div>
+          </div>
+
+          <div class="stage-conn" id="arr-0">
+            <div class="conn-line"></div><div class="conn-arrow"></div>
+          </div>
+
+          <!-- 02 ANALYZE -->
+          <div class="stage-card" id="st-analyze">
+            <span class="stage-num">02</span>
+            <div class="stage-icon-box">
+              <!-- bar chart / analysis icon -->
+              <svg viewBox="0 0 22 22">
+                <rect class="ico" x="3"  y="13" width="3" height="6" rx=".5"/>
+                <rect class="ico" x="8"  y="9"  width="3" height="10" rx=".5"/>
+                <rect class="ico" x="13" y="6"  width="3" height="13" rx=".5"/>
+                <rect class="ico" x="18" y="11" width="3" height="8"  rx=".5"/>
+                <path class="ico" d="M2 19 L20 19"/>
+                <path class="ico" d="M4.5 12 L9.5 8 L14.5 5 L19.5 10" stroke-dasharray="1.5 1"/>
+              </svg>
+            </div>
+            <div class="stage-name">ANALYZE</div>
+            <div class="stage-sub">ADVISOR AI</div>
+            <div class="stage-live" id="live-analyze">—</div>
+          </div>
+
+          <div class="stage-conn" id="arr-1">
+            <div class="conn-line"></div><div class="conn-arrow"></div>
+          </div>
+
+          <!-- 03 GENERATE -->
+          <div class="stage-card" id="st-generate">
+            <span class="stage-num">03</span>
             <div class="stage-icon-box">
               <!-- database rows / data table icon -->
               <svg viewBox="0 0 22 22">
@@ -309,18 +350,18 @@
                 <path class="ico" d="M15 15 L20 17 L15 19"/>
               </svg>
             </div>
-            <div class="stage-name">DATA GEN</div>
+            <div class="stage-name">GENERATE</div>
             <div class="stage-sub">Q&amp;A PAIRS</div>
-            <div class="stage-live" id="live-data">—</div>
+            <div class="stage-live" id="live-generate">—</div>
           </div>
 
-          <div class="stage-conn" id="arr-0">
+          <div class="stage-conn" id="arr-2">
             <div class="conn-line"></div><div class="conn-arrow"></div>
           </div>
 
-          <!-- 02 FINE-TUNE -->
+          <!-- 04 FINE-TUNE -->
           <div class="stage-card" id="st-train">
-            <span class="stage-num">02</span>
+            <span class="stage-num">04</span>
             <div class="stage-icon-box">
               <!-- neural net: 2 input, 1 hidden, 2 output -->
               <svg viewBox="0 0 22 22">
@@ -341,68 +382,24 @@
             <div class="stage-live" id="live-train">—</div>
           </div>
 
-          <div class="stage-conn" id="arr-1">
-            <div class="conn-line"></div><div class="conn-arrow"></div>
-          </div>
-
-          <!-- 03 DEPLOY -->
-          <div class="stage-card" id="st-deploy">
-            <span class="stage-num">03</span>
-            <div class="stage-icon-box">
-              <!-- server rack + upload arrow -->
-              <svg viewBox="0 0 22 22">
-                <rect class="ico" x="3"  y="13" width="16" height="6" rx="1"/>
-                <circle class="ico-fill" cx="6.5" cy="16" r="1"/>
-                <circle class="ico-fill" cx="9.5" cy="16" r="1"/>
-                <rect class="ico" x="3"  y="8.5" width="16" height="4" rx=".5"/>
-                <circle class="ico-fill" cx="6.5" cy="10.5" r=".8"/>
-                <line  class="ico" x1="11" y1="7" x2="11" y2="1"/>
-                <path  class="ico" d="M8 4 L11 1 L14 4"/>
-              </svg>
-            </div>
-            <div class="stage-name">DEPLOY</div>
-            <div class="stage-sub">vLLM / OLLAMA</div>
-            <div class="stage-live" id="live-deploy">—</div>
-          </div>
-
-          <div class="stage-conn" id="arr-2">
-            <div class="conn-line"></div><div class="conn-arrow"></div>
-          </div>
-
-          <!-- 04 EVAL -->
-          <div class="stage-card" id="st-eval">
-            <span class="stage-num">04</span>
-            <div class="stage-icon-box">
-              <!-- star for eval/scoring -->
-              <svg viewBox="0 0 22 22">
-                <path class="ico" d="M11 2 L13.2 8 L19.5 8 L14.5 11.8 L16.5 18 L11 14.2 L5.5 18 L7.5 11.8 L2.5 8 L8.8 8 Z"/>
-              </svg>
-            </div>
-            <div class="stage-name">EVAL</div>
-            <div class="stage-sub">JUDGE + SUITE</div>
-            <div class="stage-live" id="live-eval">—</div>
-          </div>
-
           <div class="stage-conn" id="arr-3">
             <div class="conn-line"></div><div class="conn-arrow"></div>
           </div>
 
-          <!-- 05 CHECK -->
-          <div class="stage-card" id="st-check">
+          <!-- 05 RE-EVAL -->
+          <div class="stage-card" id="st-reeval">
             <span class="stage-num">05</span>
             <div class="stage-icon-box">
-              <!-- circle checkmark -->
+              <!-- refresh + star: re-evaluation -->
               <svg viewBox="0 0 22 22">
-                <circle class="ico" cx="11" cy="11" r="8"/>
-                <path class="ico" d="M7.5 11 L10 13.5 L15 8"/>
-                <!-- small loop indicator bottom-right -->
-                <path class="ico" d="M15 14.5 Q17.5 17 15.5 19 Q13 21 11 19.5" stroke-dasharray="1.5 1.5"/>
-                <path class="ico" d="M11 19.5 L9.5 21.5 M11 19.5 L12.5 21.5"/>
+                <path class="ico" d="M4 11 A7 7 0 1 1 7 17"/>
+                <path class="ico" d="M4 17 L4 11 L10 11"/>
+                <path class="ico" d="M11 5 L12.2 8.4 L15.8 8.4 L13 10.5 L14 14 L11 11.8 L8 14 L9 10.5 L6.2 8.4 L9.8 8.4 Z" transform="translate(0 1) scale(0.7) translate(4.7 3)"/>
               </svg>
             </div>
-            <div class="stage-name">CHECK</div>
+            <div class="stage-name">RE-EVAL</div>
             <div class="stage-sub">PASS / LOOP</div>
-            <div class="stage-live" id="live-check">—</div>
+            <div class="stage-live" id="live-reeval">—</div>
           </div>
 
         </div><!-- end .stage-flow -->
@@ -444,27 +441,22 @@
         <div class="form-row-3">
           <div class="form-group">
             <label class="form-label">Base Model</label>
-            <input class="form-input" id="pl-model" type="text" placeholder="e.g. gpt-oss-20b" />
+            <input class="form-input" id="pl-model" type="text" placeholder="e.g. llama3.2:3b" />
           </div>
           <div class="form-group">
             <label class="form-label">Backend</label>
             <select class="form-select" id="pl-backend">
-              <option>vLLM</option><option>Ollama</option><option>Bedrock</option>
+              <option value="ollama">Ollama</option>
+              <option value="vllm">vLLM</option>
+              <option value="bedrock">Bedrock</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Node</label>
-            <select class="form-select" id="pl-node">
-              <option value="spark">SPARK-BOB</option>
-              <option value="linux">LINUX-DSKTP</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row-3">
           <div class="form-group">
             <label class="form-label">Eval Suite</label>
             <input class="form-input" id="pl-suite" type="text" value="hard_15" />
           </div>
+        </div>
+        <div class="form-row-3">
           <div class="form-group">
             <label class="form-label">Target Score %</label>
             <input class="form-input" id="pl-target" type="number" value="80" min="1" max="100" />
@@ -473,38 +465,11 @@
             <label class="form-label">Max Iterations</label>
             <input class="form-input" id="pl-maxiter" type="number" value="3" min="1" />
           </div>
-        </div>
-        <div class="form-row-3">
-          <div class="form-group">
-            <label class="form-label">LoRA Rank</label>
-            <input class="form-input" id="pl-rank" type="number" value="16" min="1" />
+          <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:4px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:1px;color:#ccc;cursor:pointer;">
+              <input type="checkbox" id="pl-auto" style="accent-color:var(--orange-dark);" /> AUTO-LOOP UNTIL TARGET
+            </label>
           </div>
-          <div class="form-group">
-            <label class="form-label">Epochs / Iter</label>
-            <input class="form-input" id="pl-epochs" type="number" value="3" min="1" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Learning Rate</label>
-            <input class="form-input" id="pl-lr" type="text" value="0.0002" />
-          </div>
-        </div>
-        <div class="form-row-2">
-          <div class="form-group">
-            <label class="form-label">Data Gen Count / Iter</label>
-            <input class="form-input" id="pl-dgcount" type="number" value="200" min="1" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Data Domain</label>
-            <input class="form-input" id="pl-domain" type="text" placeholder="e.g. IAM, S3" />
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:1px;color:#ccc;cursor:pointer;">
-            <input type="checkbox" id="pl-auto" style="accent-color:var(--orange-dark);" /> AUTO-LOOP UNTIL TARGET
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:1px;color:#ccc;cursor:pointer;">
-            <input type="checkbox" id="pl-notify" checked /> NOTIFY ON COMPLETE
-          </label>
         </div>
         <button class="form-submit" style="margin-top:12px;" onclick="launchPipeline()">&#9654; Launch Pipeline</button>
         <div class="form-output" id="pl-output">--</div>
@@ -557,11 +522,18 @@
   BCOM.pollInterval = 5000;
   startPolling();
 
-  const STAGES = ['st-data','st-train','st-deploy','st-eval','st-check'];
-  const ARROWS  = ['arr-0','arr-1','arr-2','arr-3'];
-  const STAGE_NAMES = ['Data Gen','Fine-Tune','Deploy','Eval','Check'];
+  const STAGE_IDS  = ['st-evalinitial','st-analyze','st-generate','st-train','st-reeval'];
+  const LIVE_IDS   = ['live-evalinitial','live-analyze','live-generate','live-train','live-reeval'];
+  const ARROW_IDS  = ['arr-0','arr-1','arr-2','arr-3'];
+  const STEP_MAP   = {
+    idle:-1, evaluating:0, eval_started:0,
+    analyzing:1, analysis_complete:1,
+    generating:2, generation_started:2,
+    fine_tuning:3, finetune_started:3,
+    re_evaluating:4, reeval_started:4, complete:5
+  };
 
-  let _runSeq = 1, _runs = [], _activeRun = null, _simIv = null;
+  let _pipelines = [], _activePipeline = null;
 
   function setProgress(pct) {
     const p = Math.round(Math.min(Math.max(pct, 0), 100));
@@ -571,307 +543,257 @@
     lbl.style.color = p >= 66 ? '#27ae60' : p >= 33 ? '#e8a040' : 'var(--orange)';
   }
 
-  // Stage live-metric strings for simulation
-  const STAGE_LIVE_IDLE = ['—','—','—','—','—'];
-  function stageLiveActive(idx, r) {
-    const s = [
-      `${r.dgcount||200} pairs / ${r.domain||'general'}`,
-      `rank ${r.rank||16} / ${r.epochs||3}e / lr ${r.lr||'2e-4'}`,
-      `${r.backend} → ${r.node}`,
-      `suite: ${r.suite} / judge`,
-      `target ${r.target}% / iter ${r.iter||1}`,
-    ];
-    return s[idx] || '—';
-  }
-  function stageLiveDone(idx, r) {
-    const s = [
-      `${r.dgcount||200} pairs`,
-      `loss → ${(Math.random()*.08+.07).toFixed(4)}`,
-      `${r.backend} active`,
-      `score ${r.lastScore||'?'}%`,
-      r.score >= (r.target||80) ? 'PASS ✓' : 'LOOP →',
-    ];
-    return s[idx] || '—';
+  function setStageVisual(stepIdx, isComplete, isFailed) {
+    STAGE_IDS.forEach(function(id, i) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (isComplete)                     el.className = 'stage-card done';
+      else if (i < stepIdx)               el.className = 'stage-card done';
+      else if (isFailed && i === stepIdx) el.className = 'stage-card error';
+      else if (i === stepIdx)             el.className = 'stage-card active';
+      else                                el.className = 'stage-card';
+    });
+    ARROW_IDS.forEach(function(id, i) {
+      const el = document.getElementById(id);
+      if (el) el.className = 'stage-conn' + (i < stepIdx ? ' lit' : '');
+    });
   }
 
-  function setStage(idx) {
-    STAGES.forEach((id, i) => {
+  function clearStages() {
+    STAGE_IDS.forEach(function(id) {
       const el = document.getElementById(id);
-      el.className = 'stage-card' + (i < idx ? ' done' : i === idx ? ' active' : '');
-      const lv = document.getElementById('live-' + id.replace('st-',''));
-      if (!lv) return;
-      if (_activeRun) {
-        if (i < idx)       lv.textContent = stageLiveDone(i, _activeRun);
-        else if (i === idx) lv.textContent = stageLiveActive(i, _activeRun);
-        else                lv.textContent = '—';
+      if (el) el.className = 'stage-card';
+    });
+    ARROW_IDS.forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el) el.className = 'stage-conn';
+    });
+    LIVE_IDS.forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '—';
+    });
+  }
+
+  function updateLiveMetrics(p, stepIdx, lastIter) {
+    const ar = lastIter && lastIter.advisor_result;
+    const live = [
+      lastIter && lastIter.pass_rate != null ? lastIter.pass_rate.toFixed(1) + '%' : 'suite: ' + (p.eval_suite || '--'),
+      ar ? String((ar.datagen_services || '').split(',').length) + ' services' : (stepIdx === 1 ? 'analyzing...' : '--'),
+      lastIter && lastIter.datagen_job_id ? lastIter.datagen_job_id.slice(-8) : (stepIdx === 2 ? 'generating...' : '--'),
+      lastIter && lastIter.finetune_job_id ? lastIter.finetune_job_id.slice(-8) : (stepIdx === 3 ? 'training...' : '--'),
+      lastIter && lastIter.reeval_pass_rate != null ? lastIter.reeval_pass_rate.toFixed(1) + '%' : (stepIdx === 4 ? 'evaluating...' : '--')
+    ];
+    LIVE_IDS.forEach(function(id, i) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = live[i] || '—';
+    });
+  }
+
+  // ── Poll pipeline API ─────────────────────────────────────────────
+  async function pollPipelines() {
+    try {
+      const res = await fetch((BCOM.apiBase || '') + '/api/pipeline/', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      _pipelines = Array.isArray(data) ? data : (data.pipelines || []);
+
+      const active = _pipelines.find(function(p) { return p.status === 'running'; });
+
+      if (active) {
+        _activePipeline = active;
+        const stepIdx  = STEP_MAP[active.current_step] != null ? STEP_MAP[active.current_step] : -1;
+        const isDone   = active.status === 'target_reached' || active.status === 'max_iterations_reached';
+        const isFailed = active.status === 'failed';
+        const lastIter = active.iterations && active.iterations.length
+          ? active.iterations[active.iterations.length - 1] : null;
+        const score = lastIter
+          ? (lastIter.reeval_pass_rate != null ? lastIter.reeval_pass_rate : lastIter.pass_rate) : null;
+
+        setStageVisual(Math.max(0, stepIdx), isDone, isFailed);
+        updateLiveMetrics(active, stepIdx, lastIter);
+
+        document.getElementById('active-banner').style.display = 'flex';
+        setText('bp-id',      active.pipeline_id ? active.pipeline_id.slice(-12) : '--');
+        setText('bp-model',   active.model_name  || '--');
+        setText('bp-backend', (active.model_backend || '--').toUpperCase());
+        setText('bp-node',    'DGX-SPARK');
+        setText('bp-iter',    active.current_iteration + ' / ' + active.max_iterations);
+        setText('bp-score',   score != null ? score.toFixed(1) + '%' : '--');
+        setProgress(score != null ? Math.min((score / active.target_pass_rate) * 100, 100) : 0);
+
+        const lb = document.getElementById('loop-row');
+        if (lb) lb.className = 'loop-back' + (active.current_iteration > 1 && stepIdx <= 0 ? ' lit' : '');
+
+        const badge = document.getElementById('iter-badge');
+        if (badge) {
+          badge.textContent = 'ITER ' + active.current_iteration + ' / ' + active.max_iterations;
+          badge.className = 'iter-badge lit';
+        }
+        document.getElementById('btn-stop').style.display = '';
+      } else {
+        if (_activePipeline) {
+          _activePipeline = null;
+          clearStages();
+          document.getElementById('active-banner').style.display = 'none';
+          const badge = document.getElementById('iter-badge');
+          if (badge) { badge.textContent = 'ITER — / —'; badge.className = 'iter-badge'; }
+          const lb = document.getElementById('loop-row');
+          if (lb) lb.className = 'loop-back';
+        }
+        document.getElementById('btn-stop').style.display = 'none';
       }
-    });
-    ARROWS.forEach((id, i) => {
-      document.getElementById(id).className = 'stage-conn' + (i < idx ? ' lit' : '');
-    });
-    // Light up loop-back when looping (stage wraps back to 0 on iter > 1)
-    const lb = document.getElementById('loop-row');
-    if (lb) lb.className = 'loop-back' + (_activeRun && _activeRun.iter > 1 && idx === 0 ? ' lit' : '');
-    // Iter badge
-    if (_activeRun) {
-      const badge = document.getElementById('iter-badge');
-      badge.textContent = `ITER ${_activeRun.iter} / ${_activeRun.maxiter}`;
-      badge.className = 'iter-badge lit';
+      renderRuns(_pipelines);
+    } catch(e) { /* soft fail */ }
+  }
+
+  // ── Launch pipeline ───────────────────────────────────────────────
+  async function launchPipeline() {
+    const model   = document.getElementById('pl-model').value.trim();
+    const backend = document.getElementById('pl-backend').value;
+    const suite   = document.getElementById('pl-suite').value.trim() || 'hard_15';
+    const target  = parseFloat(document.getElementById('pl-target').value)  || 80;
+    const maxiter = parseInt(document.getElementById('pl-maxiter').value)   || 3;
+    const autoAdv = document.getElementById('pl-auto').checked;
+    if (!model) { logLine('Form error: Base Model required', 'warn'); return; }
+
+    logLine('CMD: LAUNCH PIPELINE — ' + model + ' / ' + backend + ' / ' + suite, 'info');
+    const out = document.getElementById('pl-output');
+    out.textContent = 'Launching...'; out.style.color = '#888';
+
+    try {
+      const res = await fetch((BCOM.apiBase || '') + '/api/pipeline/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model_name: model, model_backend: backend, eval_suite: suite,
+          target_pass_rate: target, max_iterations: maxiter, auto_advance: autoAdv
+        })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(function() { return {}; });
+        const msg = err.detail || res.statusText;
+        logLine('Launch failed: ' + msg, 'warn');
+        out.textContent = 'Error: ' + msg; out.style.color = '#e74c3c';
+        return;
+      }
+      const data = await res.json();
+      const pid = data.pipeline_id || '—';
+      logLine('Pipeline started: ' + pid, 'info');
+      out.textContent = 'Launched: ' + pid; out.style.color = 'var(--orange-dark)';
+      pollPipelines();
+    } catch(e) {
+      logLine('Launch error: ' + e.message, 'warn');
+      out.textContent = 'Error: ' + e.message; out.style.color = '#e74c3c';
     }
   }
 
-  // ── Poll active deploy for banner ────────────────────────────────
-  async function pollActiveDeploy() {
+  // ── Stop / cancel pipeline ────────────────────────────────────────
+  async function stopPipeline() {
+    if (!_activePipeline) return;
+    const id = _activePipeline.pipeline_id;
+    logLine('CMD: CANCEL PIPELINE — ' + id, 'warn');
     try {
-      const res = await fetch('/api/deploy/active', { cache: 'no-store' });
-      if (!res.ok) return;
-      const d = await res.json();
-      if (d && d.status === 'active' && !_activeRun && !_ftJob) {
-        const banner = document.getElementById('active-banner');
-        banner.style.display = 'flex';
-        setText('bp-id',      d.id ? d.id.slice(0, 8) : '--');
-        setText('bp-model',   d.model_name ?? '--');
-        setText('bp-backend', d.backend    ?? '--');
-        setText('bp-node',    'SPARK-BOB');
-        setText('bp-iter',    '—');
-        setText('bp-score',   '—');
-        setStage(2); // highlight DEPLOY stage
-        setProgress(60);
-        // show live metric for deploy stage
-        const lv = document.getElementById('live-deploy');
-        if (lv) lv.textContent = `${d.backend} → SPARK-BOB`;
-      }
-    } catch { /* soft fail */ }
+      await fetch((BCOM.apiBase || '') + '/api/pipeline/' + id + '/cancel', { method: 'POST' });
+      pollPipelines();
+    } catch(e) { logLine('Cancel error: ' + e.message, 'warn'); }
   }
-  pollActiveDeploy();
-  setInterval(pollActiveDeploy, 10000);
 
-  // ── Finetune job status polling ──────────────────────────────────────────
-  let _ftJob = null, _ftContainerId = null;
-
-  async function pollFinetuneLog() {
-    if (!_ftContainerId || _activeRun) return;
+  // ── Manual step advance ───────────────────────────────────────────
+  async function advancePipeline(pipeId, step) {
     try {
-      const res = await fetch('/api/containers/' + _ftContainerId + '/logs?tail=3', { cache: 'no-store' });
-      if (!res.ok) return;
-      const d = await res.json();
-      const raw = d.logs || '';
-      // Parse last PROGRESS line: chunk X/Y: Z%  [epoch A/B  step C/D  loss=L  lr=LR]
-      const lines = raw.trim().split('\n');
-      let m = null;
-      for (let i = lines.length - 1; i >= 0; i--) {
-        const re = /PROGRESS chunk (\d+)\/(\d+): (\d+)%\s+\[epoch (\d+)\/(\d+)\s+step (\d+)\/(\d+)\s+loss=([\d.]+)/;
-        m = lines[i].match(re);
-        if (m) break;
-      }
-      if (!m) return;
-      const pct = m[3], epoch = m[4], totalEpoch = m[5], step = m[6], totalStep = m[7], loss = m[8];
-      // Live metric in FINE-TUNE stage card
-      const lv = document.getElementById('live-train');
-      if (lv) lv.textContent = 'e' + epoch + '/' + totalEpoch + ' s' + step + '/' + totalStep + ' loss=' + loss;
-      // Banner fields
-      document.getElementById('bp-iter').textContent  = 'EPOCH ' + epoch + ' / ' + totalEpoch;
-      document.getElementById('bp-score').textContent = 'LOSS ' + parseFloat(loss).toFixed(4);
-      setProgress(parseFloat(pct));
-      // Highlight FINE-TUNE stage and show banner
-      if (!_activeRun) {
-        document.getElementById('active-banner').style.display = 'flex';
-        setStage(1);
-      }
-    } catch(e) { /* soft fail */ }
+      await fetch((BCOM.apiBase || '') + '/api/pipeline/' + pipeId + '/advance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ step: step })
+      });
+      pollPipelines();
+    } catch(e) { logLine('Advance error: ' + e.message, 'warn'); }
   }
 
-  async function pollFinetune() {
-    if (_activeRun) return;
-    try {
-      const res = await fetch('/api/finetune/', { cache: 'no-store' });
-      if (!res.ok) return;
-      const jobs = await res.json();
-      const running = jobs.find(function(j) { return j.status === 'running'; });
-      if (!running) {
-        if (_ftJob) {
-          _ftJob = null; _ftContainerId = null;
-          document.getElementById('active-banner').style.display = 'none';
-          STAGES.forEach(function(id) { document.getElementById(id).className = 'stage-card'; });
-          ARROWS.forEach(function(id)  { document.getElementById(id).className = 'stage-conn'; });
-          STAGES.forEach(function(id) {
-            const lv = document.getElementById('live-' + id.replace('st-',''));
-            if (lv) lv.textContent = '—';
-          });
-        }
-        return;
-      }
-      _ftJob = running;
-      // Resolve container ID if not yet known
-      if (!_ftContainerId) {
-        const cr = await fetch('/api/containers/', { cache: 'no-store' });
-        if (cr.ok) {
-          const containers = await cr.json();
-          const ft = containers.find(function(c) { return c.name === 'donut-finetune' && c.status === 'running'; });
-          if (ft) _ftContainerId = ft.id;
-        }
-      }
-      // Static banner fields
-      const shortId    = running.id.slice(0, 8);
-      const modelShort = (running.base_model || '').split('/').pop() || running.id;
-      const banner = document.getElementById('active-banner');
-      banner.style.display = 'flex';
-      document.getElementById('bp-id').textContent      = shortId;
-      document.getElementById('bp-model').textContent   = modelShort;
-      document.getElementById('bp-backend').textContent = 'TRAIN';
-      document.getElementById('bp-node').textContent    = 'DGX-SPARK';
-      // Immediately fetch a live log line
-      await pollFinetuneLog();
-    } catch(e) { /* soft fail */ }
-  }
-
-  pollFinetune();
-  setInterval(pollFinetune,    15000);
-  setInterval(pollFinetuneLog,  5000);
-
-
-  function launchPipeline() {
-    if (_activeRun) { logLine('Pipeline already running', 'warn'); return; }
-    const model   = document.getElementById('pl-model').value.trim();
-    const backend = document.getElementById('pl-backend').value;
-    const node    = document.getElementById('pl-node').value;
-    const suite   = document.getElementById('pl-suite').value.trim() || 'hard_15';
-    const target  = parseInt(document.getElementById('pl-target').value)  || 80;
-    const maxiter = parseInt(document.getElementById('pl-maxiter').value) || 3;
-    const rank    = parseInt(document.getElementById('pl-rank').value)    || 16;
-    const epochs  = parseInt(document.getElementById('pl-epochs').value)  || 3;
-    const lr      = document.getElementById('pl-lr').value.trim()         || '2e-4';
-    const dgcount = parseInt(document.getElementById('pl-dgcount').value) || 200;
-    const domain  = document.getElementById('pl-domain').value.trim()     || 'general';
-    if (!model) { logLine('Form error: Base Model required', 'warn'); return; }
-
-    const id = 'PLR-' + String(_runSeq++).padStart(4,'0');
-    const t  = new Date().toTimeString().split(' ')[0];
-    _activeRun = { id, model, backend, node: node==='spark'?'SPARK-BOB':'LINUX-DSKTP',
-                   suite, target, maxiter, rank, epochs, lr, dgcount, domain,
-                   iter:1, score:0, lastScore:0, status:'running', start:t, stageLog:[] };
-
-    logLine(`CMD: LAUNCH PIPELINE — ${id} [${model} / ${backend} / ${suite}]`, 'info');
-    const out = document.getElementById('pl-output');
-    out.textContent = `[${t}] ${id} launched — ${model} on ${_activeRun.node}`;
-    out.style.color = 'var(--orange-dark)';
-
-    document.getElementById('active-banner').style.display = 'flex';
-    document.getElementById('btn-stop').style.display = '';
-    document.getElementById('bp-id').textContent      = id;
-    document.getElementById('bp-model').textContent   = model;
-    document.getElementById('bp-backend').textContent = backend;
-    document.getElementById('bp-node').textContent    = _activeRun.node;
-
-    simulatePipeline();
-  }
-
-  function simulatePipeline() {
-    let stage = 0, prog = 0;
-    setStage(stage);
-    const r = _activeRun;
-
-    _simIv = setInterval(() => {
-      prog += Math.floor(Math.random()*14) + 4;
-      const totalProg = Math.min(((stage * 100) + Math.min(prog,100)) / STAGES.length, 100);
-      setProgress(totalProg);
-      document.getElementById('bp-iter').textContent = `${r.iter} / ${r.maxiter}`;
-
-      if (prog >= 100) {
-        prog = 0;
-        r.stageLog.push({ stage: STAGE_NAMES[stage], iter: r.iter, status: 'done' });
-        logLine(`[${r.id}] Stage ${stage+1}/${STAGES.length}: ${STAGE_NAMES[stage]} — complete`, 'info');
-        stage++;
-
-        if (stage >= STAGES.length) {
-          r.lastScore = Math.floor(Math.random()*35) + 55;
-          r.score = r.lastScore;
-          document.getElementById('bp-score').textContent = r.score + '%';
-          logLine(`[${r.id}] Iter ${r.iter} — score: ${r.score}% / target: ${r.target}%`, 'info');
-
-          if (r.score >= r.target || r.iter >= r.maxiter) {
-            clearInterval(_simIv); _simIv = null;
-            r.status   = r.score >= r.target ? 'done' : 'error';
-            r.duration = Math.floor(Math.random()*120+30) + 'm';
-            logLine(`[${r.id}] Pipeline ${r.status==='done' ? 'PASSED ✓' : 'MAX ITERS — STOPPED'} (${r.score}%)`,
-                    r.status==='done' ? 'info' : 'warn');
-            setStage(r.status==='done' ? STAGES.length : stage-1);
-            _runs.unshift({ ...r });
-            _activeRun = null;
-            document.getElementById('btn-stop').style.display = 'none';
-            document.getElementById('iter-badge').className = 'iter-badge';
-            document.getElementById('iter-badge').textContent = 'ITER — / —';
-            document.getElementById('loop-row').className = 'loop-back';
-            renderRuns();
-          } else {
-            r.iter++; stage = 0;
-            logLine(`[${r.id}] Score below target — starting iter ${r.iter}`, 'warn');
-            // light loop-back briefly
-            const lb = document.getElementById('loop-row');
-            lb.className = 'loop-back lit';
-            setStage(0);
-            setTimeout(() => { if (lb) lb.className = 'loop-back'; }, 2000);
-          }
-          return;
-        }
-        setStage(stage);
-      }
-    }, 600);
-  }
-
-  function stopPipeline() {
-    if (!_activeRun) return;
-    if (_simIv) { clearInterval(_simIv); _simIv = null; }
-    logLine(`CMD: STOP PIPELINE — ${_activeRun.id}`, 'warn');
-    _activeRun.status = 'error'; _activeRun.duration = '--';
-    _runs.unshift({ ..._activeRun }); _activeRun = null;
-    document.getElementById('btn-stop').style.display = 'none';
-    document.getElementById('active-banner').style.display = 'none';
-    document.getElementById('iter-badge').className = 'iter-badge';
-    document.getElementById('iter-badge').textContent = 'ITER — / —';
-    document.getElementById('loop-row').className = 'loop-back';
-    STAGES.forEach(id => { document.getElementById(id).className = 'stage-card'; });
-    ARROWS.forEach(id => { document.getElementById(id).className = 'stage-conn'; });
-    STAGES.forEach(id => {
-      const lv = document.getElementById('live-' + id.replace('st-',''));
-      if (lv) lv.textContent = '—';
-    });
-    renderRuns();
-  }
-
-  function renderRuns() {
+  // ── Render run history table (DOM-only, no HTML strings) ──────────
+  function renderRuns(pipes) {
     const tb = document.getElementById('run-history-body');
-    if (!_runs.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">NO PIPELINE RUNS YET</td></tr>'; return; }
-    tb.innerHTML = _runs.map((r, i) => `<tr data-run="${i}" onclick="openDetail(${i})">
-      <td style="color:var(--orange-dark)">${r.id}</td>
-      <td>${r.model}</td><td>${r.backend}</td><td>${r.node}</td><td>${r.suite}</td>
-      <td>${r.iter}</td><td>${r.score}%</td><td>${r.target}%</td>
-      <td><span class="run-status ${r.status}">${r.status.toUpperCase()}</span></td>
-      <td>${r.duration||'--'}</td>
-    </tr>`).join('');
+    while (tb.firstChild) tb.removeChild(tb.firstChild);
+    if (!pipes || !pipes.length) {
+      const row = tb.insertRow(); const cell = row.insertCell();
+      cell.colSpan = 10; cell.className = 'empty';
+      cell.textContent = 'NO PIPELINE RUNS YET'; return;
+    }
+
+    function dur(p) {
+      if (!p.started_at) return '--';
+      const ms = (p.completed_at ? new Date(p.completed_at) : new Date()) - new Date(p.started_at);
+      const h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
+      return h > 0 ? h + 'h ' + m + 'm' : m + 'm';
+    }
+    function stCls(s) {
+      return s === 'target_reached' ? 'done' : s === 'failed' ? 'error' : s === 'running' ? 'running' : 'done';
+    }
+    function stLbl(s) {
+      return ({target_reached:'PASSED',max_iterations_reached:'MAX ITERS',failed:'FAILED',running:'RUNNING'})[s] || s.toUpperCase();
+    }
+
+    pipes.forEach(function(p) {
+      const lastIter = p.iterations && p.iterations.length ? p.iterations[p.iterations.length - 1] : null;
+      const score = lastIter ? (lastIter.reeval_pass_rate != null ? lastIter.reeval_pass_rate : lastIter.pass_rate) : null;
+      const row = tb.insertRow();
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', (function(pid){ return function(){ openDetail(pid); }; })(p.pipeline_id));
+
+      const vals = [
+        p.pipeline_id.slice(-14), p.model_name || '--',
+        (p.model_backend || '--').toUpperCase(), 'DGX-SPARK',
+        p.eval_suite || '--',
+        p.current_iteration + ' / ' + p.max_iterations,
+        score != null ? score.toFixed(1) + '%' : '--',
+        p.target_pass_rate + '%', null, dur(p)
+      ];
+      vals.forEach(function(val, i) {
+        const td = row.insertCell();
+        if (i === 0) { td.style.color = 'var(--orange-dark)'; td.style.fontSize = '10px'; }
+        if (val === null) {
+          const span = document.createElement('span');
+          span.className = 'run-status ' + stCls(p.status);
+          span.textContent = stLbl(p.status); td.appendChild(span);
+        } else { td.textContent = val; }
+      });
+    });
   }
 
-  function openDetail(idx) {
-    const r = _runs[idx];
-    if (!r) return;
-    document.getElementById('rd-id').textContent = r.id;
+  // ── Detail drill-down (DOM-only) ──────────────────────────────────
+  function openDetail(pipeId) {
+    const p = _pipelines.find(function(x) { return x.pipeline_id === pipeId; });
+    if (!p) return;
+    document.getElementById('rd-id').textContent = pipeId;
+    const lastIter = p.iterations && p.iterations.length ? p.iterations[p.iterations.length - 1] : null;
+    const ar    = lastIter && lastIter.advisor_result;
+    const score = lastIter ? (lastIter.reeval_pass_rate != null ? lastIter.reeval_pass_rate : lastIter.pass_rate) : null;
     const stages = [
-      { name: 'DATA GEN',   val: `${r.dgcount} pairs — ${r.domain}`,             status: 'done' },
-      { name: 'FINE-TUNE',  val: `rank ${r.rank} / ${r.epochs}e / lr ${r.lr}`,   status: 'done' },
-      { name: 'DEPLOY',     val: `${r.backend} on ${r.node}`,                     status: 'done' },
-      { name: 'EVAL',       val: `suite: ${r.suite} → ${r.score}%`,              status: r.score >= r.target ? 'done' : 'error' },
-      { name: 'CHECK',      val: r.score >= r.target ? `PASS ✓ — ${r.score}%` : `FAIL — below ${r.target}%`, status: r.score >= r.target ? 'done' : 'error' },
+      { name:'EVALUATE',  val:'Suite: ' + p.eval_suite + (lastIter && lastIter.pass_rate != null ? ' → ' + lastIter.pass_rate.toFixed(1) + '%' : ''), status: lastIter ? 'done' : '' },
+      { name:'ANALYZE',   val: ar ? (ar.datagen_services || '').slice(0, 60) : '--', status: ar ? 'done' : '' },
+      { name:'GENERATE',  val: lastIter && lastIter.datagen_job_id ? lastIter.datagen_job_id : '--', status: lastIter && lastIter.datagen_job_id ? 'done' : '' },
+      { name:'FINE-TUNE', val: lastIter && lastIter.finetune_job_id ? lastIter.finetune_job_id : '--', status: lastIter && lastIter.finetune_job_id ? 'done' : '' },
+      { name:'RE-EVAL',   val: score != null ? score.toFixed(1) + '% ' + (score >= p.target_pass_rate ? '— PASS' : '— below target') : '--', status: lastIter && lastIter.reeval_run_id ? (score >= p.target_pass_rate ? 'done' : 'error') : '' }
     ];
-    document.getElementById('rd-stages').innerHTML = stages.map(s => `
-      <div class="rd-stage ${s.status}">
-        <div class="rd-stage-name">${s.name}</div>
-        <div class="rd-stage-val">${s.val}</div>
-      </div>`).join('');
+    const container = document.getElementById('rd-stages');
+    while (container.firstChild) container.removeChild(container.firstChild);
+    stages.forEach(function(s) {
+      const div = document.createElement('div');
+      div.className = 'rd-stage ' + s.status;
+      const nd = document.createElement('div'); nd.className = 'rd-stage-name'; nd.textContent = s.name;
+      const vd = document.createElement('div'); vd.className = 'rd-stage-val';  vd.textContent = s.val;
+      div.appendChild(nd); div.appendChild(vd);
+      container.appendChild(div);
+    });
     document.getElementById('run-detail').classList.add('open');
   }
   function closeDetail() { document.getElementById('run-detail').classList.remove('open'); }
 
   function exportRuns() { logLine('CMD: EXPORT RUN HISTORY', 'info'); }
+
+  // ── Initial load + polling ────────────────────────────────────────
+  pollPipelines();
+  setInterval(pollPipelines, 5000);
 
 </script>
 </body>
