@@ -13,64 +13,89 @@
 </script>
 <link rel="stylesheet" href="../assets/css/bcom.css?v=3" />
 <style>
-  /* ── Hero chips ───────────────────────────────────────────────────── */
+  /* ── Hero chips ──────────────────────────────────────────── */
   .hero-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
   .hero-chip { flex:1; min-width:110px; padding:10px 14px; border:1px solid #1a0e05; background:#090603; }
   .hero-chip-label { font-size:9px; letter-spacing:2px; color:#666; margin-bottom:4px; }
   .hero-chip-val { font-size:20px; font-weight:700; color:var(--orange); letter-spacing:1px; }
   .hero-chip-sub { font-size:9px; color:#555; margin-top:2px; letter-spacing:1px; }
 
-  /* ── Generic table ────────────────────────────────────────────────── */
+  /* ── Node health cards ───────────────────────────────────── */
+  .node-health-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .nh-card { flex:1 1 300px; background:#0a0704; border:1px solid #1a0e06; padding:16px 18px; }
+  .nh-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .nh-name { font-size:13px; letter-spacing:2px; color:var(--orange-dark); font-weight:600; }
+  .nh-pill { font-size:10px; letter-spacing:1.5px; padding:3px 10px; border:1px solid; }
+  .nh-pill.online  { color:#27ae60; border-color:#27ae60; }
+  .nh-pill.offline { color:#e74c3c; border-color:#e74c3c; }
+  .nh-pill.unknown { color:#555;    border-color:#444; }
+  .nh-metrics { display:flex; flex-direction:column; gap:10px; }
+  .nh-metric { display:flex; flex-direction:column; gap:3px; }
+  .nh-metric-hdr { display:flex; justify-content:space-between; font-size:11px; }
+  .nh-metric-key { color:#555; letter-spacing:1px; }
+  .nh-metric-val { color:var(--orange-dark); font-variant-numeric:tabular-nums; font-weight:600; }
+  .nh-bar-track { background:#0e0a06; height:4px; margin-top:1px; }
+  .nh-bar-fill  { height:4px; background:var(--orange-dark); transition:width .5s; }
+  .nh-bar-fill.warn { background:#f39c12; }
+  .nh-bar-fill.crit { background:#e74c3c; }
+  .nh-empty { color:#444; font-size:11px; letter-spacing:1.5px; padding:8px 0; }
+
+  /* ── API Metrics chips ───────────────────────────────────── */
+  .api-metrics-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .api-chip { background:#080604; border:1px solid #150d05; padding:10px 16px; flex:1; min-width:120px; }
+  .api-chip-label { font-size:9px; letter-spacing:1.5px; color:#444; margin-bottom:3px; }
+  .api-chip-val   { font-size:18px; color:var(--orange-dark); font-variant-numeric:tabular-nums; font-weight:700; }
+
+  /* ── Generic table ───────────────────────────────────────── */
   .res-table { width:100%; border-collapse:collapse; font-size:12px; letter-spacing:.5px; }
-  .res-table th { background:#0e0a06; color:#ccc; font-weight:600; letter-spacing:1.5px; padding:7px 10px; text-align:left; border-bottom:1px solid #1e1008; }
-  .res-table td { padding:7px 10px; border-bottom:1px solid #120b04; vertical-align:middle; color:#ccc; }
+  .res-table th { background:#0e0a06; color:#ccc; font-weight:600; letter-spacing:1.5px; padding:9px 12px; text-align:left; border-bottom:1px solid #1e1008; }
+  .res-table td { padding:9px 12px; border-bottom:1px solid #120b04; vertical-align:middle; color:#ccc; }
   .res-table tr:hover td { background:#0e0905; }
   .res-table .empty { text-align:center; color:#2a2a2a; padding:24px; letter-spacing:2px; }
 
-  /* ── Status pills ─────────────────────────────────────────────────── */
-  .spill { display:inline-block; font-size:9px; letter-spacing:1.5px; padding:2px 7px; border:1px solid; }
-  .spill.up      { color:#27ae60; border-color:#27ae60; }
-  .spill.running { color:#27ae60; border-color:#27ae60; }
-  .spill.down    { color:#e74c3c; border-color:#e74c3c; }
-  .spill.stopped { color:#e74c3c; border-color:#e74c3c; }
-  .spill.paused  { color:#f39c12; border-color:#f39c12; }
+  /* ── Status pills ────────────────────────────────────────── */
+  .spill { display:inline-block; font-size:10px; letter-spacing:1.5px; padding:3px 8px; border:1px solid; }
+  .spill.up        { color:#27ae60; border-color:#27ae60; }
+  .spill.running   { color:#27ae60; border-color:#27ae60; }
+  .spill.down      { color:#e74c3c; border-color:#e74c3c; }
+  .spill.stopped   { color:#e74c3c; border-color:#e74c3c; }
+  .spill.paused    { color:#f39c12; border-color:#f39c12; }
   .spill.restarting { color:var(--orange); border-color:var(--orange-dark); }
-  .spill.loaded  { color:#27ae60; border-color:#27ae60; }
-  .spill.cached  { color:var(--orange); border-color:var(--orange-dark); }
-  .spill.avail   { color:#444; border-color:#333; }
+  .spill.loaded    { color:#27ae60; border-color:#27ae60; }
+  .spill.cached    { color:var(--orange); border-color:var(--orange-dark); }
+  .spill.avail     { color:#444; border-color:#333; }
+  .spill.unknown   { color:#555; border-color:#444; }
 
-  /* ── Action buttons in tables ─────────────────────────────────────── */
-  .ctr-btn { font-size:9px; letter-spacing:1.5px; padding:2px 8px; background:#0e0905; border:1px solid #2a1508; color:#aaa; cursor:pointer; }
+  /* ── Action buttons in tables ────────────────────────────── */
+  .ctr-btn { font-size:10px; letter-spacing:1.5px; padding:3px 10px; background:#0e0905; border:1px solid #2a1508; color:#aaa; cursor:pointer; font-family:inherit; }
   .ctr-btn:hover { border-color:var(--orange-dark); color:var(--orange); }
   .ctr-btn.danger { border-color:#3a1010; color:#e74c3c; }
   .ctr-btn.danger:hover { border-color:#e74c3c; }
-  .btn-row { display:flex; gap:4px; }
+  .btn-row { display:flex; gap:4px; flex-wrap:nowrap; }
 
-  /* ── Storage bars ─────────────────────────────────────────────────── */
+  /* ── Storage bars ────────────────────────────────────────── */
   .stor-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-  .stor-node { padding:12px; border:1px solid #1a0e05; background:#090603; }
-  .stor-hdr  { font-size:11px; letter-spacing:2px; color:var(--orange-dark); margin-bottom:10px; font-weight:700; }
-  .stor-row  { margin-bottom:8px; }
-  .stor-label{ font-size:10px; letter-spacing:1px; color:#ccc; display:flex; justify-content:space-between; margin-bottom:3px; }
-  .stor-track{ background:#0e0905; height:6px; }
-  .stor-fill { height:6px; background:var(--orange-dark); transition:width .6s; }
+  .stor-node { padding:14px; border:1px solid #1a0e05; background:#090603; }
+  .stor-hdr  { font-size:12px; letter-spacing:2px; color:var(--orange-dark); margin-bottom:12px; font-weight:700; }
+  .stor-row  { margin-bottom:10px; }
+  .stor-label { font-size:10px; letter-spacing:1px; color:#ccc; display:flex; justify-content:space-between; margin-bottom:4px; }
+  .stor-track { background:#0e0905; height:6px; }
+  .stor-fill  { height:6px; background:var(--orange-dark); transition:width .6s; }
   .stor-fill.warn   { background:#f39c12; }
   .stor-fill.danger { background:#e74c3c; }
 
-  /* ── Pull model form ──────────────────────────────────────────────── */
+  /* ── Pull model form ─────────────────────────────────────── */
   .form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
-  .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
-  .form-grp label { display:block; font-size:9px; letter-spacing:1.5px; color:#777; margin-bottom:4px; }
+  .form-grp label { display:block; font-size:10px; letter-spacing:1.5px; color:#777; margin-bottom:4px; }
   .form-grp input, .form-grp select { width:100%; box-sizing:border-box; }
   .pull-out { font-size:11px; letter-spacing:1px; color:#555; margin-top:6px; min-height:18px; }
 
-  /* ── Section header with actions ──────────────────────────────────── */
-  .card-hdr-row { display:flex; align-items:center; justify-content:space-between; }
+  /* ── Section header with actions ─────────────────────────── */
+  .card-hdr-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; }
   .card-hdr-row .filters { display:flex; gap:6px; align-items:center; }
   .card-hdr-row select { font-size:10px; padding:2px 8px; width:auto; }
-  .card-hdr-row input[type=text] { font-size:10px; padding:2px 8px; width:140px; }
+  .card-hdr-row input[type=text] { font-size:10px; padding:2px 8px; width:120px; }
 
-  /* ── Log panel override ───────────────────────────────────────────── */
   .log-panel { margin-top:16px; }
 </style>
 </head>
@@ -123,6 +148,33 @@
       <div class="hero-chip-val" id="h-api" style="font-size:13px;letter-spacing:1px">--</div>
       <div class="hero-chip-sub">BOBSPARK-APIS</div>
     </div>
+  </div>
+
+  <!-- ── Node health ───────────────────────────────────────────────── -->
+  <div class="node-health-row">
+    <div class="nh-card">
+      <div class="nh-hdr">
+        <span class="nh-name">SPARK-BOB</span>
+        <span class="nh-pill unknown" id="nh-spark-pill">CHECKING…</span>
+      </div>
+      <div class="nh-metrics" id="nh-spark-metrics"><div class="nh-empty">LOADING…</div></div>
+    </div>
+    <div class="nh-card">
+      <div class="nh-hdr">
+        <span class="nh-name">LINUX-DSKTP</span>
+        <span class="nh-pill unknown" id="nh-linux-pill">CHECKING…</span>
+      </div>
+      <div class="nh-metrics" id="nh-linux-metrics"><div class="nh-empty">LOADING…</div></div>
+    </div>
+  </div>
+
+  <!-- ── API Metrics ────────────────────────────────────────────────── -->
+  <div class="api-metrics-row">
+    <div class="api-chip"><div class="api-chip-label">REQ TOTAL</div><div class="api-chip-val" id="am-req-total">—</div></div>
+    <div class="api-chip"><div class="api-chip-label">REQ / S</div><div class="api-chip-val" id="am-req-rate">—</div></div>
+    <div class="api-chip"><div class="api-chip-label">AVG LATENCY</div><div class="api-chip-val" id="am-latency">—</div></div>
+    <div class="api-chip"><div class="api-chip-label">ACTIVE CONN</div><div class="api-chip-val" id="am-conn">—</div></div>
+    <div class="api-chip"><div class="api-chip-label">ERRORS</div><div class="api-chip-val" id="am-errors">—</div></div>
   </div>
 
   <div class="info-grid">
@@ -253,7 +305,7 @@
           <button class="ctr-btn" onclick="refreshStorage()">⟳ REFRESH</button>
         </div>
       </div>
-      <div class="stor-grid">
+      <div class="stor-grid" style="padding:14px">
         <div class="stor-node">
           <div class="stor-hdr">SPARK-BOB</div>
           <div class="stor-row">
@@ -298,10 +350,35 @@
   </div><!-- /info-grid -->
 
   <div class="log-panel" id="log">
-    <div class="log-line"><span class="log-time">--:--:--</span><span class="log-msg info">RESOURCES ready — polling containers, services, models, storage.</span></div>
+    <div class="log-line"><span class="log-time">--:--:--</span><span class="log-msg info">RESOURCES ready — polling nodes, containers, services, models, storage.</span></div>
   </div>
 
 </div><!-- /main -->
+
+<!-- TERMINAL DOCK -->
+<div class="terminal-dock" id="terminal-dock">
+  <div class="terminal-bar">
+    <div class="terminal-tabs">
+      <div class="terminal-tab active" data-term="spark" onclick="switchTerm('spark')">SPARK-BOB</div>
+      <div class="terminal-tab" data-term="linux" onclick="switchTerm('linux')">LINUX-DSKTP</div>
+    </div>
+    <div class="terminal-controls">
+      <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
+    </div>
+  </div>
+  <div class="terminal-body" id="terminal-body">
+    <div class="terminal-output" id="term-out-spark">
+      <div class="term-line sys">[bcom-c] resources terminal ready</div>
+    </div>
+    <div class="terminal-output" id="term-out-linux" style="display:none">
+      <div class="term-line sys">[bcom-c] resources terminal ready</div>
+    </div>
+    <div class="terminal-input-row">
+      <span class="term-prompt" id="term-prompt">spark-bob $</span>
+      <input class="terminal-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type command..." />
+    </div>
+  </div>
+</div>
 
 <script src="../assets/js/bcom.js?v=5"></script>
 <script>
@@ -314,332 +391,272 @@ var _services   = [];
 var _models     = [];
 
 // ── Helpers ────────────────────────────────────────────────────────────
-function setText(id, v) {
-  var el = document.getElementById(id);
-  if (el) el.textContent = v;
-}
+function setText(id, v) { var el=document.getElementById(id); if(el) el.textContent=v; }
 
 function logLine(msg, cls) {
   var panel = document.getElementById('log');
   if (!panel) return;
-  var now = new Date();
-  var ts  = now.toTimeString().split(' ')[0];
-  var div = document.createElement('div');
-  div.className = 'log-line';
-  div.innerHTML = '<span class="log-time">' + ts + '</span>'
-                + '<span class="log-msg ' + (cls||'info') + '">' + msg + '</span>';
-  panel.appendChild(div);
-  panel.scrollTop = panel.scrollHeight;
+  var ts  = new Date().toTimeString().split(' ')[0];
+  var div = document.createElement('div'); div.className='log-line';
+  var tSpan = document.createElement('span'); tSpan.className='log-time'; tSpan.textContent=ts;
+  var mSpan = document.createElement('span'); mSpan.className='log-msg '+(cls||'info'); mSpan.textContent=msg;
+  div.appendChild(tSpan); div.appendChild(mSpan);
+  panel.appendChild(div); panel.scrollTop=panel.scrollHeight;
   while (panel.children.length > 120) panel.removeChild(panel.firstChild);
 }
 
-function pillHtml(status) {
-  var s = (status || 'unknown').toLowerCase();
-  var cls = s;
-  if (s === 'active' || s === 'online') cls = 'up';
-  return '<span class="spill ' + cls + '">' + s.toUpperCase() + '</span>';
-}
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function pillHtml(st) { var s=(st||'unknown').toLowerCase(); var c=s; if(s==='active'||s==='online')c='up'; return '<span class="spill '+c+'">'+s.toUpperCase()+'</span>'; }
+function fmtBytes(b) { if(b==null)return'—'; if(b>=1e12)return(b/1e12).toFixed(1)+'TB'; if(b>=1e9)return(b/1e9).toFixed(1)+'GB'; if(b>=1e6)return(b/1e6).toFixed(1)+'MB'; return b+'B'; }
+function barCls(p) { return p>=90?' crit':p>=70?' warn':''; }
 
 function setStorBar(fillId, labelId, usedGb, totalGb) {
   if (!totalGb) return;
-  var pct = Math.min(100, Math.round(usedGb / totalGb * 100));
+  var p = Math.min(100, Math.round(usedGb/totalGb*100));
   var fill = document.getElementById(fillId);
-  if (fill) {
-    fill.style.width = pct + '%';
-    fill.className   = 'stor-fill' + (pct >= 90 ? ' danger' : pct >= 75 ? ' warn' : '');
-  }
+  if (fill) { fill.style.width=p+'%'; fill.className='stor-fill'+(p>=90?' danger':p>=75?' warn':''); }
   var lbl = document.getElementById(labelId);
-  if (lbl) lbl.textContent = usedGb.toFixed(1) + ' / ' + totalGb.toFixed(1) + ' GB';
+  if (lbl) lbl.textContent=usedGb.toFixed(1)+' / '+totalGb.toFixed(1)+' GB';
+}
+
+// ── Node health ────────────────────────────────────────────────────────
+function metricBar(label, valStr, p) {
+  p = Math.min(100, Math.max(0, parseFloat(p)||0));
+  return '<div class="nh-metric">'
+    +'<div class="nh-metric-hdr"><span class="nh-metric-key">'+escHtml(label)+'</span>'
+    +'<span class="nh-metric-val">'+escHtml(valStr)+'</span></div>'
+    +'<div class="nh-bar-track"><div class="nh-bar-fill'+barCls(p)+'" style="width:'+p+'%"></div></div>'
+    +'</div>';
+}
+
+function applyNodeStats(node, d) {
+  var pill = document.getElementById('nh-'+node+'-pill');
+  pill.textContent='ONLINE'; pill.className='nh-pill online';
+  var html='';
+  var cpu=d.cpu_percent||d.cpu||0, ram=d.memory_percent||d.ram_percent||0;
+  var ramU=d.memory_used||d.ram_used, ramT=d.memory_total||d.ram_total;
+  html += metricBar('CPU', cpu.toFixed(1)+'%', cpu);
+  html += metricBar('RAM', ramU!=null?fmtBytes(ramU)+(ramT?'/'+fmtBytes(ramT):''):ram.toFixed(1)+'%', ram);
+  var gpus=d.gpus||d.gpu||[]; if(!Array.isArray(gpus))gpus=[gpus];
+  gpus.forEach(function(g,i){
+    var gp=g.utilization||g.gpu_percent||0;
+    var vp=g.memory_percent||g.vram_percent||(g.memory_used&&g.memory_total?Math.round(g.memory_used/g.memory_total*100):0);
+    var vU=g.memory_used,vT=g.memory_total,pfx=gpus.length>1?'GPU '+i+' ':'GPU ';
+    html+=metricBar(pfx+'UTIL',gp.toFixed(1)+'%',gp);
+    html+=metricBar(pfx+'VRAM',vU!=null?fmtBytes(vU)+(vT?'/'+fmtBytes(vT):''):vp.toFixed(1)+'%',vp);
+  });
+  if (d.disk_percent||d.disk){var dp=d.disk_percent||d.disk||0;html+=metricBar('DISK',dp.toFixed(1)+'%',dp);}
+  if (d.temperature||d.temp){var t=d.temperature||d.temp;html+=metricBar('TEMP',t.toFixed(1)+'°C',(t-40)/50*100);}
+  document.getElementById('nh-'+node+'-metrics').innerHTML=html;
+}
+
+function setNodeOffline(node) {
+  var pill=document.getElementById('nh-'+node+'-pill');
+  pill.textContent='OFFLINE'; pill.className='nh-pill offline';
+  document.getElementById('nh-'+node+'-metrics').innerHTML='<div class="nh-empty">NODE OFFLINE</div>';
+}
+
+async function refreshNodes() {
+  try { var r=await fetch('/api/system/stats',{cache:'no-store'}); if(r.ok)applyNodeStats('spark',await r.json()); else setNodeOffline('spark'); } catch(_){setNodeOffline('spark');}
+  try { var r2=await fetch('/api/system/linux/stats',{cache:'no-store'}); if(r2.ok)applyNodeStats('linux',await r2.json()); else setNodeOffline('linux'); } catch(_){setNodeOffline('linux');}
+}
+
+// ── API Metrics ────────────────────────────────────────────────────────
+async function refreshApiMetrics() {
+  try {
+    var r=await fetch('/api/metrics',{cache:'no-store'}); if(!r.ok)return;
+    var d=await r.json();
+    var s=function(id,k){var v=d[k]; if(v!=null)setText(id,typeof v==='number'&&v>1000?fmtBytes(v):String(v));};
+    s('am-req-total','requests_total'); s('am-req-rate','requests_per_sec');
+    s('am-latency','avg_latency_ms'); s('am-conn','active_connections'); s('am-errors','errors_total');
+  } catch(_){}
 }
 
 // ── Containers ─────────────────────────────────────────────────────────
 function renderContainers() {
-  var filter = document.getElementById('ctr-filter').value;
-  var list   = _containers;
-  if (filter !== 'all') list = list.filter(function(c) {
-    var s = (c.status || c.state || '').toLowerCase();
-    return filter === 'running' ? s === 'running' : s !== 'running';
-  });
-  var tb = document.getElementById('ctr-body');
-  if (!list.length) {
-    tb.innerHTML = '<tr><td colspan="7" class="empty">NO CONTAINERS</td></tr>';
-    return;
-  }
-  tb.innerHTML = list.map(function(c) {
-    var name   = c.name   || c.Names   || c.id || '--';
-    var image  = c.image  || c.Image   || '--';
-    var status = c.status || c.State   || 'unknown';
-    var ports  = c.ports  || c.Ports   || '';
-    var node   = c.node   || 'SPARK-BOB';
-    var uptime = c.uptime || c.Started || '--';
-    if (Array.isArray(name))  name  = name.join(', ').replace(/^\//, '');
-    if (Array.isArray(ports)) ports = ports.map(function(p){ return p.PublicPort || ''; }).filter(Boolean).join(', ');
-    var id = c.id || c.Id || '';
+  var filter=document.getElementById('ctr-filter').value;
+  var list=_containers;
+  if(filter!=='all')list=list.filter(function(c){var s=(c.status||c.state||'').toLowerCase();return filter==='running'?s==='running':s!=='running';});
+  var tb=document.getElementById('ctr-body');
+  if(!list.length){tb.innerHTML='<tr><td colspan="7" class="empty">NO CONTAINERS</td></tr>';return;}
+  tb.innerHTML=list.map(function(c){
+    var name=c.name||c.Names||c.id||'--',image=c.image||c.Image||'--',status=c.status||c.State||'unknown';
+    var ports=c.ports||c.Ports||'',node=c.node||'SPARK-BOB',uptime=c.uptime||c.Started||'--';
+    if(Array.isArray(name))name=name.join(', ').replace(/^\//,'');
+    if(Array.isArray(ports))ports=ports.map(function(p){return p.PublicPort||'';}).filter(Boolean).join(', ');
+    var id=c.id||c.Id||'';
     return '<tr>'
-      + '<td style="color:var(--orange-dark);font-weight:600">' + name + '</td>'
-      + '<td style="color:#888;font-size:10px">' + image + '</td>'
-      + '<td>' + pillHtml(status) + '</td>'
-      + '<td style="color:#777;font-size:10px">' + (ports || '—') + '</td>'
-      + '<td style="color:#666;font-size:10px">' + node + '</td>'
-      + '<td style="color:#666;font-size:10px">' + uptime + '</td>'
-      + '<td><div class="btn-row">'
-      + '<button class="ctr-btn" onclick="containerAction(\'' + id + '\',\'start\')">START</button>'
-      + '<button class="ctr-btn" onclick="containerAction(\'' + id + '\',\'stop\')">STOP</button>'
-      + '<button class="ctr-btn" onclick="containerAction(\'' + id + '\',\'restart\')">RESTART</button>'
-      + '</div></td>'
-      + '</tr>';
+      +'<td style="color:var(--orange-dark);font-weight:600">'+escHtml(name)+'</td>'
+      +'<td style="color:#888;font-size:11px">'+escHtml(image)+'</td>'
+      +'<td>'+pillHtml(status)+'</td>'
+      +'<td style="color:#777;font-size:11px">'+escHtml(String(ports||'—'))+'</td>'
+      +'<td style="color:#666;font-size:11px">'+escHtml(node)+'</td>'
+      +'<td style="color:#666;font-size:11px">'+escHtml(uptime)+'</td>'
+      +'<td><div class="btn-row">'
+      +'<button class="ctr-btn" onclick="containerAction(\''+escHtml(id)+'\',\'start\')">START</button>'
+      +'<button class="ctr-btn" onclick="containerAction(\''+escHtml(id)+'\',\'stop\')">STOP</button>'
+      +'<button class="ctr-btn" onclick="containerAction(\''+escHtml(id)+'\',\'restart\')">RESTART</button>'
+      +'</div></td></tr>';
   }).join('');
 }
 
 async function refreshContainers() {
   try {
-    var res = await fetch('/api/system/containers', { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var d = await res.json();
-    _containers = d.containers || d || [];
-    var running = _containers.filter(function(c){ return (c.status||c.state||'').toLowerCase()==='running'; }).length;
-    setText('h-containers', _containers.length);
-    setText('h-running', running);
+    var res=await fetch('/api/system/containers',{cache:'no-store'});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    var d=await res.json(); _containers=d.containers||d||[];
+    var running=_containers.filter(function(c){return(c.status||c.state||'').toLowerCase()==='running';}).length;
+    setText('h-containers',_containers.length); setText('h-running',running);
     renderContainers();
-  } catch (err) {
-    logLine('Containers error: ' + err.message, 'warn');
-    document.getElementById('ctr-body').innerHTML = '<tr><td colspan="7" class="empty">API UNAVAILABLE</td></tr>';
-  }
+  } catch(err){logLine('Containers: '+err.message,'warn');document.getElementById('ctr-body').innerHTML='<tr><td colspan="7" class="empty">API UNAVAILABLE</td></tr>';}
 }
 
-async function containerAction(id, action) {
-  if (!id) return;
-  try {
-    logLine('Container ' + action + ': ' + id, 'info');
-    var res = await fetch('/api/system/containers/' + id + '/' + action, { method: 'POST' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    logLine('Container ' + action + ' OK', 'info');
-    setTimeout(refreshContainers, 1200);
-  } catch (err) {
-    logLine('Container action failed: ' + err.message, 'warn');
-  }
+async function containerAction(id,action) {
+  if(!id)return;
+  try{logLine('Container '+action+': '+id,'info');var res=await fetch('/api/system/containers/'+encodeURIComponent(id)+'/'+action,{method:'POST'});if(!res.ok)throw new Error('HTTP '+res.status);logLine('Container '+action+' OK','info');setTimeout(refreshContainers,1200);}
+  catch(err){logLine('Container action failed: '+err.message,'warn');}
 }
 
 // ── Services ───────────────────────────────────────────────────────────
 function renderServices() {
-  var tb = document.getElementById('svc-body');
-  if (!_services.length) {
-    tb.innerHTML = '<tr><td colspan="7" class="empty">NO SERVICES</td></tr>';
-    return;
-  }
-  tb.innerHTML = _services.map(function(s) {
-    var name   = s.name    || s.service  || '--';
-    var status = s.status  || s.state    || 'unknown';
-    var port   = s.port    || s.Port     || '--';
-    var node   = s.node    || 'SPARK-BOB';
-    var pid    = s.pid     || '--';
-    var uptime = s.uptime  || '--';
+  var tb=document.getElementById('svc-body');
+  if(!_services.length){tb.innerHTML='<tr><td colspan="7" class="empty">NO SERVICES</td></tr>';return;}
+  tb.innerHTML=_services.map(function(s){
+    var name=s.name||s.service||'--',status=s.status||s.state||'unknown';
+    var port=s.port||s.Port||'--',node=s.node||'SPARK-BOB',pid=s.pid||'--',uptime=s.uptime||'--';
     return '<tr>'
-      + '<td style="color:var(--orange-dark);font-weight:600">' + name + '</td>'
-      + '<td>' + pillHtml(status) + '</td>'
-      + '<td style="color:#777;font-size:10px">' + port + '</td>'
-      + '<td style="color:#666;font-size:10px">' + node + '</td>'
-      + '<td style="color:#666;font-size:10px">' + pid + '</td>'
-      + '<td style="color:#666;font-size:10px">' + uptime + '</td>'
-      + '<td><div class="btn-row">'
-      + '<button class="ctr-btn" onclick="serviceAction(\'' + name + '\',\'start\')">START</button>'
-      + '<button class="ctr-btn" onclick="serviceAction(\'' + name + '\',\'stop\')">STOP</button>'
-      + '<button class="ctr-btn" onclick="serviceAction(\'' + name + '\',\'restart\')">RESTART</button>'
-      + '</div></td>'
-      + '</tr>';
+      +'<td style="color:var(--orange-dark);font-weight:600">'+escHtml(name)+'</td>'
+      +'<td>'+pillHtml(status)+'</td>'
+      +'<td style="color:#777;font-size:11px">'+escHtml(String(port))+'</td>'
+      +'<td style="color:#666;font-size:11px">'+escHtml(node)+'</td>'
+      +'<td style="color:#666;font-size:11px">'+escHtml(String(pid))+'</td>'
+      +'<td style="color:#666;font-size:11px">'+escHtml(uptime)+'</td>'
+      +'<td><div class="btn-row">'
+      +'<button class="ctr-btn" onclick="serviceAction(\''+escHtml(name)+'\',\'start\')">START</button>'
+      +'<button class="ctr-btn" onclick="serviceAction(\''+escHtml(name)+'\',\'stop\')">STOP</button>'
+      +'<button class="ctr-btn" onclick="serviceAction(\''+escHtml(name)+'\',\'restart\')">RESTART</button>'
+      +'</div></td></tr>';
   }).join('');
 }
 
 async function refreshServices() {
   try {
-    var res = await fetch('/api/system/services', { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var d = await res.json();
-    _services = d.services || d || [];
-    var active = _services.filter(function(s){ var st=(s.status||s.state||'').toLowerCase(); return st==='up'||st==='running'||st==='active'; }).length;
-    setText('h-services', active);
-    renderServices();
-  } catch (err) {
-    logLine('Services error: ' + err.message, 'warn');
-    document.getElementById('svc-body').innerHTML = '<tr><td colspan="7" class="empty">API UNAVAILABLE</td></tr>';
-  }
+    var res=await fetch('/api/system/services',{cache:'no-store'});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    var d=await res.json(); _services=d.services||d||[];
+    var active=_services.filter(function(s){var st=(s.status||s.state||'').toLowerCase();return st==='up'||st==='running'||st==='active';}).length;
+    setText('h-services',active); renderServices();
+  } catch(err){logLine('Services: '+err.message,'warn');document.getElementById('svc-body').innerHTML='<tr><td colspan="7" class="empty">API UNAVAILABLE</td></tr>';}
 }
 
-async function serviceAction(name, action) {
-  if (!name) return;
-  try {
-    logLine('Service ' + action + ': ' + name, 'info');
-    var res = await fetch('/api/system/services/' + encodeURIComponent(name) + '/' + action, { method: 'POST' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    logLine('Service ' + action + ' OK: ' + name, 'info');
-    setTimeout(refreshServices, 1200);
-  } catch (err) {
-    logLine('Service action failed: ' + err.message, 'warn');
-  }
+async function serviceAction(name,action) {
+  if(!name)return;
+  try{logLine('Service '+action+': '+name,'info');var res=await fetch('/api/system/services/'+encodeURIComponent(name)+'/'+action,{method:'POST'});if(!res.ok)throw new Error('HTTP '+res.status);logLine('Service '+action+' OK','info');setTimeout(refreshServices,1200);}
+  catch(err){logLine('Service action failed: '+err.message,'warn');}
 }
 
 // ── Model Registry ─────────────────────────────────────────────────────
 function renderRegistry() {
-  var fn  = document.getElementById('reg-filter-node').value;
-  var fs  = document.getElementById('reg-filter-status').value;
-  var srch = (document.getElementById('reg-search').value || '').toLowerCase();
-  var m   = _models.slice();
-  if (fn !== 'all')  m = m.filter(function(x){ return x.node === fn; });
-  if (fs !== 'all')  m = m.filter(function(x){ return x.status === fs; });
-  if (srch) m = m.filter(function(x){ return x.id.toLowerCase().indexOf(srch) >= 0; });
-  var tb = document.getElementById('reg-body');
-  if (!m.length) {
-    tb.innerHTML = '<tr><td colspan="8" class="empty">NO MODELS</td></tr>';
-    return;
-  }
-  tb.innerHTML = m.map(function(x) {
+  var fn=(document.getElementById('reg-filter-node').value),fs=(document.getElementById('reg-filter-status').value);
+  var srch=(document.getElementById('reg-search').value||'').toLowerCase();
+  var m=_models.slice();
+  if(fn!=='all')m=m.filter(function(x){return x.node===fn;});
+  if(fs!=='all')m=m.filter(function(x){return x.status===fs;});
+  if(srch)m=m.filter(function(x){return x.id.toLowerCase().indexOf(srch)>=0;});
+  var tb=document.getElementById('reg-body');
+  if(!m.length){tb.innerHTML='<tr><td colspan="8" class="empty">NO MODELS</td></tr>';return;}
+  tb.innerHTML=m.map(function(x){
     return '<tr>'
-      + '<td style="color:var(--orange-dark);font-weight:600">' + x.id + '</td>'
-      + '<td>' + x.type + '</td>'
-      + '<td>' + x.size + '</td>'
-      + '<td>' + x.backend + '</td>'
-      + '<td style="color:#777;font-size:10px">' + (x.node==='spark'?'SPARK-BOB':'LINUX-DSKTP') + '</td>'
-      + '<td style="color:#999;font-size:10px">' + x.quant + '</td>'
-      + '<td>' + pillHtml(x.status) + '</td>'
-      + '<td><div class="btn-row">'
-      + '<button class="ctr-btn" onclick="modelAction(\'' + x.id + '\',\'load\')">LOAD</button>'
-      + '<button class="ctr-btn danger" onclick="modelAction(\'' + x.id + '\',\'remove\')">RM</button>'
-      + '</div></td>'
-      + '</tr>';
+      +'<td style="color:var(--orange-dark);font-weight:600">'+escHtml(x.id)+'</td>'
+      +'<td>'+escHtml(x.type)+'</td><td>'+escHtml(x.size)+'</td><td>'+escHtml(x.backend)+'</td>'
+      +'<td style="color:#777;font-size:11px">'+escHtml(x.node==='spark'?'SPARK-BOB':'LINUX-DSKTP')+'</td>'
+      +'<td style="color:#999;font-size:11px">'+escHtml(x.quant)+'</td>'
+      +'<td>'+pillHtml(x.status)+'</td>'
+      +'<td><div class="btn-row">'
+      +'<button class="ctr-btn" onclick="modelAction(\''+escHtml(x.id)+'\',\'load\')">LOAD</button>'
+      +'<button class="ctr-btn danger" onclick="modelAction(\''+escHtml(x.id)+'\',\'remove\')">RM</button>'
+      +'</div></td></tr>';
   }).join('');
 }
 
 async function refreshModels() {
   try {
-    var res = await fetch('/api/models/', { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var d   = await res.json();
-    var raw = d.models || (Array.isArray(d) ? d : []);
-    _models = raw.map(function(m) {
-      return {
-        id:      m.name || m.model || m.id || '--',
-        type:    ((m.details && m.details.family) || 'LLM').toUpperCase(),
-        size:    m.size ? (m.size / 1e9).toFixed(1) + ' GB' : '--',
-        backend: 'Ollama',
-        node:    'spark',
-        quant:   (m.details && m.details.quantization_level) || '--',
-        status:  'loaded',
-      };
-    });
-    var loaded = _models.filter(function(m){ return m.status === 'loaded'; }).length;
-    setText('h-models', loaded);
+    var res=await fetch('/api/models/',{cache:'no-store'});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    var d=await res.json(),raw=d.models||(Array.isArray(d)?d:[]);
+    _models=raw.map(function(m){return{id:m.name||m.model||m.id||'--',type:((m.details&&m.details.family)||'LLM').toUpperCase(),size:m.size?(m.size/1e9).toFixed(1)+' GB':'--',backend:'Ollama',node:'spark',quant:(m.details&&m.details.quantization_level)||'--',status:'loaded'};});
+    setText('h-models',_models.filter(function(m){return m.status==='loaded';}).length);
     renderRegistry();
-  } catch (err) {
-    logLine('Models error: ' + err.message, 'warn');
-    document.getElementById('reg-body').innerHTML = '<tr><td colspan="8" class="empty">API UNAVAILABLE</td></tr>';
-  }
+  } catch(err){logLine('Models: '+err.message,'warn');document.getElementById('reg-body').innerHTML='<tr><td colspan="8" class="empty">API UNAVAILABLE</td></tr>';}
 }
 
-function modelAction(id, action) {
-  logLine('Model ' + action + ': ' + id, 'info');
-}
+function modelAction(id,action){logLine('Model '+action+': '+id,'info');}
 
 // ── Pull model ─────────────────────────────────────────────────────────
 async function submitPull() {
-  var id  = (document.getElementById('pull-id').value || '').trim();
-  var bk  = document.getElementById('pull-backend').value;
-  var nd  = document.getElementById('pull-node').value;
-  var qt  = document.getElementById('pull-quant').value;
-  var tag = (document.getElementById('pull-tag').value || 'latest').trim();
-  var out = document.getElementById('pull-output');
-  if (!id) { out.textContent = 'ERROR: Model ID required.'; out.style.color = '#e74c3c'; return; }
-  out.textContent = 'Pulling ' + id + ':' + tag + ' via ' + bk + ' on ' + (nd==='spark'?'SPARK-BOB':'LINUX-DSKTP') + '…';
-  out.style.color = 'var(--orange-dark)';
+  var id=(document.getElementById('pull-id').value||'').trim();
+  var bk=document.getElementById('pull-backend').value,nd=document.getElementById('pull-node').value;
+  var qt=document.getElementById('pull-quant').value,tag=(document.getElementById('pull-tag').value||'latest').trim();
+  var out=document.getElementById('pull-output');
+  if(!id){out.textContent='ERROR: Model ID required.';out.style.color='#e74c3c';return;}
+  out.textContent='Pulling '+id+':'+tag+' via '+bk+' on '+(nd==='spark'?'SPARK-BOB':'LINUX-DSKTP')+'…';
+  out.style.color='var(--orange-dark)';
   try {
-    var res = await fetch('/api/models/pull', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: id, tag: tag, backend: bk, node: nd, quantization: qt }),
-    });
-    var d = await res.json();
-    if (res.ok) {
-      out.textContent = 'Pull started: ' + (d.message || d.status || 'OK');
-      out.style.color = '#27ae60';
-      logLine('Pull queued: ' + id, 'info');
-      setTimeout(refreshModels, 3000);
-    } else {
-      out.textContent = 'ERROR: ' + (d.detail || d.error || 'Unknown error');
-      out.style.color = '#e74c3c';
-    }
-  } catch (err) {
-    out.textContent = 'ERROR: ' + err.message;
-    out.style.color = '#e74c3c';
-  }
+    var res=await fetch('/api/models/pull',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:id,tag:tag,backend:bk,node:nd,quantization:qt})});
+    var d=await res.json();
+    if(res.ok){out.textContent='Pull started: '+(d.message||d.status||'OK');out.style.color='#27ae60';logLine('Pull queued: '+id,'info');setTimeout(refreshModels,3000);}
+    else{out.textContent='ERROR: '+(d.detail||d.error||'Unknown error');out.style.color='#e74c3c';}
+  } catch(err){out.textContent='ERROR: '+err.message;out.style.color='#e74c3c';}
 }
 
 // ── Storage ────────────────────────────────────────────────────────────
 async function refreshStorage() {
   try {
-    var [storRes, linuxRes] = await Promise.all([
-      fetch('/api/system/storage',      { cache: 'no-store' }),
-      fetch('/api/system/linux/stats',  { cache: 'no-store' }),
-    ]);
-
-    if (storRes.ok) {
-      var stor = await storRes.json();
-      var sp   = stor.spark || stor || {};
-      if (sp.models)      setStorBar('sf-spark-models', 'stor-spark-models', sp.models.used_gb,      sp.models.total_gb);
-      if (sp.datasets)    setStorBar('sf-spark-data',   'stor-spark-data',   sp.datasets.used_gb,    sp.datasets.total_gb);
-      if (sp.checkpoints) setStorBar('sf-spark-ckpt',   'stor-spark-ckpt',   sp.checkpoints.used_gb, sp.checkpoints.total_gb);
-      if (sp.root)        setStorBar('sf-spark-root',   'stor-spark-root',   sp.root.used_gb,        sp.root.total_gb);
-      if (sp.root)        setText('h-storage', sp.root.used_gb.toFixed(1) + ' GB');
+    var results=await Promise.all([fetch('/api/system/storage',{cache:'no-store'}),fetch('/api/system/linux/stats',{cache:'no-store'})]);
+    if(results[0].ok){var stor=await results[0].json(),sp=stor.spark||stor||{};
+      if(sp.models)setStorBar('sf-spark-models','stor-spark-models',sp.models.used_gb,sp.models.total_gb);
+      if(sp.datasets)setStorBar('sf-spark-data','stor-spark-data',sp.datasets.used_gb,sp.datasets.total_gb);
+      if(sp.checkpoints)setStorBar('sf-spark-ckpt','stor-spark-ckpt',sp.checkpoints.used_gb,sp.checkpoints.total_gb);
+      if(sp.root){setStorBar('sf-spark-root','stor-spark-root',sp.root.used_gb,sp.root.total_gb);setText('h-storage',sp.root.used_gb.toFixed(1)+' GB');}
     }
-
-    if (linuxRes.ok) {
-      var lx = await linuxRes.json();
-      var d  = lx.disk || {};
-      if (d.ubdrive) setStorBar('sf-linux-ubdrive', 'stor-linux-ubdrive', d.ubdrive.used_gb, d.ubdrive.total_gb);
-      if (d.ubdrive) setStorBar('sf-linux-data',    'stor-linux-data',    d.ubdrive.used_gb, d.ubdrive.total_gb);
-      if (d.ckpts)   setStorBar('sf-linux-ckpt',    'stor-linux-ckpt',    d.ckpts.used_gb,   d.ckpts.total_gb);
-      if (d.root)    setStorBar('sf-linux-root',    'stor-linux-root',    d.root.used_gb,    d.root.total_gb);
+    if(results[1].ok){var lx=await results[1].json(),disk=lx.disk||{};
+      if(disk.ubdrive){setStorBar('sf-linux-ubdrive','stor-linux-ubdrive',disk.ubdrive.used_gb,disk.ubdrive.total_gb);setStorBar('sf-linux-data','stor-linux-data',disk.ubdrive.used_gb,disk.ubdrive.total_gb);}
+      if(disk.ckpts)setStorBar('sf-linux-ckpt','stor-linux-ckpt',disk.ckpts.used_gb,disk.ckpts.total_gb);
+      if(disk.root)setStorBar('sf-linux-root','stor-linux-root',disk.root.used_gb,disk.root.total_gb);
     }
-  } catch (err) {
-    logLine('Storage error: ' + err.message, 'warn');
-  }
+  } catch(err){logLine('Storage: '+err.message,'warn');}
 }
 
 // ── API health chip ────────────────────────────────────────────────────
 async function refreshApiHealth() {
   try {
-    var res = await fetch('/api/health', { cache: 'no-store' });
-    var el  = document.getElementById('h-api');
-    if (res.ok) {
-      el.textContent = 'ONLINE';
-      el.style.color = '#27ae60';
-    } else {
-      el.textContent = 'ERROR';
-      el.style.color = '#e74c3c';
-    }
-  } catch (_) {
-    var el = document.getElementById('h-api');
-    el.textContent = 'OFFLINE';
-    el.style.color = '#e74c3c';
-  }
+    var res=await fetch('/api/health',{cache:'no-store'}),el=document.getElementById('h-api');
+    el.textContent=res.ok?'ONLINE':'ERROR'; el.style.color=res.ok?'#27ae60':'#e74c3c';
+  } catch(_){var el=document.getElementById('h-api');el.textContent='OFFLINE';el.style.color='#e74c3c';}
 }
 
-// ── Poll all ───────────────────────────────────────────────────────────
-function pollAll() {
-  refreshContainers();
-  refreshServices();
-  refreshModels();
-  refreshStorage();
-  refreshApiHealth();
+// ── Terminal ───────────────────────────────────────────────────────────
+var _termNode='spark';
+function switchTerm(node){
+  _termNode=node;
+  document.querySelectorAll('.terminal-tab').forEach(function(t){t.classList.toggle('active',t.dataset.term===node);});
+  ['spark','linux'].forEach(function(n){var el=document.getElementById('term-out-'+n);if(el)el.style.display=n===node?'block':'none';});
+  document.getElementById('term-prompt').textContent=(node==='spark'?'spark-bob':'linux-dsktp')+' $';
+  document.getElementById('terminal-input').focus();
 }
 
-// Initial load
-pollAll();
-
-// Staggered intervals
-setInterval(refreshContainers,   12000);
-setInterval(refreshServices,     15000);
-setInterval(refreshModels,       20000);
-setInterval(refreshStorage,      30000);
-setInterval(refreshApiHealth,     8000);
+// ── Init ───────────────────────────────────────────────────────────────
+(function boot(){
+  refreshNodes(); refreshContainers(); refreshServices();
+  refreshModels(); refreshStorage(); refreshApiHealth(); refreshApiMetrics();
+  setInterval(refreshNodes,       6000);
+  setInterval(refreshApiMetrics, 10000);
+  setInterval(refreshContainers, 12000);
+  setInterval(refreshServices,   15000);
+  setInterval(refreshModels,     20000);
+  setInterval(refreshStorage,    30000);
+  setInterval(refreshApiHealth,   8000);
+})();
 </script>
 </body>
 </html>
