@@ -793,6 +793,25 @@
       </div>
     </div>
 
+    <!-- Alternating Table Colors -->
+    <div class="sett-row" style="background:rgba(218,119,86,0.04);margin-top:4px;">
+      <label style="color:var(--text-dim);font-weight:700;letter-spacing:1px;">ALTERNATING TABLE COLORS</label>
+    </div>
+    <div class="sett-row theme-picker-row">
+      <label>Row Color 1</label>
+      <div class="theme-picker-wrap">
+        <input type="color" class="theme-picker" id="tc--table-row-1" value="#090603" oninput="themePreview('--table-row-1',this.value)" />
+        <span class="theme-hex" id="th--table-row-1">#090603</span>
+      </div>
+    </div>
+    <div class="sett-row theme-picker-row">
+      <label>Row Color 2</label>
+      <div class="theme-picker-wrap">
+        <input type="color" class="theme-picker" id="tc--table-row-2" value="#0f0b07" oninput="themePreview('--table-row-2',this.value)" />
+        <span class="theme-hex" id="th--table-row-2">#0f0b07</span>
+      </div>
+    </div>
+
     <!-- Action row -->
     <div class="sett-row" style="gap:8px;flex-wrap:wrap;padding:10px 12px;">
       <button class="sett-btn" onclick="themeReset()" style="font-size:10px;">RESET TO DEFAULT</button>
@@ -1110,6 +1129,7 @@ const THEME_VARS = [
   '--text', '--text-dim', '--text-muted',
   '--orange', '--orange-dark', '--orange-deep',
   '--border', '--border-dim',
+  '--table-row-1', '--table-row-2',
 ];
 
 const THEME_DEFAULTS = {
@@ -1126,6 +1146,8 @@ const THEME_DEFAULTS = {
   '--orange-deep':  '#6b3020',
   '--border':       '#b8613a',
   '--border-dim':   '#5a3a28',
+  '--table-row-1':  '#090603',
+  '--table-row-2':  '#0f0b07',
 };
 
 function _apiBase() {

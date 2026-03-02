@@ -23,6 +23,9 @@
   /* card/input bg for settings */
   --input-bg:     #2e2e2e;
   --input-border: #555;
+  /* alternating table row colors */
+  --table-row-1:  #090603;
+  --table-row-2:  #0f0b07;
 }
 
 /* ── LIGHT MODE ────────────────────────────────────────── */
@@ -39,6 +42,8 @@
   --nav-hover-bg: #c8b09a;
   --input-bg:     #e8ddd0;
   --input-border: #b89070;
+  --table-row-1:  #ede3d8;
+  --table-row-2:  #f5ede4;
 }
 [data-theme="light"] body                     { color: var(--text); }
 [data-theme="light"] .nav-btn                 { color: var(--orange-dark); background: var(--bg-deep); border-color: var(--text-muted); }
@@ -1134,3 +1139,8 @@ body { padding-bottom: 220px; }
   transition: opacity 0.3s;
 }
 .sett-save-msg.show { opacity: 1; }
+
+/* ── ALTERNATING TABLE ROWS ───────────────────── */
+tbody tr:nth-child(odd)  td { background: var(--table-row-1); }
+tbody tr:nth-child(even) td { background: var(--table-row-2); }
+tbody tr:hover           td { background: var(--orange-deep) !important; }
