@@ -11,7 +11,7 @@
     try { var raw=localStorage.getItem("bcom-theme-vars"); if(raw){ var vars=JSON.parse(raw); Object.keys(vars).forEach(function(k){ document.documentElement.style.setProperty(k,vars[k]); }); } } catch(_) {}
   })();
 </script>
-<link rel="stylesheet" href="bcom.css?v=3" />
+<link rel="stylesheet" href="../assets/css/bcom.css?v=3" />
 <style>
   /* ── Hero summary row ─────────────────────────────────────────────── */
   .hero-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
@@ -78,18 +78,17 @@
 <nav class="bcom-nav">
   <span class="bcom-nav-brand">BCOM-C</span>
   <div class="bcom-nav-links">
-    <a href="pages/pipeline.html">PIPELINE</a>
-    <a href="pages/data-gen.html">DATAGEN</a>
-    <a href="pages/analytics.html">ANALYTICS</a>
-    <a href="pages/coordinator.html">COORDINATOR</a>
-    <a href="pages/datasets.html">DATASETS</a>
-    <a href="pages/evals.html">EVALS</a>
-    <a href="pages/models.html">MODELS</a>
-    <a href="pages/monitor.html">MONITOR</a>
-    <a href="pages/deploy.html">DEPLOY</a>
-    <a href="pages/resources.html">RESOURCES</a>
-    <a href="pages/reports.html">REPORTS</a>
-    <a href="pages/settings.html">⚙</a>
+    <a href="pipeline.html">PIPELINE</a>
+    <a href="data-gen.html">DATAGEN</a>
+    <a href="analytics.html">ANALYTICS</a>
+    <a href="coordinator.html">COORDINATOR</a>
+    <a href="datasets.html">DATASETS</a>
+    <a href="evals.html">EVALS</a>
+    <a href="models.html">MODELS</a>
+    <a href="deploy.html">DEPLOY</a>
+    <a href="resources.html">RESOURCES</a>
+    <a href="reports.html">REPORTS</a>
+    <a href="settings.html">⚙</a>
   </div>
 </nav>
 
@@ -136,62 +135,57 @@
 
   <!-- ── Page navigation grid ─────────────────────────────────────────── -->
   <div class="page-grid">
-    <a class="page-card" href="pages/pipeline.html">
+    <a class="page-card" href="pipeline.html">
       <div class="page-card-icon">⚙</div>
       <div class="page-card-name">PIPELINE</div>
       <div class="page-card-desc">Closed-loop training with real SSE + Chart.js loss curve</div>
     </a>
-    <a class="page-card" href="pages/data-gen.html">
+    <a class="page-card" href="data-gen.html">
       <div class="page-card-icon">⚡</div>
       <div class="page-card-name">DATAGEN</div>
       <div class="page-card-desc">Live SSE worker stream, batch dispatch, run history feed</div>
     </a>
-    <a class="page-card" href="pages/analytics.html">
+    <a class="page-card" href="analytics.html">
       <div class="page-card-icon">📊</div>
       <div class="page-card-name">ANALYTICS</div>
       <div class="page-card-desc">5× Chart.js charts — tok/s, run volume, agent distribution</div>
     </a>
-    <a class="page-card" href="pages/coordinator.html">
+    <a class="page-card" href="coordinator.html">
       <div class="page-card-icon">🔀</div>
       <div class="page-card-name">COORDINATOR</div>
       <div class="page-card-desc">Multi-node job dispatch, node health, active/queued runs</div>
     </a>
-    <a class="page-card" href="pages/datasets.html">
+    <a class="page-card" href="datasets.html">
       <div class="page-card-icon">🗄</div>
       <div class="page-card-name">DATASETS</div>
       <div class="page-card-desc">Searchable registry, provenance chain, slide-out detail</div>
     </a>
-    <a class="page-card" href="pages/evals.html">
+    <a class="page-card" href="evals.html">
       <div class="page-card-icon">✔</div>
       <div class="page-card-name">EVALS</div>
       <div class="page-card-desc">Run evals, compare results, suite history, test breakdown</div>
     </a>
-    <a class="page-card" href="pages/models.html">
+    <a class="page-card" href="models.html">
       <div class="page-card-icon">🤖</div>
       <div class="page-card-name">MODELS</div>
       <div class="page-card-desc">Leaderboard, registry, pull models, lineage chain</div>
     </a>
-    <a class="page-card" href="pages/monitor.html">
-      <div class="page-card-icon">📡</div>
-      <div class="page-card-name">MONITOR</div>
-      <div class="page-card-desc">CPU/RAM/GPU/VRAM bars, storage mounts, services table</div>
-    </a>
-    <a class="page-card" href="pages/deploy.html">
+    <a class="page-card" href="deploy.html">
       <div class="page-card-icon">🚀</div>
       <div class="page-card-name">DEPLOY</div>
       <div class="page-card-desc">Active deploys, history, rolling/blue-green/canary</div>
     </a>
-    <a class="page-card" href="pages/resources.html">
+    <a class="page-card" href="resources.html">
       <div class="page-card-icon">📦</div>
       <div class="page-card-name">RESOURCES</div>
-      <div class="page-card-desc">Containers, services, model registry, storage bars</div>
+      <div class="page-card-desc">Node health, API metrics, containers, services, model registry, storage</div>
     </a>
-    <a class="page-card" href="pages/reports.html">
+    <a class="page-card" href="reports.html">
       <div class="page-card-icon">📋</div>
       <div class="page-card-name">REPORTS</div>
       <div class="page-card-desc">8 report endpoints — heatmaps, timelines, leaderboard</div>
     </a>
-    <a class="page-card" href="pages/datagen-run.html" style="opacity:.6">
+    <a class="page-card" href="datagen-run.html" style="opacity:.6">
       <div class="page-card-icon">🔍</div>
       <div class="page-card-name">RUN DETAIL</div>
       <div class="page-card-desc">Full run monitoring with live SSE event chain</div>
@@ -270,11 +264,11 @@
             </div>
             <div class="gauge-wrap">
               <div class="gauge">
-                <svg viewBox="0 0 140 140"><circle class="gauge-track" cx="70" cy="70" r="50"/><circle class="gauge-fill" id="gf-linux-ram" cx="70" cy="70" r="50"/></svg>
-                <div class="gauge-needle" id="gn-linux-ram"></div><div class="gauge-center"></div>
+                <svg viewBox="0 0 140 140"><circle class="gauge-track" cx="70" cy="70" r="50"/><circle class="gauge-fill" id="gf-linux-gpu" cx="70" cy="70" r="50"/></svg>
+                <div class="gauge-needle" id="gn-linux-gpu"></div><div class="gauge-center"></div>
               </div>
-              <div class="gauge-value" id="gv-linux-ram">--%</div>
-              <div class="gauge-label">RAM USED</div>
+              <div class="gauge-value" id="gv-linux-gpu">--%</div>
+              <div class="gauge-label">GPU LOAD</div>
             </div>
           </div>
           <div class="metrics">
@@ -300,7 +294,7 @@
     <div class="info-card">
       <div class="info-card-hdr card-hdr-row">
         <span>Recent Runs</span>
-        <a href="pages/data-gen.html">VIEW ALL ↗</a>
+        <a href="data-gen.html">VIEW ALL ↗</a>
       </div>
       <div style="overflow-x:auto">
         <table class="idx-table">
@@ -314,7 +308,7 @@
     <div class="info-card">
       <div class="info-card-hdr card-hdr-row">
         <span>Recent Evals</span>
-        <a href="pages/evals.html">VIEW ALL ↗</a>
+        <a href="evals.html">VIEW ALL ↗</a>
       </div>
       <div style="overflow-x:auto">
         <table class="idx-table">
@@ -328,7 +322,7 @@
     <div class="info-card">
       <div class="info-card-hdr card-hdr-row">
         <span>Loaded Models</span>
-        <a href="pages/models.html">VIEW ALL ↗</a>
+        <a href="models.html">VIEW ALL ↗</a>
       </div>
       <div id="models-feed">
         <div style="color:#2a2a2a;text-align:center;padding:20px;font-size:11px;letter-spacing:2px">LOADING…</div>
@@ -350,7 +344,7 @@
     <div class="info-card">
       <div class="info-card-hdr card-hdr-row">
         <span>Quick — Generate Data</span>
-        <a href="pages/coordinator.html">COORDINATOR ↗</a>
+        <a href="coordinator.html">COORDINATOR ↗</a>
       </div>
       <div class="form-body">
         <div class="form-row-2" style="margin-bottom:10px">
@@ -382,7 +376,7 @@
     <div class="info-card">
       <div class="info-card-hdr card-hdr-row">
         <span>Quick — Launch Pipeline</span>
-        <a href="pages/pipeline.html">PIPELINE ↗</a>
+        <a href="pipeline.html">PIPELINE ↗</a>
       </div>
       <div class="form-body">
         <div class="form-row-3" style="margin-bottom:10px">
@@ -425,7 +419,7 @@
 
 </div><!-- /main -->
 
-<script src="bcom.js?v=5"></script>
+<script src="../assets/js/bcom.js?v=5"></script>
 <script>
 window.BCOM = window.BCOM || {};
 BCOM.apiBase = '';
