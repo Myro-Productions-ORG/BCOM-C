@@ -1,4 +1,4 @@
-# ADR-006: SSE Live Generation Stream + Feed via BobSpark-APIs Run Endpoints
+# ADR-008: SSE Live Generation Stream + Feed via BobSpark-APIs Run Endpoints
 
 **Status:** Accepted
 **Date:** 2026-03-01
