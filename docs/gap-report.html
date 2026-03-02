@@ -76,7 +76,7 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
 <body>
 
 <h1>BCOM-C ← → SPARK MISSION CONTROL</h1>
-<div class="subtitle">FEATURE GAP ANALYSIS &nbsp;·&nbsp; Generated 2026-03-01 &nbsp;·&nbsp; <span style="color:var(--green)">Updated 2026-03-01 (session 2 — pages audit + progress bar)</span></div>
+<div class="subtitle">FEATURE GAP ANALYSIS &nbsp;·&nbsp; Generated 2026-03-01 &nbsp;·&nbsp; <span style="color:var(--green)">Updated 2026-03-01 (session 3 — first fine-tune completed, donut-irs990 published)</span></div>
 <div class="ts">Ross's dashboard @ 192.168.3.30:9010 &nbsp;|&nbsp; BCOM-C @ 10.0.0.223 (Mac Mini)</div>
 
 <h2>Executive Summary</h2>
@@ -485,6 +485,11 @@ footer{margin-top:60px;font-size:10px;color:var(--fg-dim);text-align:center;padd
     <tr><td>Orchestrator with agent step log (SSE)</td><td>orchestrator.html</td><td>Ross doesn't have an orchestrator concept — pipeline steps are pre-defined. BCOM's orchestrator shows active agents, pending queue, step log.</td></tr>
     <tr><td>VLLM / LLM restart controls</td><td>All pages (header buttons)</td><td>RESTART VLLM / RESTART LLM buttons — not present in Ross</td></tr>
     <tr><td>Linux Desktop node integration</td><td>resources.html</td><td>BCOM fetches from 10.0.0.10:11434 for Linux Desktop models. Ross only tracks its own Spark cluster.</td></tr>
+    <tr style="background:rgba(0,204,102,.04);border-left:2px solid var(--green)">
+      <td><strong style="color:var(--green)">First Fine-Tune Completed — donut-irs990</strong><br><span style="font-size:11px;color:var(--fg-dim)">Milestone: 2026-03-01. First ever model fine-tuned on this pipeline. Published at <a href="https://huggingface.co/MyroProductoCodo/donut-irs990" style="color:var(--cyan)">huggingface.co/MyroProductoCodo/donut-irs990</a>.<br><br>Known issue for pipeline Claude to fix: several field tokens (f1_20b, f1_60b, f1_16b and others) were not properly registered in the tokenizer vocabulary before training. They decode as &lt;unk&gt; in the output, which breaks token2json structured parsing. The vision encoder is reading the right content. Fix is to audit and correct field token registration in train_donut.py and retrain.</span></td>
+      <td>pipeline (fine-tune)</td>
+      <td>3 epochs, 36,000 steps, 17 hours on DGX Spark GB10. Model: naver-clova-ix/donut-base. Dataset: irs-990-synthetic (1,075 fields). Output: 780MB model.safetensors. Ross does not have a comparable document OCR fine-tune in his pipeline.</td>
+    </tr>
   </tbody>
 </table>
 
