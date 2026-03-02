@@ -538,38 +538,6 @@
   <span id="footer-status">LANGGRAPH READY</span>
 </div>
 
-<!-- TERMINAL DOCK -->
-<div class="terminal-dock" id="terminal-dock">
-  <div class="terminal-bar">
-    <div class="terminal-tabs">
-      <div class="terminal-tab active" data-term="orch"    onclick="switchTerm('orch')">ORCHESTRATOR</div>
-      <div class="terminal-tab"        data-term="agent"   onclick="switchTerm('agent')">AGENT LOG</div>
-      <div class="terminal-tab"        data-term="history" onclick="switchTerm('history')">RUN HISTORY</div>
-      <div class="terminal-tab" data-term="shell">SHELL</div>
-    </div>
-    <div class="terminal-controls">
-      <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
-    </div>
-  </div>
-  <div class="terminal-body" id="terminal-body">
-    <div class="terminal-output" id="term-out-orch">
-      <div class="term-line sys">[bob-ai] LangGraph multi-agent system initialized</div>
-      <div class="term-line dim">[bob-ai] awaiting dispatch — select model and describe your task</div>
-    </div>
-    <div class="terminal-output" id="term-out-agent" style="display:none">
-      <div class="term-line sys">[agent-log] sub-agent monitor active</div>
-    </div>
-    <div class="terminal-output" id="term-out-history" style="display:none">
-      <div id="run-history-body"><div class="term-line dim">[run-history] loading...</div></div>
-    </div>
-    <div id="xterm-container" style="display:none;flex:1;min-height:0;width:100%;background:#080808;"></div>
-    <div class="terminal-input-row">
-      <span class="term-prompt" id="term-prompt">orch $</span>
-      <input class="terminal-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type command..." />
-    </div>
-  </div>
-</div>
-
 <script src="../assets/js/bcom.js?v=5"></script>
 <script>
 /* ══════════════════════════════════════════════════════════
@@ -673,7 +641,6 @@ function spawnAgent(agentId) {
   // Show agents section label
   document.getElementById('agents-section-label').style.display = '';
   addAgentCard(agentId, def, 'busy');
-  agentLog(`[spawn] ${def.label} spawned`, 'sys');
 }
 
 function despawnAgent(agentId) {
@@ -957,9 +924,7 @@ function setView(v) {
   currentView = v;
   document.getElementById('btn-view-tree').classList.toggle('active-ctrl', v === 'tree');
   document.getElementById('btn-view-flow').classList.toggle('active-ctrl', v === 'flow');
-  orchLog(`View: ${v.toUpperCase()}`, 'dim');
 }
-function resetCanvas() { orchLog('Canvas reset', 'dim'); }
 
 // ── Map SSE agent names → AGENT_DEFS keys ────────────────
 const AGENT_NODE_MAP = {
@@ -1066,7 +1031,6 @@ async function deployTask() {
     _attachedFiles.forEach(f => { fullTask += `\n--- ${f.name} ---\n${f.content}\n`; });
   }
 
-  orchLog(`DISPATCH: "${name}" [${(orchModel ? MODEL_SHORT[orchModel] : 'LOCAL')}] ${_attachedFiles.length > 0 ? `+${_attachedFiles.length}file(s)` : ''}`, 'sys');
 
   document.getElementById('task-name-input').value = '';
   document.getElementById('task-prompt-input').value = '';
@@ -1088,7 +1052,6 @@ async function deployTask() {
     const data = await res.json();
     runId = data.run_id;
   } catch (err) {
-    orchLog(`ERROR dispatching: ${err.message}`, 'err');
     return;
   }
 
@@ -1104,7 +1067,6 @@ async function deployTask() {
   tasks.push(task);
   renderTaskTable();
   updateTaskCount();
-  orchLog(`RUN ${runId.slice(0,8)} — streaming live events`, 'sys');
   _streamRun(runId, task);
 }
 
@@ -1128,7 +1090,6 @@ function _streamRun(runId, taskRef) {
         renderTaskTable();
       }
       BOB.tasks = Math.max(0, BOB.tasks - 1);
-      orchLog(`RUN ${runId.slice(0,8)} → ${fs.toUpperCase()}`, fs === 'completed' ? 'sys' : 'err');
       setTimeout(despawnAll, 1200);
       refreshRunHistory(); refreshAnalytics();
       return;
@@ -1138,17 +1099,13 @@ function _streamRun(runId, taskRef) {
       const agent   = data.active_agent || node;
       const snippet = data.snippet  ? ` — ${data.snippet.slice(0,80)}`   : '';
       const tokStr  = data.tokens_out != null ? ` [${data.tokens_in||0}→${data.tokens_out}tok]` : '';
-      orchLog(`[${agent.toUpperCase()}]${tokStr}${snippet}`, agent === 'supervisor' ? 'sys' : '');
       if (taskRef && data.iteration != null) {
         taskRef.progress = Math.min(95, Math.round((data.iteration / (data.max_iter || 6)) * 100));
         taskRef.status = 'running'; renderTaskTable();
       }
       _setActiveNode(agent);
-      agentLog(`[${node}] iter:${data.iteration||'?'} next:${data.next_node||'?'}${tokStr}`, '');
     } else if (etype === 'error') {
-      orchLog(`ERROR: ${data.message || '?'}`, 'err');
     } else if (etype === 'status') {
-      orchLog(`STATUS: ${data.message || etype}`, 'dim');
     }
   };
 
@@ -1188,25 +1145,17 @@ function updateTaskCount() {
 function clearCompletedTasks() {
   tasks = tasks.filter(t => t.status === 'running');
   renderTaskTable(); updateTaskCount();
-  orchLog('Completed tasks cleared', 'dim');
 }
 
 // ── View run detail ──────────────────────────────────────
 async function viewRun(runId) {
-  switchTerm('orch');
-  orchLog(`Fetching run ${runId.slice(0,8)}…`, 'dim');
   try {
     const res = await fetch(`${API}/api/runs/${runId}`);
     if (!res.ok) throw new Error('not found');
     const { run, events } = await res.json();
-    orchLog(`── RUN ${runId.slice(0,8)} [${run.status.toUpperCase()}] ──`, 'sys');
-    orchLog(`   model:${run.model||'?'} tok:${run.tokens_in||0}in/${run.tokens_out||0}out dur:${run.duration_s||0}s`, 'dim');
     events.forEach(ev => {
       const d = ev.data || {};
-      if (ev.event_type === 'node_update') orchLog(`  [${ev.node||'?'}] ${d.snippet||''} tok:${d.tokens_out||0}`, '');
-      else orchLog(`  [${ev.event_type}] ${d.message||JSON.stringify(d).slice(0,80)}`, 'dim');
     });
-  } catch (err) { orchLog(`ERROR: ${err.message}`, 'err'); }
 }
 
 // ── Analytics ────────────────────────────────────────────
@@ -1242,7 +1191,6 @@ async function refreshRunHistory() {
     if (!res.ok) throw new Error('fetch failed');
     const { runs } = await res.json();
     if (!runs.length) {
-      body.innerHTML = '<div class="term-line dim">[run-history] no runs yet</div>';
       return;
     }
     const sc = s => ({ completed:'#2ecc71', failed:'#e74c3c', running:'var(--orange)', queued:'#7fb3cc', cancelled:'#888' }[s] || '#555');
@@ -1250,7 +1198,6 @@ async function refreshRunHistory() {
       const ts  = r.created_at ? new Date(r.created_at).toLocaleTimeString() : '?';
       const dur = r.duration_s != null ? `${r.duration_s}s` : '--';
       const tok = (r.tokens_in + r.tokens_out) > 0 ? ` ${_fmtNum(r.tokens_in+r.tokens_out)}tok` : '';
-      return `<div class="term-line" style="cursor:pointer;font-size:9px" onclick="viewRun('${r.id}')">
         <span style="color:#444">[${ts}]</span>
         <span style="color:${sc(r.status)};margin:0 4px">${r.status.toUpperCase()}</span>
         <span style="color:#888">${r.id.slice(0,8)}</span>
@@ -1259,46 +1206,28 @@ async function refreshRunHistory() {
       </div>`;
     }).join('');
   } catch (err) {
-    body.innerHTML = `<div class="term-line err">[run-history] ${err.message}</div>`;
   }
 }
 
-// ── Terminal ─────────────────────────────────────────────
-let _termNode = 'orch';
-function switchTerm(node) {
-  _termNode = node;
-  document.querySelectorAll('.terminal-tab').forEach(t =>
     t.classList.toggle('active', t.dataset.term === node));
   ['orch','agent','history'].forEach(n => {
-    const el = document.getElementById('term-out-' + n);
     if (el) el.style.display = n === node ? 'block' : 'none';
   });
-  document.getElementById('term-prompt').textContent =
     { orch:'orch $', agent:'agent $', history:'hist $' }[node] || 'orch $';
-  document.getElementById('terminal-input').focus();
   if (node === 'history') refreshRunHistory();
 }
 
-function orchLog(msg, cls) {
-  const out = document.getElementById('term-out-orch'); if (!out) return;
   const d = document.createElement('div');
-  d.className = 'term-line' + (cls ? ' '+cls : '');
   const t = new Date().toTimeString().split(' ')[0];
   d.textContent = `[${t}] ${msg}`;
   out.appendChild(d); out.scrollTop = out.scrollHeight;
 }
-function agentLog(msg, cls) {
-  const out = document.getElementById('term-out-agent'); if (!out) return;
   const d = document.createElement('div');
-  d.className = 'term-line' + (cls ? ' '+cls : '');
   const t = new Date().toTimeString().split(' ')[0];
   d.textContent = `[${t}] ${msg}`;
   out.appendChild(d); out.scrollTop = out.scrollHeight;
 }
 
-// terminal input wired by bcom-terminal.js
-
-// minimize wired by bcom-terminal.js
 
 // ── Clock ─────────────────────────────────────────────────
 function padZ(n) { return n < 10 ? '0'+n : n; }
@@ -1338,7 +1267,6 @@ refreshAnalytics();
 pollOrchMetrics();
 setInterval(pollOrchMetrics, 10000);
 setInterval(refreshAnalytics, 15000);
-orchLog('BOB AI ready — select model, enter prompt, dispatch task', 'sys');
 
 
   // ═══════════════════════════════════════════════════════════════════
@@ -1493,6 +1421,5 @@ orchLog('BOB AI ready — select model, enter prompt, dispatch task', 'sys');
   startQueuePolling();
 
 </script>
-  <script src="../assets/js/bcom-terminal.js?v=3"></script>
 </body>
 </html>

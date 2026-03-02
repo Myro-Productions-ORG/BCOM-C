@@ -74,11 +74,6 @@
 [data-theme="light"] .mdl-backend,
 [data-theme="light"] .mdl-size,
 [data-theme="light"] .mcp-status              { color: var(--text-muted) !important; }
-/* keep terminal dark in light mode — it's a terminal */
-[data-theme="light"] .terminal-dock           { background: #080808; }
-[data-theme="light"] .terminal-bar            { background: #111; }
-[data-theme="light"] .terminal-output         { background: #080808; }
-[data-theme="light"] .terminal-input-row      { background: #080808; }
 /* settings page specific */
 [data-theme="light"] .sett-section            { background: var(--bg-panel); border-color: var(--orange-dark); }
 [data-theme="light"] .sett-row                { border-color: var(--border-dim); color: var(--text); }
@@ -748,125 +743,7 @@ body {
   letter-spacing: 2px;
 }
 
-/* ── TERMINAL DOCK ────────────────────────────────── */
-.terminal-dock {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  z-index: 200;
-  background: #080808;
-  border-top: 2px solid var(--orange-dark);
-  display: flex;
-  flex-direction: column;
-  height: 220px;
-  transition: height 0.15s ease;
-}
-.terminal-dock.minimized { height: 34px; }
 
-.terminal-bar {
-  background: #111;
-  border-bottom: 1px solid var(--border-dim);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 10px;
-  height: 34px;
-  flex-shrink: 0;
-}
-
-.terminal-tabs { display: flex; gap: 2px; height: 100%; align-items: center; }
-.terminal-tab {
-  padding: 4px 14px;
-  font-size: 9px;
-  letter-spacing: 1.5px;
-  color: #444;
-  cursor: pointer;
-  border: 1px solid transparent;
-  border-bottom: none;
-  background: transparent;
-  font-family: 'Courier New', monospace;
-  text-transform: uppercase;
-}
-.terminal-tab.active  { color: var(--orange); border-color: var(--border-dim); background: #080808; }
-.terminal-tab:hover:not(.active) { color: #888; }
-
-.term-node-tag {
-  font-size: 8px;
-  color: #333;
-  letter-spacing: 1px;
-  margin-left: 4px;
-}
-
-.terminal-controls { display: flex; gap: 4px; }
-.term-ctrl {
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
-  color: #666;
-  font-family: 'Courier New', monospace;
-  font-size: 10px;
-  padding: 1px 8px;
-  cursor: pointer;
-  line-height: 1.4;
-}
-.term-ctrl:hover { color: var(--orange); border-color: var(--orange-dark); }
-
-.terminal-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-.terminal-output {
-  flex: 1;
-  padding: 6px 12px;
-  overflow-y: auto;
-  font-family: 'Courier New', monospace;
-  font-size: 11px;
-  color: #00cc44;
-  line-height: 1.5;
-  background: #080808;
-}
-.terminal-output::-webkit-scrollbar       { width: 4px; }
-.terminal-output::-webkit-scrollbar-track { background: #080808; }
-.terminal-output::-webkit-scrollbar-thumb { background: #2a1a0a; }
-
-.term-line     { white-space: pre-wrap; word-break: break-all; }
-.term-line.dim { color: #2a3a2a; }
-.term-line.err { color: #e74c3c; }
-.term-line.sys { color: var(--orange-dark); }
-
-.terminal-input-row {
-  display: flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-top: 1px solid #161616;
-  gap: 6px;
-  background: #080808;
-  flex-shrink: 0;
-}
-.term-prompt { color: var(--orange); font-size: 11px; flex-shrink: 0; font-family: 'Courier New', monospace; }
-.terminal-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: #00cc44;
-  font-family: 'Courier New', monospace;
-  font-size: 11px;
-  outline: none;
-  caret-color: var(--orange);
-}
-
-
-/* ── XTERM CONTAINER (real shell terminal) ─────────── */
-#xterm-container {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  background: #080808;
-  overflow: hidden;
-}
-#xterm-container .xterm { height: 100%; }
-#xterm-container .xterm-viewport { overflow-y: scroll; }
-#xterm-container .xterm-viewport::-webkit-scrollbar { width: 4px; }
-#xterm-container .xterm-viewport::-webkit-scrollbar-thumb { background: #2a1a0a; }
-
-/* ── BODY PADDING for terminal dock ───────────────── */
-body { padding-bottom: 220px; }
 
 /* ══════════════════════════════════════════════════════
    READABILITY PASS — white text, font +2

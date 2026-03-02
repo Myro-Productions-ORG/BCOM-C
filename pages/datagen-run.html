@@ -537,27 +537,6 @@
   <span id="footer-status">RUN DETAIL</span>
 </div>
 
-<!-- TERMINAL DOCK -->
-<div class="terminal-dock" id="terminal-dock">
-  <div class="terminal-bar">
-    <div class="terminal-tabs">
-      <div class="terminal-tab active" data-term="spark" onclick="switchTerm('spark')">SPARK-BOB</div>
-    </div>
-    <div class="terminal-controls">
-      <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
-    </div>
-  </div>
-  <div class="terminal-body" id="terminal-body">
-    <div class="terminal-output" id="term-out-spark">
-      <div class="term-line sys">[bcom-c] run-detail terminal ready</div>
-    </div>
-    <div class="terminal-input-row">
-      <span class="term-prompt" id="term-prompt">spark-bob $</span>
-      <input class="terminal-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type command..." />
-    </div>
-  </div>
-</div>
-
 <script src="../assets/js/bcom.js?v=5"></script>
 <script>
   BCOM.apiBase = '';
@@ -1010,15 +989,6 @@
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ── Terminal ───────────────────────────────────────────
-  var _termNode = 'spark';
-  function switchTerm(node) {
-    _termNode = node;
-    document.querySelectorAll('.terminal-tab').forEach(function(t){ t.classList.toggle('active', t.dataset.term===node); });
-    document.getElementById('term-prompt').textContent = 'spark-bob $';
-    document.getElementById('terminal-input').focus();
-  }
 </script>
-<script src="../assets/js/bcom-terminal.js?v=3"></script>
 </body>
 </html>

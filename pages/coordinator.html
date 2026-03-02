@@ -521,31 +521,6 @@
   <span>COORDINATOR</span>
 </div>
 
-<!-- TERMINAL DOCK -->
-<div class="terminal-dock" id="terminal-dock">
-  <div class="terminal-bar">
-    <div class="terminal-tabs">
-      <div class="terminal-tab active" data-term="spark" onclick="switchTerm('spark')">SPARK-BOB</div>
-      <div class="terminal-tab" data-term="linux" onclick="switchTerm('linux')">LINUX-DSKTP</div>
-    </div>
-    <div class="terminal-controls">
-      <button class="term-ctrl" id="term-minimize" title="Minimize">_</button>
-    </div>
-  </div>
-  <div class="terminal-body" id="terminal-body">
-    <div class="terminal-output" id="term-out-spark">
-      <div class="term-line sys">[bcom-c] coordinator terminal ready</div>
-    </div>
-    <div class="terminal-output" id="term-out-linux" style="display:none">
-      <div class="term-line sys">[bcom-c] coordinator terminal ready</div>
-    </div>
-    <div class="terminal-input-row">
-      <span class="term-prompt" id="term-prompt">spark-bob $</span>
-      <input class="terminal-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type command..." />
-    </div>
-  </div>
-</div>
-
 <script src="../assets/js/bcom.js?v=5"></script>
 <script>
   BCOM.apiBase      = '';
@@ -882,7 +857,6 @@
         '/api/coordinator/jobs/' + encodeURIComponent(jobId) +
         '/nodes/' + encodeURIComponent(nodeName) + '/pause',
         { method: 'PUT' }
-      );
       if (res.ok) {
         logLine('CMD: PAUSE NODE ' + nodeName.toUpperCase(), 'warn');
         setTimeout(pollActiveJob, 400);
@@ -898,7 +872,6 @@
         '/api/coordinator/jobs/' + encodeURIComponent(jobId) +
         '/nodes/' + encodeURIComponent(nodeName) + '/resume',
         { method: 'PUT' }
-      );
       if (res.ok) {
         logLine('CMD: RESUME NODE ' + nodeName.toUpperCase(), 'info');
         setTimeout(pollActiveJob, 400);
@@ -939,18 +912,7 @@
   function escHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
-
-  // ── Terminal ────────────────────────────────────────────
-  var _termNode = 'spark';
-  function switchTerm(node) {
-    _termNode = node;
-    document.querySelectorAll('.terminal-tab').forEach(function(t){ t.classList.toggle('active', t.dataset.term===node); });
-    ['spark','linux'].forEach(function(n){ var el=document.getElementById('term-out-'+n); if(el) el.style.display=n===node?'block':'none'; });
-    document.getElementById('term-prompt').textContent = (node==='spark'?'spark-bob':'linux-dsktp')+' $';
-    document.getElementById('terminal-input').focus();
   }
-  switchTerm('spark');
 </script>
-<script src="../assets/js/bcom-terminal.js?v=3"></script>
 </body>
 </html>
