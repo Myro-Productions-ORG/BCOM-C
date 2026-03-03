@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eval Center — BCOM-C</title>
-<link rel="stylesheet" href="../assets/css/bcom.css?v=3">
+<link rel="stylesheet" href="../bcom.css?v=3">
 <style>
 .ev-hero{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
 .ev-chip{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 20px;min-width:140px}
@@ -78,19 +78,22 @@
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="topbar-title">BCOM-C</div>
-  <div class="topbar-right">
-    <a class="nav-btn" href="dashboard.html">DASHBOARD</a>
-    <a class="nav-btn" href="data-gen.html">DATA GEN</a>
-    <a class="nav-btn" href="pipeline.html">PIPELINE</a>
-    <a class="nav-btn" href="resources.html">RESOURCES</a>
-    <a class="nav-btn" href="reports.html">REPORTS</a>
-    <a class="nav-btn" href="orchestrator.html">ORCHESTRATOR</a>
-    <a class="cog-btn" href="settings.html" title="Settings">⚙</a>
-    <div class="timestamp"><span id="clock">--:--:--</span>&nbsp;&nbsp;<span id="datestamp">----/--/--</span></div>
+<nav class="bcom-nav">
+  <a href="../index.html" class="bcom-nav-brand">BCOM-C</a>
+  <div class="bcom-nav-links">
+    <a href="pipeline.html">PIPELINE</a>
+    <a href="data-gen.html">DATAGEN</a>
+    <a href="analytics.html">ANALYTICS</a>
+    <a href="coordinator.html">COORDINATOR</a>
+    <a href="datasets.html">DATASETS</a>
+    <a href="evals.html" class="active">EVALS</a>
+    <a href="models.html">MODELS</a>
+    <a href="monitor.html">MONITOR</a>
+    <a href="deploy.html">DEPLOY</a>
+    <a href="reports.html">REPORTS</a>
+    <a href="resources.html">⚙</a>
   </div>
-</div>
+</nav>
 
 <div class="bcom-page">
   <div class="bcom-page-header">
@@ -187,7 +190,7 @@
   <div id="ev-panel-content"></div>
 </div>
 
-<script src="../assets/js/bcom.js?v=5"></script>
+<script src="../bcom.js?v=5"></script>
 <script>
 window.BCOM = window.BCOM || {};
 BCOM.apiBase = '';
