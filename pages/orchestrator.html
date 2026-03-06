@@ -1243,6 +1243,7 @@ async function viewRun(runId) {
     events.forEach(ev => {
       const d = ev.data || {};
     });
+  } catch (_) {}
 }
 
 // ── Analytics ────────────────────────────────────────────
@@ -1285,6 +1286,7 @@ async function refreshRunHistory() {
       const ts  = r.created_at ? new Date(r.created_at).toLocaleTimeString() : '?';
       const dur = r.duration_s != null ? `${r.duration_s}s` : '--';
       const tok = (r.tokens_in + r.tokens_out) > 0 ? ` ${_fmtNum(r.tokens_in+r.tokens_out)}tok` : '';
+      return `<div style="padding:3px 0;border-bottom:1px solid #2a2a2a;cursor:pointer" onclick="watchRun('${r.id}')">
         <span style="color:#444">[${ts}]</span>
         <span style="color:${sc(r.status)};margin:0 4px">${r.status.toUpperCase()}</span>
         <span style="color:#888">${r.id.slice(0,8)}</span>
@@ -1296,20 +1298,33 @@ async function refreshRunHistory() {
   }
 }
 
+// ── Terminal ─────────────────────────────────────────────
+let _termNode = 'orch';
+function switchTerm(node) {
+  _termNode = node;
+  document.querySelectorAll('.terminal-tab').forEach(t =>
     t.classList.toggle('active', t.dataset.term === node));
   ['orch','agent','history'].forEach(n => {
+    const el = document.getElementById('term-out-' + n);
     if (el) el.style.display = n === node ? 'block' : 'none';
   });
+  document.getElementById('term-prompt').textContent =
     { orch:'orch $', agent:'agent $', history:'hist $' }[node] || 'orch $';
   if (node === 'history') refreshRunHistory();
 }
 
+function orchLog(msg, cls) {
+  const out = document.getElementById('term-out-orch'); if (!out) return;
   const d = document.createElement('div');
+  d.className = 'term-line' + (cls ? ' '+cls : '');
   const t = new Date().toTimeString().split(' ')[0];
   d.textContent = `[${t}] ${msg}`;
   out.appendChild(d); out.scrollTop = out.scrollHeight;
 }
+function agentLog(msg, cls) {
+  const out = document.getElementById('term-out-agent'); if (!out) return;
   const d = document.createElement('div');
+  d.className = 'term-line' + (cls ? ' '+cls : '');
   const t = new Date().toTimeString().split(' ')[0];
   d.textContent = `[${t}] ${msg}`;
   out.appendChild(d); out.scrollTop = out.scrollHeight;
