@@ -69,6 +69,34 @@
 }
 .orch-label { font-size: 7px; color: #3a3a3a; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1px; }
 
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+.preset-btn {
+  background: #2a2a2a;
+  border: 1px solid #4a4a4a;
+  color: #aaa;
+  font-family: 'Courier New', monospace;
+  font-size: 7px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 5px 4px;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.3;
+  transition: border-color 0.15s, color 0.15s;
+}
+.preset-btn:hover { border-color: var(--orange); color: var(--orange); background: #333; }
+.preset-btn .preset-tag {
+  display: block;
+  font-size: 6px;
+  color: #666;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
 .orch-input {
   background: #3b3b3b; border: 1px solid var(--border-dim);
   color: var(--orange); font-family: 'Courier New', monospace;
@@ -381,7 +409,16 @@
     <div class="orch-panel-hdr">Deploy Task</div>
     <div class="orch-panel-body">
       <div class="deploy-sep">Task</div>
-      <div class="orch-label">Name</div>
+      <div class="orch-label">Quick Tests</div>
+      <div class="preset-grid">
+        <button class="preset-btn" onclick="loadPreset(0)"><span class="preset-tag">ROUTING</span>Multi-agent route</button>
+        <button class="preset-btn" onclick="loadPreset(1)"><span class="preset-tag">ITERATION</span>Self-correct loop</button>
+        <button class="preset-btn" onclick="loadPreset(2)"><span class="preset-tag">CODE+TEST</span>Code &amp; unit tests</button>
+        <button class="preset-btn" onclick="loadPreset(3)"><span class="preset-tag">CHAIN</span>Sequential deps</button>
+        <button class="preset-btn" onclick="loadPreset(4)"><span class="preset-tag">AMBIGUOUS</span>Clarify &amp; resolve</button>
+        <button class="preset-btn" onclick="loadPreset(5)"><span class="preset-tag">STRESS</span>Full class + docs</button>
+      </div>
+      <div class="orch-label" style="margin-top:4px;">Name</div>
       <input class="orch-input" id="task-name-input" type="text" placeholder="e.g. debug agent loop..." />
       <div class="orch-label">Prompt / Instructions</div>
       <textarea class="orch-textarea" id="task-prompt-input" placeholder="Describe what you want BOB AI and agents to do..."></textarea>
@@ -1009,6 +1046,51 @@ function renderAttachList() {
 function removeAttach(i) {
   _attachedFiles.splice(i, 1);
   renderAttachList();
+}
+
+// ── Quick Test Presets ────────────────────────────────────
+const PRESETS = [
+  {
+    name: 'Multi-Agent Routing Test',
+    prompt: 'Write a Python function that sorts a list of dicts by a given key, then write unit tests for it. Make sure the tests cover edge cases like empty lists and missing keys.',
+    type: 'code', agent: 'auto', model: 'claude-sonnet-4-6', priority: 'normal'
+  },
+  {
+    name: 'Self-Correction Loop Test',
+    prompt: 'Write a Python function that returns the square root of a string. If the result is invalid, fix it and explain what went wrong.',
+    type: 'debug', agent: 'auto', model: 'claude-sonnet-4-6', priority: 'normal'
+  },
+  {
+    name: 'Code + Unit Test Chain',
+    prompt: 'Write a Python class for a stack data structure with push, pop, peek, and is_empty methods. Then write pytest unit tests covering all methods including edge cases.',
+    type: 'code', agent: 'code', model: 'claude-sonnet-4-6', priority: 'normal'
+  },
+  {
+    name: 'Sequential Dependency Chain',
+    prompt: 'Write a Python REST API endpoint using FastAPI that returns a list of users. Then write a curl command to test it. Then explain what each part of the endpoint does line by line.',
+    type: 'pipeline', agent: 'auto', model: 'claude-sonnet-4-6', priority: 'high'
+  },
+  {
+    name: 'Ambiguous Routing Test',
+    prompt: 'Optimize the system.',
+    type: 'custom', agent: 'auto', model: 'claude-sonnet-4-6', priority: 'normal'
+  },
+  {
+    name: 'Full Class + Docs Stress Test',
+    prompt: 'Build a complete Python BankAccount class with deposit, withdraw, get_balance, and transaction_history methods including validation. Then write unit tests for all methods. Then write full docstrings and a README-style usage guide.',
+    type: 'code', agent: 'auto', model: 'claude-sonnet-4-6', priority: 'high'
+  },
+];
+
+function loadPreset(i) {
+  const p = PRESETS[i];
+  if (!p) return;
+  document.getElementById('task-name-input').value   = p.name;
+  document.getElementById('task-prompt-input').value = p.prompt;
+  document.getElementById('task-type-select').value  = p.type;
+  document.getElementById('task-agent-select').value = p.agent;
+  document.getElementById('task-model-select').value = p.model;
+  document.getElementById('task-priority-select').value = p.priority;
 }
 
 // ── Deploy Task ──────────────────────────────────────────
