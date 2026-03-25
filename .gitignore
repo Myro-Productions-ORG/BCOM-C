@@ -67,3 +67,7 @@ out/
 # ── Docker local overrides ────────────
 docker-compose.override.yml
 .worktrees
+
+# ── Audit screenshots ─────────────────
+audit-*.png
+.playwright-mcp/
