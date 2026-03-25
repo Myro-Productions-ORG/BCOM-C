@@ -351,16 +351,16 @@ async function pollGauges() {
     const [metricsRes, containersRes, modelsRes, deployRes, linuxRes] =
       await Promise.allSettled(fetches);
 
+    // ── Linux Desktop (soft — single response has all data) ───────────
+    let _linuxFull = null;
+    if (linuxRes && linuxRes.status === 'fulfilled' && linuxRes.value.ok) {
+      _linuxFull = await linuxRes.value.json();
+    }
+
     // ── Metrics (required) ────────────────────────────────────────────
     if (metricsRes.status === 'fulfilled' && metricsRes.value.ok) {
       const data = await metricsRes.value.json();
-
-      // ── Linux Desktop (soft — single response has all data) ─────────
-      let _linuxFull = null;
-      if (linuxRes && linuxRes.status === 'fulfilled' && linuxRes.value.ok) {
-        _linuxFull = await linuxRes.value.json();
-        if (_linuxFull.linux) data.linux = _linuxFull.linux;
-      }
+      if (_linuxFull && _linuxFull.linux) data.linux = _linuxFull.linux;
 
       if (!BCOM._connected) {
         logLine('Data source connected. Live telemetry active.', 'info');
