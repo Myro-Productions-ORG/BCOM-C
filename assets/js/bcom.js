@@ -9,7 +9,7 @@
    ──────────────────────────────────────────────────── */
 const BCOM = {
   apiBase:      '',       // '' = same-origin proxy; 'http://...' = explicit host
-  linuxBase:    'http://10.0.0.10:8090',  // Linux Desktop metrics daemon
+  linuxBase:    '/api/linux',  // Proxied via Caddy → http://10.0.0.10:8090
   pollInterval: 5000,     // ms between data refreshes
   _timer:       null,
   _connected:   false,
