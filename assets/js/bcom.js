@@ -344,25 +344,22 @@ async function pollGauges() {
       fetch(base + '/api/models/',       { cache: 'no-store' }),
       fetch(base + '/api/deploy/active', { cache: 'no-store' }),
     ];
-    // Linux Desktop — fetched directly from its own daemon
+    // Linux Desktop — single fetch from its daemon (includes all data)
     if (BCOM.linuxBase) {
-      fetches.push(fetch(BCOM.linuxBase + '/api/metrics',    { cache: 'no-store' }));
-      fetches.push(fetch(BCOM.linuxBase + '/api/models/',    { cache: 'no-store' }));
-      fetches.push(fetch(BCOM.linuxBase + '/api/processes/', { cache: 'no-store' }));
-      fetches.push(fetch(BCOM.linuxBase + '/api/ollama/ps',  { cache: 'no-store' }));
+      fetches.push(fetch(BCOM.linuxBase + '/api/metrics', { cache: 'no-store' }));
     }
-    const [metricsRes, containersRes, modelsRes, deployRes,
-           linuxRes, linuxModelsRes, linuxProcsRes, linuxOllamaPs] =
+    const [metricsRes, containersRes, modelsRes, deployRes, linuxRes] =
       await Promise.allSettled(fetches);
 
     // ── Metrics (required) ────────────────────────────────────────────
     if (metricsRes.status === 'fulfilled' && metricsRes.value.ok) {
       const data = await metricsRes.value.json();
 
-      // ── Linux metrics (soft — merge if available) ──────────────────
+      // ── Linux Desktop (soft — single response has all data) ─────────
+      let _linuxFull = null;
       if (linuxRes && linuxRes.status === 'fulfilled' && linuxRes.value.ok) {
-        const linuxData = await linuxRes.value.json();
-        if (linuxData.linux) data.linux = linuxData.linux;
+        _linuxFull = await linuxRes.value.json();
+        if (_linuxFull.linux) data.linux = _linuxFull.linux;
       }
 
       if (!BCOM._connected) {
@@ -394,22 +391,24 @@ async function pollGauges() {
       setText('active-backend-spark', dep.backend     ?? '--');
     }
 
-    // ── Linux models (soft) — Ollama models ────────────────────────────
-    if (linuxModelsRes && linuxModelsRes.status === 'fulfilled' && linuxModelsRes.value.ok) {
-      const lm = await linuxModelsRes.value.json();
-      applyModels(lm.models ?? [], 'mdl-linux', 'dot-mdl-linux');
-    }
+    // ── Linux models, processes, Ollama running (from single response) ─
+    if (_linuxFull) {
+      // Ollama installed models → Models card
+      const lmModels = (_linuxFull.ollama_models ?? []).map(m => ({
+        name: m.name,
+        details: {
+          parameter_size: m.parameter_size,
+          quantization_level: m.quantization,
+        },
+        size_gb: m.size_gb,
+      }));
+      applyModels(lmModels, 'mdl-linux', 'dot-mdl-linux');
 
-    // ── Linux processes (soft) — notable services ──────────────────────
-    if (linuxProcsRes && linuxProcsRes.status === 'fulfilled' && linuxProcsRes.value.ok) {
-      const lp = await linuxProcsRes.value.json();
-      applyProcesses(lp.processes ?? [], 'proc-linux', 'dot-proc-linux');
-    }
+      // Tracked processes → Processes card
+      applyProcesses(_linuxFull.processes ?? [], 'proc-linux', 'dot-proc-linux');
 
-    // ── Linux Ollama running (soft) — loaded models in VRAM ────────────
-    if (linuxOllamaPs && linuxOllamaPs.status === 'fulfilled' && linuxOllamaPs.value.ok) {
-      const lo = await linuxOllamaPs.value.json();
-      applyOllamaRunning(lo.models ?? [], 'ollama-running-linux', 'dot-ollama-linux');
+      // Ollama running models → Ollama Active card
+      applyOllamaRunning(_linuxFull.ollama_running ?? [], 'ollama-running-linux', 'dot-ollama-linux');
     }
 
   } catch (err) {
