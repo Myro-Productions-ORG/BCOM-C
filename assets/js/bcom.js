@@ -263,6 +263,72 @@ async function ctrlContainer(id, action) {
   }
 }
 
+/* ── HTML-escape helper (prevents XSS from API data) ────────────────── */
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+/* ── Process renderer ────────────────────────────────────────────────────
+   processes: array from /api/processes/  [{name, pid, mem_mb, uptime, status}]
+   nodeId:    DOM id of process list container
+   dotId:     DOM id of header status dot
+   ─────────────────────────────────────────────────────────────────────── */
+function applyProcesses(processes, nodeId, dotId) {
+  const el  = document.getElementById(nodeId);
+  const dot = document.getElementById(dotId);
+  if (!el) return;
+
+  if (!processes || processes.length === 0) {
+    el.innerHTML = '<div class="await-row">NO TRACKED PROCESSES</div>';
+    if (dot) dot.className = 'status-dot off';
+    return;
+  }
+
+  if (dot) dot.className = 'status-dot';
+
+  el.innerHTML = processes.map(p => {
+    const mem = p.mem_mb >= 1000 ? `${(p.mem_mb / 1000).toFixed(1)} GB` : `${p.mem_mb} MB`;
+    return `<div class="proc-row">
+      <div class="proc-dot"></div>
+      <span class="proc-name">${esc(p.name)}</span>
+      <span class="proc-mem">${esc(mem)}</span>
+      <span class="proc-uptime">${esc(p.uptime)}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── Ollama running model renderer ──────────────────────────────────────
+   models: array from /api/ollama/ps  [{name, vram_gb, context_length, ...}]
+   nodeId: DOM id of list container
+   dotId:  DOM id of header status dot
+   ─────────────────────────────────────────────────────────────────────── */
+function applyOllamaRunning(models, nodeId, dotId) {
+  const el  = document.getElementById(nodeId);
+  const dot = document.getElementById(dotId);
+  if (!el) return;
+
+  if (!models || models.length === 0) {
+    el.innerHTML = '<div class="await-row">NO MODELS LOADED IN VRAM</div>';
+    if (dot) dot.className = 'status-dot off';
+    return;
+  }
+
+  if (dot) dot.className = 'status-dot';
+
+  el.innerHTML = models.map(m => {
+    const ctx  = m.context_length ? `ctx:${m.context_length}` : '';
+    const vram = m.vram_gb ? `${m.vram_gb} GB` : '--';
+    return `<div class="mdl-row">
+      <div class="mdl-dot"></div>
+      <span class="mdl-name">${esc(m.name)}</span>
+      <span class="mdl-size">${esc(vram)} VRAM</span>
+      <span class="mdl-backend">${esc(ctx)}</span>
+    </div>`;
+  }).join('');
+}
+
 /* ── Polling engine ──────────────────────────────────────────────────────
    Fetches metrics, containers, and models in parallel each tick.
    - Metrics failure is fatal (sets error state).
@@ -278,11 +344,15 @@ async function pollGauges() {
       fetch(base + '/api/models/',       { cache: 'no-store' }),
       fetch(base + '/api/deploy/active', { cache: 'no-store' }),
     ];
-    // Linux Desktop metrics — fetched directly from its own daemon
+    // Linux Desktop — fetched directly from its own daemon
     if (BCOM.linuxBase) {
-      fetches.push(fetch(BCOM.linuxBase + '/api/metrics', { cache: 'no-store' }));
+      fetches.push(fetch(BCOM.linuxBase + '/api/metrics',    { cache: 'no-store' }));
+      fetches.push(fetch(BCOM.linuxBase + '/api/models/',    { cache: 'no-store' }));
+      fetches.push(fetch(BCOM.linuxBase + '/api/processes/', { cache: 'no-store' }));
+      fetches.push(fetch(BCOM.linuxBase + '/api/ollama/ps',  { cache: 'no-store' }));
     }
-    const [metricsRes, containersRes, modelsRes, deployRes, linuxRes] =
+    const [metricsRes, containersRes, modelsRes, deployRes,
+           linuxRes, linuxModelsRes, linuxProcsRes, linuxOllamaPs] =
       await Promise.allSettled(fetches);
 
     // ── Metrics (required) ────────────────────────────────────────────
@@ -322,6 +392,24 @@ async function pollGauges() {
       const dep = await deployRes.value.json();
       setText('active-model-spark',   dep.model_name ?? '--');
       setText('active-backend-spark', dep.backend     ?? '--');
+    }
+
+    // ── Linux models (soft) — Ollama models ────────────────────────────
+    if (linuxModelsRes && linuxModelsRes.status === 'fulfilled' && linuxModelsRes.value.ok) {
+      const lm = await linuxModelsRes.value.json();
+      applyModels(lm.models ?? [], 'mdl-linux', 'dot-mdl-linux');
+    }
+
+    // ── Linux processes (soft) — notable services ──────────────────────
+    if (linuxProcsRes && linuxProcsRes.status === 'fulfilled' && linuxProcsRes.value.ok) {
+      const lp = await linuxProcsRes.value.json();
+      applyProcesses(lp.processes ?? [], 'proc-linux', 'dot-proc-linux');
+    }
+
+    // ── Linux Ollama running (soft) — loaded models in VRAM ────────────
+    if (linuxOllamaPs && linuxOllamaPs.status === 'fulfilled' && linuxOllamaPs.value.ok) {
+      const lo = await linuxOllamaPs.value.json();
+      applyOllamaRunning(lo.models ?? [], 'ollama-running-linux', 'dot-ollama-linux');
     }
 
   } catch (err) {

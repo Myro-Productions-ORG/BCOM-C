@@ -72,6 +72,7 @@
 [data-theme="light"] .form-select             { background: var(--input-bg); color: var(--text); border-color: var(--orange-dark); }
 [data-theme="light"] .ctr-row                 { border-color: var(--border-dim); }
 [data-theme="light"] .mdl-row                 { border-color: var(--border-dim); }
+[data-theme="light"] .proc-row                { border-color: var(--border-dim); }
 [data-theme="light"] .mcp-row                 { border-color: var(--border-dim); }
 [data-theme="light"] .info-card               { background: var(--bg-panel); border-color: var(--orange-dark); }
 [data-theme="light"] .footer                  { background: var(--bg-bar); color: var(--text-dim); border-color: var(--orange-dark); }
@@ -596,6 +597,29 @@ body {
 
 .mdl-name    { color: var(--orange); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mdl-backend { color: #555; min-width: 46px; text-align: right; letter-spacing: 1px; font-size: 8px; }
+
+/* ── Process rows ───────────────────────────────── */
+.proc-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid #161616;
+  font-size: 9px;
+}
+.proc-row:last-child { border-bottom: none; }
+
+.proc-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #2ecc71;
+  box-shadow: 0 0 4px #2ecc71;
+  flex-shrink: 0;
+}
+
+.proc-name   { color: var(--orange); font-weight: 700; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.proc-mem    { color: #888; min-width: 60px; text-align: right; }
+.proc-uptime { color: #555; min-width: 55px; text-align: right; }
 .mdl-size    { color: #444; min-width: 42px; text-align: right; }
 .mdl-test {
   background: #1a0e06;
@@ -767,7 +791,8 @@ body {
 .node-col-hdr { font-size: 11px !important; color: #ccc !important; }
 
 /* Container rows */
-.ctr-row { font-size: 11px !important; }
+.ctr-row  { font-size: 11px !important; }
+.proc-row { font-size: 11px !important; }
 .ctr-image  { color: #999 !important; }
 .ctr-uptime { color: #999 !important; }
 .ctr-btn    { font-size: 10px !important; }

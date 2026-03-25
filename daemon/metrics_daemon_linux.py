@@ -29,6 +29,7 @@ import subprocess
 import time
 import argparse
 import threading
+import urllib.request
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 import psutil
@@ -36,6 +37,21 @@ import psutil
 # ── Configuration ────────────────────────────────────────────────────────────
 
 PORT = 8090
+OLLAMA_URL = "http://localhost:11434"
+
+# Notable processes to track (command substrings → display names)
+TRACKED_PROCESSES = {
+    "ollama":           "Ollama",
+    "init_agent.js":    "Mindcraft Agent",
+    "minecraft":        "Minecraft",
+    "fabric-server":    "Minecraft Server",
+    "vault":            "Vault",
+    "chroma":           "ChromaDB",
+    "bob-stt":          "Bob STT",
+    "node_exporter":    "Node Exporter",
+    "ttyd":             "TTYD",
+    "Runner.Listener":  "GH Actions Runner",
+}
 
 # ── Metric collectors ────────────────────────────────────────────────────────
 
@@ -88,6 +104,95 @@ def _uptime_str(seconds: float) -> str:
     return f"{days}d {hours}h"
 
 
+def _ollama_get(path: str):
+    """GET a JSON endpoint from the local Ollama server."""
+    try:
+        req = urllib.request.Request(f"{OLLAMA_URL}{path}")
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            return json.loads(resp.read())
+    except Exception:
+        return None
+
+
+def collect_ollama_models() -> list:
+    """Return list of all Ollama models (installed)."""
+    data = _ollama_get("/api/tags")
+    if not data:
+        return []
+    return [
+        {
+            "name": m["name"],
+            "parameter_size": m.get("details", {}).get("parameter_size", "--"),
+            "quantization": m.get("details", {}).get("quantization_level", "--"),
+            "family": m.get("details", {}).get("family", "--"),
+            "size_gb": round(m.get("size", 0) / 1e9, 1),
+        }
+        for m in data.get("models", [])
+    ]
+
+
+def collect_ollama_running() -> list:
+    """Return list of currently loaded/running Ollama models."""
+    data = _ollama_get("/api/ps")
+    if not data:
+        return []
+    return [
+        {
+            "name": m["name"],
+            "parameter_size": m.get("details", {}).get("parameter_size", "--"),
+            "quantization": m.get("details", {}).get("quantization_level", "--"),
+            "vram_gb": round(m.get("size_vram", 0) / 1e9, 1),
+            "context_length": m.get("context_length", 0),
+            "expires_at": m.get("expires_at", ""),
+        }
+        for m in data.get("models", [])
+    ]
+
+
+def collect_processes() -> list:
+    """Return notable running processes with resource usage."""
+    results = []
+    seen_labels = {}
+    for proc in psutil.process_iter(["pid", "name", "cmdline", "cpu_percent",
+                                      "memory_info", "create_time"]):
+        try:
+            info = proc.info
+            cmdline = " ".join(info.get("cmdline") or [])
+            pname = info.get("name", "")
+            full = f"{pname} {cmdline}"
+
+            for substr, label in TRACKED_PROCESSES.items():
+                if substr.lower() in full.lower():
+                    # For Mindcraft agents, extract the agent name
+                    display = label
+                    if substr == "init_agent.js" and info.get("cmdline"):
+                        args = info["cmdline"]
+                        for i, a in enumerate(args):
+                            if "init_agent.js" in a and i + 1 < len(args):
+                                display = f"Mindcraft: {args[i+1]}"
+                                break
+
+                    key = display
+                    mem_mb = round((info.get("memory_info") or
+                                    psutil._common.pmem(0,0,0,0,0,0,0)).rss / 1e6)
+                    uptime_s = time.time() - (info.get("create_time") or time.time())
+
+                    # Keep the one using the most memory if duplicated
+                    if key not in seen_labels or mem_mb > seen_labels[key]["mem_mb"]:
+                        seen_labels[key] = {
+                            "name": display,
+                            "pid": info["pid"],
+                            "mem_mb": mem_mb,
+                            "uptime": _uptime_str(uptime_s),
+                            "status": "running",
+                        }
+                    break
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+
+    return sorted(seen_labels.values(), key=lambda x: x["mem_mb"], reverse=True)
+
+
 def collect_metrics() -> dict:
     """Collect all local metrics for the Linux Desktop node."""
     cpu_pct = psutil.cpu_percent(interval=0.5)
@@ -115,8 +220,14 @@ _cache_lock = threading.Lock()
 
 def _refresh_cache() -> None:
     linux = collect_metrics()
+    models = collect_ollama_models()
+    running = collect_ollama_running()
+    processes = collect_processes()
     with _cache_lock:
         _cache["linux"] = linux
+        _cache["ollama_models"] = models
+        _cache["ollama_running"] = running
+        _cache["processes"] = processes
         _cache["_ts"] = time.time()
 
 
@@ -133,15 +244,7 @@ def _poll_loop(interval: int = 5) -> None:
 
 class MetricsHandler(BaseHTTPRequestHandler):
 
-    def do_GET(self):
-        if self.path != "/api/metrics":
-            self.send_response(404)
-            self.end_headers()
-            return
-
-        with _cache_lock:
-            payload = {k: v for k, v in _cache.items() if not k.startswith("_")}
-
+    def _json_response(self, payload: dict | list):
         body = json.dumps(payload).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
@@ -149,6 +252,37 @@ class MetricsHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(body)
+
+    def do_GET(self):
+        with _cache_lock:
+            cache = dict(_cache)
+
+        if self.path == "/api/metrics":
+            self._json_response({
+                k: v for k, v in cache.items() if not k.startswith("_")
+            })
+        elif self.path == "/api/models/":
+            # Ollama models in same format as BobSpark-APIs /api/models/
+            models = cache.get("ollama_models", [])
+            self._json_response({"models": [
+                {
+                    "name": m["name"],
+                    "details": {
+                        "parameter_size": m["parameter_size"],
+                        "quantization_level": m["quantization"],
+                        "family": m["family"],
+                    },
+                    "size_gb": m["size_gb"],
+                }
+                for m in models
+            ]})
+        elif self.path == "/api/ollama/ps":
+            self._json_response({"models": cache.get("ollama_running", [])})
+        elif self.path == "/api/processes/":
+            self._json_response({"processes": cache.get("processes", [])})
+        else:
+            self.send_response(404)
+            self.end_headers()
 
     def do_OPTIONS(self):
         self.send_response(204)
