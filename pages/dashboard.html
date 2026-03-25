@@ -125,8 +125,18 @@
               <div class="gauge-value" id="gv-linux-gpu">--%</div>
               <div class="gauge-label">GPU LOAD</div>
             </div>
+            <div class="gauge-wrap">
+              <div class="gauge">
+                <svg viewBox="0 0 140 140"><circle class="gauge-track" cx="70" cy="70" r="50"/><circle class="gauge-fill" id="gf-linux-vram" cx="70" cy="70" r="50"/></svg>
+                <div class="gauge-needle" id="gn-linux-vram"></div><div class="gauge-center"></div>
+              </div>
+              <div class="gauge-value" id="gv-linux-vram">--%</div>
+              <div class="gauge-label">VRAM USED</div>
+            </div>
           </div>
           <div class="metrics">
+            <div class="metric">VRAM<span id="vram-linux-gb">--</span></div>
+            <div class="metric">GPU TEMP<span id="gpu-temp-linux">--</span></div>
             <div class="metric">RAM<span id="ram-linux-gb">--</span></div>
             <div class="metric">UPTIME<span id="uptime-linux">--</span></div>
           </div>

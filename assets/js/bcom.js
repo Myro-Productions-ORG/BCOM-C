@@ -9,6 +9,7 @@
    ──────────────────────────────────────────────────── */
 const BCOM = {
   apiBase:      '',       // '' = same-origin proxy; 'http://...' = explicit host
+  linuxBase:    'http://10.0.0.10:8090',  // Linux Desktop metrics daemon
   pollInterval: 5000,     // ms between data refreshes
   _timer:       null,
   _connected:   false,
@@ -155,12 +156,15 @@ function applyDashboard(data) {
   setText('uptime-spark',   s.uptime   ?? '--');
 
   // LINUX-DSKTP
-  setGauge('gf-linux-cpu', 'gn-linux-cpu', 'gv-linux-cpu', l.cpu_pct ?? 0);
-  setGauge('gf-linux-gpu', 'gn-linux-gpu', 'gv-linux-gpu', l.gpu_pct ?? 0);
+  setGauge('gf-linux-cpu',  'gn-linux-cpu',  'gv-linux-cpu',  l.cpu_pct  ?? 0);
+  setGauge('gf-linux-gpu',  'gn-linux-gpu',  'gv-linux-gpu',  l.gpu_pct  ?? 0);
+  setGauge('gf-linux-vram', 'gn-linux-vram', 'gv-linux-vram', l.vram_pct ?? 0);
   setTempBar('linux-cpu-temp-bar', 'linux-cpu-temp-val',
     l.cpu_temp ?? 0, 70, 85, 100);
-  setText('ram-linux-gb',  l.ram_gb  ?? '--');
-  setText('uptime-linux',  l.uptime  ?? '--');
+  setText('vram-linux-gb',  l.vram_gb  ?? '--');
+  setText('gpu-temp-linux', l.gpu_temp ?? '--');
+  setText('ram-linux-gb',   l.ram_gb   ?? '--');
+  setText('uptime-linux',   l.uptime   ?? '--');
 
   // LINUX panel online / offline indicator
   const linuxOnline = !!(data.linux && l.cpu_pct !== undefined);
@@ -268,16 +272,29 @@ async function ctrlContainer(id, action) {
 async function pollGauges() {
   try {
     const base = BCOM.apiBase || '';
-    const [metricsRes, containersRes, modelsRes, deployRes] = await Promise.allSettled([
+    const fetches = [
       fetch(base + '/api/metrics',       { cache: 'no-store' }),
       fetch(base + '/api/containers/',   { cache: 'no-store' }),
       fetch(base + '/api/models/',       { cache: 'no-store' }),
       fetch(base + '/api/deploy/active', { cache: 'no-store' }),
-    ]);
+    ];
+    // Linux Desktop metrics — fetched directly from its own daemon
+    if (BCOM.linuxBase) {
+      fetches.push(fetch(BCOM.linuxBase + '/api/metrics', { cache: 'no-store' }));
+    }
+    const [metricsRes, containersRes, modelsRes, deployRes, linuxRes] =
+      await Promise.allSettled(fetches);
 
     // ── Metrics (required) ────────────────────────────────────────────
     if (metricsRes.status === 'fulfilled' && metricsRes.value.ok) {
       const data = await metricsRes.value.json();
+
+      // ── Linux metrics (soft — merge if available) ──────────────────
+      if (linuxRes && linuxRes.status === 'fulfilled' && linuxRes.value.ok) {
+        const linuxData = await linuxRes.value.json();
+        if (linuxData.linux) data.linux = linuxData.linux;
+      }
+
       if (!BCOM._connected) {
         logLine('Data source connected. Live telemetry active.', 'info');
         BCOM._connected = true;
