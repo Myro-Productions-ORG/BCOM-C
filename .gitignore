@@ -71,3 +71,7 @@ docker-compose.override.yml
 # ── Audit screenshots ─────────────────
 audit-*.png
 .playwright-mcp/
+
+# ── Software factory runtime state ────
+factory/board.json
+factory/jobs/
